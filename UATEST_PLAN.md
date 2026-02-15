@@ -58,4 +58,15 @@
 
 ---
 
-*Last tested: January 24, 2026*
+## Legal Compliance (Feb 15, 2026)
+| Feature | Status | Notes |
+|---------|--------|-------|
+| Single footer (no duplicates) | ✅ | |
+| Footer disclaimer text | ✅ | |
+| Footer copyright + AIUNITES link | ✅ | |
+| Privacy Policy → legal.html#privacy | ✅ | Centralized |
+| Terms of Service → legal.html#terms | ✅ | Centralized |
+
+---
+
+*Last tested: February 15, 2026*
