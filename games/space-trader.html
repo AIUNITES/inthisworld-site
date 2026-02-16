@@ -230,12 +230,12 @@ function animate(){
   var right=new THREE.Vector3(1,0,0).applyQuaternion(camera.quaternion);
 
   var mx=(keys.ShiftLeft||keys.ShiftRight)?ship.boostMax:ship.maxSpeed;
-  if(keys.KeyW&&ship.fuel>0){ship.speed=Math.min(ship.speed+3*dt,mx);ship.fuel=Math.max(0,ship.fuel-dt*(keys.ShiftLeft?3:1));}
-  if(keys.KeyS)ship.speed=Math.max(ship.speed-4*dt,-ship.maxSpeed*0.3);
+  if((keys.KeyW||keys.ArrowUp)&&ship.fuel>0){ship.speed=Math.min(ship.speed+3*dt,mx);ship.fuel=Math.max(0,ship.fuel-dt*(keys.ShiftLeft?3:1));}
+  if(keys.KeyS||keys.ArrowDown)ship.speed=Math.max(ship.speed-4*dt,-ship.maxSpeed*0.3);
   if(keys.Space)ship.speed*=(1-3*dt);
   var shifting=keys.ShiftLeft||keys.ShiftRight;
-  if(keys.KeyA){if(shifting)camera.position.add(right.clone().multiplyScalar(-1.5*dt));else{euler.y+=2.0*dt;camera.quaternion.setFromEuler(euler);}}
-  if(keys.KeyD){if(shifting)camera.position.add(right.clone().multiplyScalar(1.5*dt));else{euler.y-=2.0*dt;camera.quaternion.setFromEuler(euler);}}
+  if(keys.KeyA||keys.ArrowLeft){if(shifting)camera.position.add(right.clone().multiplyScalar(-1.5*dt));else{euler.y+=2.0*dt;camera.quaternion.setFromEuler(euler);}}
+  if(keys.KeyD||keys.ArrowRight){if(shifting)camera.position.add(right.clone().multiplyScalar(1.5*dt));else{euler.y-=2.0*dt;camera.quaternion.setFromEuler(euler);}}
   ship.speed*=(1-0.3*dt);if(Math.abs(ship.speed)<0.01)ship.speed=0;
   camera.position.add(fwd.multiplyScalar(ship.speed));
 

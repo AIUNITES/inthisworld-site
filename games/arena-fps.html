@@ -76,9 +76,9 @@ canvas#gameCanvas{display:block;position:fixed;top:0;left:0}
   <p>Survive waves of enemies in a neon arena. Each wave gets harder. How long can you last?</p>
   <button class="start-btn" onclick="startGame()">Enter the Arena</button>
   <div class="controls">
-    <kbd>W</kbd><kbd>S</kbd> Move &nbsp;|&nbsp;
-    <kbd>A</kbd><kbd>D</kbd> Turn &nbsp;|&nbsp;
-    <kbd>Shift</kbd>+<kbd>A</kbd><kbd>D</kbd> Strafe &nbsp;|&nbsp;
+    <kbd>W</kbd><kbd>S</kbd> or <kbd>↑</kbd><kbd>↓</kbd> Move &nbsp;|&nbsp;
+    <kbd>A</kbd><kbd>D</kbd> or <kbd>←</kbd><kbd>→</kbd> Turn &nbsp;|&nbsp;
+    <kbd>Shift</kbd>+Turn = Strafe &nbsp;|&nbsp;
     <kbd>Mouse</kbd> Aim &nbsp;|&nbsp;
     <kbd>Click</kbd> Shoot &nbsp;|&nbsp;
     <kbd>Space</kbd> Jump &nbsp;|&nbsp;
@@ -347,10 +347,10 @@ function animate(){
   var right=new THREE.Vector3(1,0,0).applyQuaternion(camera.quaternion);right.y=0;right.normalize();
   var spd=(keys.ShiftLeft||keys.ShiftRight)?10:6;
   var move=new THREE.Vector3();
-  if(keys.KeyW)move.add(fwd);if(keys.KeyS)move.sub(fwd);
+  if(keys.KeyW||keys.ArrowUp)move.add(fwd);if(keys.KeyS||keys.ArrowDown)move.sub(fwd);
   var shifting=keys.ShiftLeft||keys.ShiftRight;
-  if(keys.KeyA){if(shifting)move.sub(right);else{euler.y+=2.0*dt;camera.quaternion.setFromEuler(euler);}}
-  if(keys.KeyD){if(shifting)move.add(right);else{euler.y-=2.0*dt;camera.quaternion.setFromEuler(euler);}}
+  if(keys.KeyA||keys.ArrowLeft){if(shifting)move.sub(right);else{euler.y+=2.0*dt;camera.quaternion.setFromEuler(euler);}}
+  if(keys.KeyD||keys.ArrowRight){if(shifting)move.add(right);else{euler.y-=2.0*dt;camera.quaternion.setFromEuler(euler);}}
   if(move.length()>0)move.normalize().multiplyScalar(spd*dt);
   camera.position.add(move);
 

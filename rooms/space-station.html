@@ -46,7 +46,7 @@ canvas{display:block;position:fixed;top:0;left:0}
   <h1>Space Station Lounge</h1>
   <p>A circular observation lounge orbiting high above the planet. Floor-to-ceiling windows reveal the stars, nebulae, and passing ships. The ultimate social club among the cosmos.</p>
   <button class="start-btn" onclick="enterRoom()">Board Station</button>
-  <div class="controls"><kbd>W</kbd><kbd>S</kbd> Walk &nbsp;|&nbsp; <kbd>A</kbd><kbd>D</kbd> Turn &nbsp;|&nbsp; <kbd>Shift</kbd>+<kbd>A</kbd><kbd>D</kbd> Strafe &nbsp;|&nbsp; <kbd>Mouse</kbd> Look &nbsp;|&nbsp; <kbd>T</kbd> Chat</div>
+  <div class="controls"><kbd>W</kbd><kbd>S</kbd> or <kbd>↑</kbd><kbd>↓</kbd> Walk &nbsp;|&nbsp; <kbd>A</kbd><kbd>D</kbd> or <kbd>←</kbd><kbd>→</kbd> Turn &nbsp;|&nbsp; <kbd>Shift</kbd>+Turn = Strafe &nbsp;|&nbsp; <kbd>Mouse</kbd> Look &nbsp;|&nbsp; <kbd>T</kbd> Chat</div>
 </div>
 <a href="../rooms/index.html" class="back-link hidden" id="backLink">← Back to Rooms</a>
 <div class="hud-top hidden" id="hud"><div class="hud-pill"><span class="emoji">🛸</span> Station Lounge — Orbit Alt: 420km</div></div>
@@ -385,11 +385,11 @@ function animate(){
     var fwd=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);fwd.y=0;fwd.normalize();
     var rt=new THREE.Vector3(1,0,0).applyQuaternion(camera.quaternion);rt.y=0;rt.normalize();
     var mv=new THREE.Vector3();
-    if(keys['KeyW'])mv.add(fwd.clone().multiplyScalar(speed));
-    if(keys['KeyS'])mv.add(fwd.clone().multiplyScalar(-speed));
+    if(keys['KeyW']||keys['ArrowUp'])mv.add(fwd.clone().multiplyScalar(speed));
+    if(keys['KeyS']||keys['ArrowDown'])mv.add(fwd.clone().multiplyScalar(-speed));
     var shifting=keys['ShiftLeft']||keys['ShiftRight'];
-    if(keys['KeyA']){if(shifting)mv.add(rt.clone().multiplyScalar(-speed));else{euler.y+=2.0*dt;camera.quaternion.setFromEuler(euler);}}
-    if(keys['KeyD']){if(shifting)mv.add(rt.clone().multiplyScalar(speed));else{euler.y-=2.0*dt;camera.quaternion.setFromEuler(euler);}}
+    if(keys['KeyA']||keys['ArrowLeft']){if(shifting)mv.add(rt.clone().multiplyScalar(-speed));else{euler.y+=2.0*dt;camera.quaternion.setFromEuler(euler);}}
+    if(keys['KeyD']||keys['ArrowRight']){if(shifting)mv.add(rt.clone().multiplyScalar(speed));else{euler.y-=2.0*dt;camera.quaternion.setFromEuler(euler);}}
     camera.position.add(mv);
     // NPC collision — push camera away from NPCs
     npcs.forEach(function(npc){

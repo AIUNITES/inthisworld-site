@@ -46,7 +46,7 @@ canvas{display:block;position:fixed;top:0;left:0}
   <h1>The Bedroom</h1>
   <p>A chill late-night vibe. Neon accents, a cozy bed, gaming setup, and ambient mood lighting. Relax and chat with friends.</p>
   <button class="start-btn" onclick="enterRoom()">Enter Room</button>
-  <div class="controls"><kbd>W</kbd><kbd>S</kbd> Walk &nbsp;|&nbsp; <kbd>A</kbd><kbd>D</kbd> Turn &nbsp;|&nbsp; <kbd>Shift</kbd>+<kbd>A</kbd><kbd>D</kbd> Strafe &nbsp;|&nbsp; <kbd>Mouse</kbd> Look &nbsp;|&nbsp; <kbd>T</kbd> Chat</div>
+  <div class="controls"><kbd>W</kbd><kbd>S</kbd> or <kbd>↑</kbd><kbd>↓</kbd> Walk &nbsp;|&nbsp; <kbd>A</kbd><kbd>D</kbd> or <kbd>←</kbd><kbd>→</kbd> Turn &nbsp;|&nbsp; <kbd>Shift</kbd>+Turn = Strafe &nbsp;|&nbsp; <kbd>Mouse</kbd> Look &nbsp;|&nbsp; <kbd>T</kbd> Chat</div>
 </div>
 <a href="../games/index.html" class="back-link hidden" id="backLink">← Back to Hub</a>
 <div class="hud-top hidden" id="hud"><div class="hud-pill"><span class="emoji">🛏️</span> Bedroom</div></div>
@@ -211,12 +211,19 @@ function animate(){
     var fwd=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);fwd.y=0;fwd.normalize();
     var rt=new THREE.Vector3(1,0,0).applyQuaternion(camera.quaternion);rt.y=0;rt.normalize();
     var mv=new THREE.Vector3();
-    if(keys['KeyW'])mv.add(fwd.clone().multiplyScalar(speed));
-    if(keys['KeyS'])mv.add(fwd.clone().multiplyScalar(-speed));
+    if(keys['KeyW']||keys['ArrowUp'])mv.add(fwd.clone().multiplyScalar(speed));
+    if(keys['KeyS']||keys['ArrowDown'])mv.add(fwd.clone().multiplyScalar(-speed));
     var shifting=keys['ShiftLeft']||keys['ShiftRight'];
-    if(keys['KeyA']){if(shifting)mv.add(rt.clone().multiplyScalar(-speed));else{euler.y+=2.0*dt;camera.quaternion.setFromEuler(euler);}}
-    if(keys['KeyD']){if(shifting)mv.add(rt.clone().multiplyScalar(speed));else{euler.y-=2.0*dt;camera.quaternion.setFromEuler(euler);}}
+    if(keys['KeyA']||keys['ArrowLeft']){if(shifting)mv.add(rt.clone().multiplyScalar(-speed));else{euler.y+=2.0*dt;camera.quaternion.setFromEuler(euler);}}
+    if(keys['KeyD']||keys['ArrowRight']){if(shifting)mv.add(rt.clone().multiplyScalar(speed));else{euler.y-=2.0*dt;camera.quaternion.setFromEuler(euler);}}
     camera.position.add(mv);
+    // NPC collision
+    npcs.forEach(function(npc){
+      var dx=camera.position.x-npc.mesh.position.x;
+      var dz=camera.position.z-npc.mesh.position.z;
+      var d=Math.sqrt(dx*dx+dz*dz);
+      if(d<1.0&&d>0.001){var push=1.0/d;camera.position.x=npc.mesh.position.x+dx*push;camera.position.z=npc.mesh.position.z+dz*push;}
+    });
     camera.position.x=Math.max(-4.2,Math.min(4.2,camera.position.x));
     camera.position.z=Math.max(-4.2,Math.min(4.2,camera.position.z));
     camera.position.y=1.6;
