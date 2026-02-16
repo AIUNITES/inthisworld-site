@@ -460,6 +460,13 @@ function animate() {
     if (keys['KeyD']) { if (shifting) move.add(right.clone().multiplyScalar(speed)); else { euler.y -= 2.0 * dt; camera.quaternion.setFromEuler(euler); } }
 
     camera.position.add(move);
+    // NPC collision — push camera away from NPCs
+    npcs.forEach(function(npc){
+      var dx=camera.position.x-npc.mesh.position.x;
+      var dz=camera.position.z-npc.mesh.position.z;
+      var d=Math.sqrt(dx*dx+dz*dz);
+      if(d<1.0&&d>0.001){var push=1.0/d;camera.position.x=npc.mesh.position.x+dx*push;camera.position.z=npc.mesh.position.z+dz*push;}
+    });
     // Room bounds
     camera.position.x = Math.max(-5.2, Math.min(5.2, camera.position.x));
     camera.position.z = Math.max(-5.2, Math.min(5.2, camera.position.z));
