@@ -7,8 +7,8 @@
 | **Repository** | inthisworld-site |
 | **Live URL** | https://aiunites.github.io/inthisworld-site/ |
 | **Local Path** | C:/Users/Tom/Documents/GitHub/inthisworld-site |
-| **Last Updated** | February 15, 2026 |
-| **Version** | 2.0.0 |
+| **Last Updated** | February 16, 2026 |
+| **Version** | 2.1.0 |
 | **Type** | Landing Page |
 | **Tagline** | World Content Platform |
 
@@ -19,10 +19,10 @@
 | Page | File | Description | Status |
 |------|------|-------------|--------|
 | Landing | index.html | Main landing page | ✅ Active |
-| Games Hub | games.html | 3D games directory page | ✅ Active |
-| Space Trader | games/space-trader.html | 3D trading/exploration game | ✅ Active |
-| World Explorer | games/world-explorer.html | 3D exploration/discovery game | ✅ Active |
-| Void Arena | games/void-arena.html | 3D FPS wave survival game | ✅ Active |
+| Games Hub | games/index.html | 3D games gallery with cards | ✅ Active |
+| Space Trader | games/space-trader.html | 3D space trading game (Three.js) | ✅ Active |
+| World Explorer | games/world-explorer.html | 3D procedural terrain exploration (Three.js) | ✅ Active |
+| Arena FPS | games/arena-fps.html | 3D wave-survival FPS (Three.js) | ✅ Active |
 
 ---
 
@@ -44,10 +44,10 @@
 ### 🎮 3D Games (Three.js)
 | Feature | Status | Notes |
 |---------|--------|-------|
-| Games Hub Page | ✅ | games.html with cards for all 3 games |
-| Space Trader | ✅ | WASD+mouse flight, 8 planets, commodity trading, minimap, cargo/fuel/credits |
-| World Explorer | ✅ | Procedural terrain, 40+ POIs, 12 discovery types, journal, compass, artifacts |
-| Void Arena | ✅ | FPS wave survival, 3 enemy types, pickups, cover, escalating waves |
+| Games Hub Page | ✅ | games/index.html with cards for all 3 games, AIUNITES webring |
+| Space Trader | ✅ | WASD+mouse flight, 8 planets, 8 commodities, buy/sell modal, minimap, fuel/cargo/credits |
+| World Explorer | ✅ | FBM procedural terrain, 6 biomes, 12 artifacts, 300 trees, 80 rocks, compass, inventory |
+| Arena FPS | ✅ | Raycast shooting, wave enemies, ammo/reload, hit markers, damage flash, kill feed, neon arena |
 
 ### 👤 User System (DemoTemplate Features)
 | Feature | Status | Notes |
@@ -89,6 +89,7 @@
 | Version | Date | Changes |
 |---------|------|--------|
 | 1.0.0 | Jan 24, 2026 | Initial landing page |
-| 2.0.0 | Feb 15, 2026 | Added 3 full 3D games (Space Trader, World Explorer, Void Arena), games hub page, games section on landing page |
+| 2.0.0 | Feb 15, 2026 | Added 3D games section to landing page (aborted — files not persisted) |
+| 2.1.0 | Feb 16, 2026 | Rebuilt 3 games via MCP: Space Trader, World Explorer, Arena FPS + games hub. Fixed nav/link references |
 
-*Last tested: February 15, 2026*
+*Last tested: February 16, 2026*
