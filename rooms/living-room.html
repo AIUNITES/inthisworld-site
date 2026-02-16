@@ -60,10 +60,11 @@ canvas{display:block;position:fixed;top:0;left:0}
   <p>A cozy space to hang out and chat. Walk around the room, check out the fireplace, and meet other visitors. Type in chat to talk.</p>
   <button class="start-btn" onclick="enterRoom()">Enter Room</button>
   <div class="controls">
-    <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> Walk &nbsp;|&nbsp;
+    <kbd>W</kbd><kbd>S</kbd> Walk &nbsp;|&nbsp;
+    <kbd>A</kbd><kbd>D</kbd> Turn &nbsp;|&nbsp;
+    <kbd>Shift</kbd>+<kbd>A</kbd><kbd>D</kbd> Strafe &nbsp;|&nbsp;
     <kbd>Mouse</kbd> Look &nbsp;|&nbsp;
-    <kbd>Enter</kbd> Chat &nbsp;|&nbsp;
-    <kbd>T</kbd> Focus Chat
+    <kbd>T</kbd> Chat
   </div>
 </div>
 
@@ -229,9 +230,11 @@ function init() {
   document.addEventListener('keyup', function(e) { keys[e.code] = false; });
   document.addEventListener('mousemove', function(e) {
     if (!isPointerLocked) return;
-    euler.y -= e.movementX * 0.002;
-    euler.x -= e.movementY * 0.002;
-    euler.x = Math.max(-1.2, Math.min(1.2, euler.x));
+    var mx = Math.max(-50, Math.min(50, e.movementX));
+    var my = Math.max(-50, Math.min(50, e.movementY));
+    euler.y -= mx * 0.002;
+    euler.x -= my * 0.002;
+    euler.x = Math.max(-0.9, Math.min(0.9, euler.x));
     camera.quaternion.setFromEuler(euler);
   });
   renderer.domElement.addEventListener('click', function() {
@@ -452,8 +455,9 @@ function animate() {
     var move = new THREE.Vector3();
     if (keys['KeyW']) move.add(forward.clone().multiplyScalar(speed));
     if (keys['KeyS']) move.add(forward.clone().multiplyScalar(-speed));
-    if (keys['KeyA']) move.add(right.clone().multiplyScalar(-speed));
-    if (keys['KeyD']) move.add(right.clone().multiplyScalar(speed));
+    var shifting = keys['ShiftLeft'] || keys['ShiftRight'];
+    if (keys['KeyA']) { if (shifting) move.add(right.clone().multiplyScalar(-speed)); else { euler.y += 2.0 * dt; camera.quaternion.setFromEuler(euler); } }
+    if (keys['KeyD']) { if (shifting) move.add(right.clone().multiplyScalar(speed)); else { euler.y -= 2.0 * dt; camera.quaternion.setFromEuler(euler); } }
 
     camera.position.add(move);
     // Room bounds

@@ -46,7 +46,7 @@ canvas{display:block;position:fixed;top:0;left:0}
   <h1>Space Station Lounge</h1>
   <p>A circular observation lounge orbiting high above the planet. Floor-to-ceiling windows reveal the stars, nebulae, and passing ships. The ultimate social club among the cosmos.</p>
   <button class="start-btn" onclick="enterRoom()">Board Station</button>
-  <div class="controls"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> Walk &nbsp;|&nbsp; <kbd>Mouse</kbd> Look &nbsp;|&nbsp; <kbd>T</kbd> Chat</div>
+  <div class="controls"><kbd>W</kbd><kbd>S</kbd> Walk &nbsp;|&nbsp; <kbd>A</kbd><kbd>D</kbd> Turn &nbsp;|&nbsp; <kbd>Shift</kbd>+<kbd>A</kbd><kbd>D</kbd> Strafe &nbsp;|&nbsp; <kbd>Mouse</kbd> Look &nbsp;|&nbsp; <kbd>T</kbd> Chat</div>
 </div>
 <a href="../rooms/index.html" class="back-link hidden" id="backLink">← Back to Rooms</a>
 <div class="hud-top hidden" id="hud"><div class="hud-pill"><span class="emoji">🛸</span> Station Lounge — Orbit Alt: 420km</div></div>
@@ -172,7 +172,7 @@ function init(){
   window.addEventListener('resize',function(){var w=window.innerWidth>768?window.innerWidth-320:window.innerWidth;var h=window.innerWidth>768?window.innerHeight:window.innerHeight*0.6;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h)});
   document.addEventListener('keydown',function(e){keys[e.code]=true;if(e.code==='KeyT'&&gameStarted){e.preventDefault();document.exitPointerLock();document.getElementById('chatInput').focus()}if(e.code==='Enter'&&document.activeElement===document.getElementById('chatInput'))sendChat()});
   document.addEventListener('keyup',function(e){keys[e.code]=false});
-  document.addEventListener('mousemove',function(e){if(!isPointerLocked)return;euler.y-=e.movementX*0.002;euler.x-=e.movementY*0.002;euler.x=Math.max(-1.2,Math.min(1.2,euler.x));camera.quaternion.setFromEuler(euler)});
+  document.addEventListener('mousemove',function(e){if(!isPointerLocked)return;var mx=Math.max(-50,Math.min(50,e.movementX));var my=Math.max(-50,Math.min(50,e.movementY));euler.y-=mx*0.002;euler.x-=my*0.002;euler.x=Math.max(-0.9,Math.min(0.9,euler.x));camera.quaternion.setFromEuler(euler)});
   renderer.domElement.addEventListener('click',function(){if(gameStarted)renderer.domElement.requestPointerLock()});
   document.addEventListener('pointerlockchange',function(){isPointerLocked=(document.pointerLockElement===renderer.domElement)});
   renderer.render(scene,camera);
@@ -387,8 +387,9 @@ function animate(){
     var mv=new THREE.Vector3();
     if(keys['KeyW'])mv.add(fwd.clone().multiplyScalar(speed));
     if(keys['KeyS'])mv.add(fwd.clone().multiplyScalar(-speed));
-    if(keys['KeyA'])mv.add(rt.clone().multiplyScalar(-speed));
-    if(keys['KeyD'])mv.add(rt.clone().multiplyScalar(speed));
+    var shifting=keys['ShiftLeft']||keys['ShiftRight'];
+    if(keys['KeyA']){if(shifting)mv.add(rt.clone().multiplyScalar(-speed));else{euler.y+=2.0*dt;camera.quaternion.setFromEuler(euler);}}
+    if(keys['KeyD']){if(shifting)mv.add(rt.clone().multiplyScalar(speed));else{euler.y-=2.0*dt;camera.quaternion.setFromEuler(euler);}}
     camera.position.add(mv);
     // Circular room bounds
     var dist=Math.sqrt(camera.position.x*camera.position.x+camera.position.z*camera.position.z);

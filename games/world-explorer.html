@@ -52,9 +52,10 @@ canvas#gameCanvas{display:block;position:fixed;top:0;left:0}
   <p>Explore a vast procedural landscape. Discover ancient artifacts hidden across mountains, forests, and deserts. Collect them all to unlock the ancient mystery.</p>
   <button class="start-btn" onclick="startGame()">Begin Exploration</button>
   <div class="controls">
-    <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> Move &nbsp;|&nbsp;
+    <kbd>W</kbd><kbd>S</kbd> Move &nbsp;|&nbsp;
+    <kbd>A</kbd><kbd>D</kbd> Turn &nbsp;|&nbsp;
+    <kbd>Shift</kbd>+<kbd>A</kbd><kbd>D</kbd> Strafe &nbsp;|&nbsp;
     <kbd>Mouse</kbd> Look &nbsp;|&nbsp;
-    <kbd>Shift</kbd> Sprint &nbsp;|&nbsp;
     <kbd>Space</kbd> Jump &nbsp;|&nbsp;
     <kbd>E</kbd> Collect
   </div>
@@ -235,8 +236,10 @@ function init(){
   addEventListener('keyup',function(e){keys[e.code]=false;if(e.code==='Space')canJump=true;});
   document.addEventListener('mousemove',function(e){
     if(!isLocked)return;
-    euler.y-=e.movementX*0.002;euler.x-=e.movementY*0.002;
-    euler.x=Math.max(-1.4,Math.min(1.4,euler.x));
+    var mx=Math.max(-50,Math.min(50,e.movementX));
+    var my=Math.max(-50,Math.min(50,e.movementY));
+    euler.y-=mx*0.002;euler.x-=my*0.002;
+    euler.x=Math.max(-0.9,Math.min(0.9,euler.x));
     camera.quaternion.setFromEuler(euler);
   });
   renderer.domElement.addEventListener('click',function(){if(gameStarted)renderer.domElement.requestPointerLock();});
@@ -290,7 +293,9 @@ function animate(){
   var spd=(keys.ShiftLeft||keys.ShiftRight)?12:6;
   var move=new THREE.Vector3();
   if(keys.KeyW)move.add(fwd);if(keys.KeyS)move.sub(fwd);
-  if(keys.KeyA)move.sub(right);if(keys.KeyD)move.add(right);
+  var shifting=keys.ShiftLeft||keys.ShiftRight;
+  if(keys.KeyA){if(shifting)move.sub(right);else{euler.y+=2.0*dt;camera.quaternion.setFromEuler(euler);}}
+  if(keys.KeyD){if(shifting)move.add(right);else{euler.y-=2.0*dt;camera.quaternion.setFromEuler(euler);}}
   if(move.length()>0)move.normalize().multiplyScalar(spd*dt);
   camera.position.add(move);
 
