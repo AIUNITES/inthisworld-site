@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Games — InThisWorld</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--dark:#0a0a0f;--card:#12121a;--primary:#8b5cf6;--gradient:linear-gradient(135deg,#8b5cf6,#a855f7,#06b6d4);--font:'Segoe UI',system-ui,sans-serif}
+body{font-family:var(--font);background:var(--dark);color:#fff;line-height:1.6}
+a{color:inherit;text-decoration:none}
+
+/* Webring */
+.aiunites-bar{position:fixed;top:0;left:0;right:0;z-index:10000;background:linear-gradient(90deg,#0a0a0f,#1a1a2e);border-bottom:1px solid rgba(99,102,241,.3);padding:8px 0;font-size:12px}
+.aiunites-bar-content{max-width:1400px;margin:0 auto;padding:0 20px;display:flex;align-items:center;gap:12px;overflow-x:auto;scrollbar-width:none}
+.aiunites-bar-content::-webkit-scrollbar{display:none}
+.aiunites-bar a{color:rgba(255,255,255,.7);text-decoration:none;white-space:nowrap;transition:color .2s}
+.aiunites-bar a:hover{color:#fff}
+.aiunites-bar-brand{color:#6366f1!important;font-weight:600}
+.aiunites-bar-divider{color:rgba(255,255,255,.2)}
+body{padding-top:36px}
+
+.nav{position:sticky;top:36px;z-index:1000;padding:1rem 2rem;background:rgba(10,10,15,0.9);backdrop-filter:blur(10px);display:flex;justify-content:space-between;align-items:center;max-width:1200px;margin:0 auto}
+.nav-logo{font-size:1.5rem;font-weight:700;display:flex;align-items:center;gap:0.5rem}
+.accent{background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-links{display:flex;gap:1.5rem}.nav-links a{color:#9ca3af;font-weight:500}.nav-links a:hover{color:#fff}
+
+.hero{padding:80px 2rem 60px;text-align:center;background:radial-gradient(ellipse at 50% 30%,rgba(139,92,246,0.15),transparent 60%)}
+.hero h1{font-size:clamp(2rem,5vw,3.5rem);margin-bottom:12px;background:linear-gradient(135deg,#fff,#8b5cf6,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{color:#9ca3af;max-width:600px;margin:0 auto;font-size:1.05rem}
+
+.games-grid{max-width:1100px;margin:0 auto;padding:20px 2rem 80px;display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px}
+
+.game-card{background:var(--card);border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);transition:all 0.3s;cursor:pointer;position:relative}
+.game-card:hover{transform:translateY(-6px);border-color:rgba(139,92,246,0.3);box-shadow:0 12px 40px rgba(0,0,0,0.4)}
+.game-card .preview{height:200px;position:relative;overflow:hidden}
+.game-card .preview .bg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:5rem}
+.game-card .preview.trader .bg{background:radial-gradient(ellipse at 40% 40%,#1a1040,#050520)}
+.game-card .preview.explorer .bg{background:radial-gradient(ellipse at 40% 60%,#0a2010,#050510)}
+.game-card .preview.fps .bg{background:radial-gradient(ellipse at 50% 40%,#200a0a,#050510)}
+.game-card .tag{position:absolute;top:12px;right:12px;padding:4px 12px;border-radius:20px;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px}
+.tag.trading{background:rgba(139,92,246,0.3);color:#c4b5fd}
+.tag.exploration{background:rgba(34,197,94,0.3);color:#86efac}
+.tag.action{background:rgba(239,68,68,0.3);color:#fca5a5}
+.game-card .info{padding:20px 24px 24px}
+.game-card .info h3{font-size:1.3rem;margin-bottom:8px}
+.game-card .info p{color:#9ca3af;font-size:0.9rem;line-height:1.6;margin-bottom:16px}
+.game-card .play-btn{display:inline-block;padding:10px 28px;border-radius:10px;font-weight:700;font-size:0.9rem;transition:all 0.2s}
+.game-card .play-btn.purple{background:linear-gradient(135deg,#8b5cf6,#a855f7);color:#fff}
+.game-card .play-btn.green{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff}
+.game-card .play-btn.red{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff}
+.game-card .play-btn:hover{box-shadow:0 4px 20px rgba(139,92,246,0.4);transform:translateY(-2px)}
+
+.footer{background:var(--card);padding:40px 2rem;text-align:center;border-top:1px solid rgba(255,255,255,0.05)}
+.footer p{color:#6b7280;font-size:0.9rem}
+.footer a{color:#8b5cf6}
+
+@media(max-width:768px){
+  .nav{flex-direction:column;gap:12px;text-align:center}
+  .games-grid{grid-template-columns:1fr;padding:20px 1rem 60px}
+}
+</style>
+</head>
+<body>
+
+<div class="aiunites-bar"><div class="aiunites-bar-content"><a href="https://aiunites.github.io/aiunites-site/" class="aiunites-bar-brand">◆ AIUNITES</a><span class="aiunites-bar-divider">|</span><a href="https://aiunites.github.io/aizines-app/">AIZines</a><a href="https://aiunites.github.io/aibyjob-demo/">AIByJob</a><a href="https://aiunites.github.io/redomy-demo/">Redomy</a><a href="https://aiunites.github.io/videobate-site/">VideoBate</a><a href="https://aiunites.github.io/voicestry-site/">VoiceStry</a><a href="https://aiunites.github.io/furnishthings-site/">FurnishThings</a><a href="https://aiunites.github.io/bizstry-site/">BizStry</a><a href="https://aiunites.github.io/aiyhwh-site/">AI YHWH</a><a href="https://aiunites.github.io/cloudsion-site/">Cloudsion</a><a href="https://aiunites.github.io/gameatica-site/">Gameatica</a><a href="https://aiunites.github.io/uptownit-site/">UptownIT</a><a href="https://aiunites.github.io/inthisworld-site/" style="color:#a855f7!important;font-weight:600;">🌍 InThisWorld</a><a href="https://aiunites.github.io/erpise-site/">ERPise</a><a href="https://aiunites.github.io/erpize-site/">ERPize</a><a href="https://aiunites.github.io/cosmostheopera-site/">🌌 COSMOS</a></div></div>
+<script>(function(){if(location.protocol==='file:'||location.hostname==='localhost'||location.hostname==='127.0.0.1'){document.querySelectorAll('.aiunites-bar a').forEach(a=>{a.href=a.href.replace('https://aiunites.github.io/','../../')+'index.html';});}})()</script>
+
+<nav class="nav">
+  <a href="../index.html" class="nav-logo"><span>🌍</span><span>InThis<span class="accent">World</span></span></a>
+  <div class="nav-links">
+    <a href="../index.html">Home</a>
+    <a href="index.html" style="color:#fff">Games</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <h1>🎮 InThisWorld Games</h1>
+  <p>Playable 3D games built with Three.js. Trade across the galaxy, explore procedural worlds, or survive waves of enemies.</p>
+</section>
+
+<div class="games-grid">
+
+  <a href="space-trader.html" class="game-card">
+    <div class="preview trader"><div class="bg">🚀</div><span class="tag trading">Trading</span></div>
+    <div class="info">
+      <h3>Space Trader</h3>
+      <p>Fly between 8 planets, trade commodities, and amass a fortune. Buy low at mining worlds, sell high at luxury stations. First-person space flight with full trade economy.</p>
+      <span class="play-btn purple">▶ Play Now</span>
+    </div>
+  </a>
+
+  <a href="world-explorer.html" class="game-card">
+    <div class="preview explorer"><div class="bg">🌍</div><span class="tag exploration">Exploration</span></div>
+    <div class="info">
+      <h3>World Explorer</h3>
+      <p>Traverse a procedurally generated landscape with oceans, forests, mountains, and snow peaks. Discover 12 ancient artifacts hidden across diverse biomes.</p>
+      <span class="play-btn green">▶ Play Now</span>
+    </div>
+  </a>
+
+  <a href="arena-fps.html" class="game-card">
+    <div class="preview fps"><div class="bg">🔫</div><span class="tag action">FPS</span></div>
+    <div class="info">
+      <h3>Arena FPS</h3>
+      <p>Survive escalating waves of enemies in a neon arena. Each wave brings more and tougher foes. Grab health drops, reload, and see how far you can go.</p>
+      <span class="play-btn red">▶ Play Now</span>
+    </div>
+  </a>
+
+</div>
+
+<footer class="footer">
+  <p>🌍 InThisWorld Games — Built with Three.js</p>
+  <p style="color:#f59e0b;margin:8px 0;font-size:0.85rem;">⚠️ Demo games — work in progress</p>
+  <p>&copy; 2026 InThisWorld. Part of <a href="https://aiunites.github.io/aiunites-site/">AIUNITES</a></p>
+  <div style="margin-top:8px;font-size:0.75rem;">
+    <a href="https://aiunites.github.io/aiunites-site/legal.html#privacy" style="color:rgba(255,255,255,0.4);margin:0 6px;">Privacy Policy</a> ·
+    <a href="https://aiunites.github.io/aiunites-site/legal.html#terms" style="color:rgba(255,255,255,0.4);margin:0 6px;">Terms of Service</a>
+  </div>
+</footer>
+
+</body>
+</html>

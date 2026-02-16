@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>World Explorer — InThisWorld</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#050510;color:#e0e0f0;font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden}
+canvas#gameCanvas{display:block;position:fixed;top:0;left:0}
+
+.hud{position:fixed;z-index:10;pointer-events:none}
+.hud-top{top:10px;left:10px;display:flex;gap:10px;flex-wrap:wrap}
+.hud-stat{background:rgba(10,10,30,0.85);border:1px solid rgba(34,197,94,0.3);border-radius:10px;padding:8px 14px;backdrop-filter:blur(6px)}
+.hud-stat .label{font-size:0.65rem;color:#22c55e;text-transform:uppercase;letter-spacing:1px}
+.hud-stat .val{font-size:1.2rem;font-weight:800;font-family:'Courier New',monospace;color:#ffd700}
+.hud-stat .val.cyan{color:#06b6d4}
+.hud-stat .val.green{color:#4ade80}
+
+.compass{position:fixed;top:10px;right:10px;z-index:10;width:80px;height:80px;pointer-events:none}
+.compass canvas{border:1px solid rgba(34,197,94,0.3);border-radius:50%;background:rgba(10,10,30,0.85)}
+
+.crosshair{position:fixed;top:50%;left:50%;z-index:10;width:4px;height:4px;background:rgba(255,255,255,0.5);border-radius:50%;transform:translate(-50%,-50%);pointer-events:none}
+
+.hud-msg{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:10;pointer-events:none;text-align:center;font-size:1.1rem;font-weight:700;color:#ffd700;text-shadow:0 0 20px rgba(255,215,0,0.5);opacity:0;transition:opacity 0.3s}
+.hud-msg.show{opacity:1}
+
+.coords{position:fixed;bottom:10px;left:10px;z-index:10;font-family:'Courier New',monospace;font-size:0.75rem;color:rgba(255,255,255,0.3);pointer-events:none}
+
+/* Inventory */
+.inv-bar{position:fixed;bottom:10px;left:50%;transform:translateX(-50%);z-index:10;display:flex;gap:4px;pointer-events:none}
+.inv-slot{width:50px;height:50px;background:rgba(10,10,30,0.85);border:1px solid rgba(34,197,94,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;position:relative}
+.inv-slot .count{position:absolute;bottom:2px;right:4px;font-size:0.6rem;font-family:'Courier New',monospace;color:#ffd700}
+
+/* Splash */
+.splash{position:fixed;inset:0;z-index:200;background:radial-gradient(ellipse at 50% 30%,#0a2010,#050510);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px}
+.splash h1{font-size:clamp(2rem,6vw,3.5rem);background:linear-gradient(135deg,#22c55e,#06b6d4,#ffd700);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:12px}
+.splash p{color:rgba(255,255,255,0.6);max-width:480px;margin-bottom:28px;line-height:1.7}
+.splash .start-btn{padding:16px 48px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:14px;color:#fff;font-size:1.1rem;font-weight:800;cursor:pointer;font-family:inherit;transition:all 0.3s;box-shadow:0 4px 30px rgba(34,197,94,0.4)}
+.splash .start-btn:hover{transform:translateY(-3px);box-shadow:0 8px 40px rgba(34,197,94,0.6)}
+.splash .controls{margin-top:28px;font-size:0.8rem;color:rgba(255,255,255,0.3);line-height:1.9}
+.splash .controls kbd{background:rgba(255,255,255,0.1);padding:2px 8px;border-radius:4px;font-family:'Courier New',monospace}
+.hidden{display:none!important}
+.back-link{position:fixed;top:10px;right:100px;z-index:20;color:rgba(255,255,255,0.5);text-decoration:none;font-size:0.85rem;pointer-events:auto;background:rgba(10,10,30,0.7);padding:6px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.1)}
+.back-link:hover{color:#fff}
+</style>
+</head>
+<body>
+
+<div class="splash" id="splash">
+  <h1>🌍 World Explorer</h1>
+  <p>Explore a vast procedural landscape. Discover ancient artifacts hidden across mountains, forests, and deserts. Collect them all to unlock the ancient mystery.</p>
+  <button class="start-btn" onclick="startGame()">Begin Exploration</button>
+  <div class="controls">
+    <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> Move &nbsp;|&nbsp;
+    <kbd>Mouse</kbd> Look &nbsp;|&nbsp;
+    <kbd>Shift</kbd> Sprint &nbsp;|&nbsp;
+    <kbd>Space</kbd> Jump &nbsp;|&nbsp;
+    <kbd>E</kbd> Collect
+  </div>
+</div>
+
+<a href="../index.html" class="back-link hidden" id="backLink">← InThisWorld</a>
+<div class="crosshair hidden" id="cross"></div>
+
+<div class="hud hud-top hidden" id="hudTop">
+  <div class="hud-stat"><div class="label">Artifacts</div><div class="val" id="hArt">0 / 12</div></div>
+  <div class="hud-stat"><div class="label">Biome</div><div class="val green" id="hBiome">—</div></div>
+  <div class="hud-stat"><div class="label">Altitude</div><div class="val cyan" id="hAlt">0</div></div>
+</div>
+
+<div class="compass hidden" id="compass"><canvas id="compC" width="80" height="80"></canvas></div>
+<div class="hud-msg" id="msg"></div>
+<div class="coords hidden" id="coords">X: 0 Z: 0</div>
+<div class="inv-bar hidden" id="invBar"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+var scene,camera,renderer,clock;
+var keys={},isLocked=false,gameStarted=false;
+var playerY=10,velY=0,onGround=false,canJump=true;
+var euler=new THREE.Euler(0,0,0,'YXZ');
+var artifacts=[],collected=[];
+var terrainMesh;
+var WORLD=200,SEGMENTS=128,HEIGHT_SCALE=25;
+var msgTimer=null;
+
+// Simple 2D noise
+var noiseP=[];for(var i=0;i<512;i++)noiseP[i]=Math.floor(Math.random()*256);
+function fade(t){return t*t*t*(t*(t*6-15)+10);}
+function lerp(a,b,t){return a+t*(b-a);}
+function grad(h,x,y){var v=h&3;return(v===0?x+y:v===1?-x+y:v===2?x-y:-x-y);}
+function noise2(x,y){
+  var X=Math.floor(x)&255,Y=Math.floor(y)&255;
+  x-=Math.floor(x);y-=Math.floor(y);
+  var u=fade(x),v=fade(y);
+  var a=noiseP[X]+Y,b=noiseP[X+1]+Y;
+  return lerp(lerp(grad(noiseP[a],x,y),grad(noiseP[b],x-1,y),u),lerp(grad(noiseP[a+1],x,y-1),grad(noiseP[b+1],x-1,y-1),u),v);
+}
+function fbm(x,y,oct){var v=0,a=1,f=1,t=0;for(var i=0;i<oct;i++){v+=a*noise2(x*f,y*f);t+=a;a*=0.5;f*=2;}return v/t;}
+
+function getHeight(wx,wz){
+  return fbm(wx*0.008,wz*0.008,6)*HEIGHT_SCALE+fbm(wx*0.03,wz*0.03,3)*5;
+}
+
+function getBiome(h){
+  if(h<-3)return{name:'Ocean',color:new THREE.Color(0x1e3a5f)};
+  if(h<1)return{name:'Beach',color:new THREE.Color(0xc2b280)};
+  if(h<8)return{name:'Plains',color:new THREE.Color(0x4a7c3f)};
+  if(h<15)return{name:'Forest',color:new THREE.Color(0x2d5a27)};
+  if(h<22)return{name:'Mountain',color:new THREE.Color(0x6b6b6b)};
+  return{name:'Snow Peak',color:new THREE.Color(0xe8e8e8)};
+}
+
+// Artifact types
+var ART_TYPES=[
+  {name:'Crystal Shard',icon:'💎',color:0x06b6d4},
+  {name:'Ancient Rune',icon:'🔮',color:0x8b5cf6},
+  {name:'Golden Idol',icon:'👑',color:0xffd700},
+  {name:'Star Fragment',icon:'⭐',color:0xfbbf24},
+  {name:'Dragon Scale',icon:'🐉',color:0xef4444},
+  {name:'Moon Stone',icon:'🌙',color:0xa78bfa},
+  {name:'Phoenix Feather',icon:'🔥',color:0xf97316},
+  {name:'Ice Crystal',icon:'❄️',color:0x67e8f9},
+  {name:'Earth Core',icon:'🌍',color:0x22c55e},
+  {name:'Sky Pearl',icon:'☁️',color:0xe0e7ff},
+  {name:'Shadow Gem',icon:'🖤',color:0x4b5563},
+  {name:'Light Prism',icon:'🌈',color:0xfbbf24}
+];
+
+function init(){
+  scene=new THREE.Scene();
+  scene.fog=new THREE.FogExp2(0x0a1520,0.006);
+  scene.background=new THREE.Color(0x0a1520);
+
+  camera=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,0.1,500);
+  camera.position.set(0,20,0);
+
+  renderer=new THREE.WebGLRenderer({antialias:true,canvas:document.createElement('canvas')});
+  renderer.setSize(innerWidth,innerHeight);
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.domElement.id='gameCanvas';
+  document.body.insertBefore(renderer.domElement,document.body.firstChild);
+  clock=new THREE.Clock();
+
+  // Lights
+  var amb=new THREE.AmbientLight(0x334466,0.5);scene.add(amb);
+  var dir=new THREE.DirectionalLight(0xffeedd,1.0);dir.position.set(80,120,60);scene.add(dir);
+  var hemi=new THREE.HemisphereLight(0x4488cc,0x443322,0.4);scene.add(hemi);
+
+  // Terrain
+  var geo=new THREE.PlaneGeometry(WORLD*2,WORLD*2,SEGMENTS,SEGMENTS);
+  geo.rotateX(-Math.PI/2);
+  var pos=geo.attributes.position;
+  var colors=new Float32Array(pos.count*3);
+  for(var i=0;i<pos.count;i++){
+    var x=pos.getX(i),z=pos.getZ(i);
+    var h=getHeight(x,z);
+    pos.setY(i,h);
+    var b=getBiome(h);
+    colors[i*3]=b.color.r;colors[i*3+1]=b.color.g;colors[i*3+2]=b.color.b;
+  }
+  geo.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));
+  geo.computeVertexNormals();
+  var mat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:0.85,metalness:0.05,flatShading:true});
+  terrainMesh=new THREE.Mesh(geo,mat);
+  scene.add(terrainMesh);
+
+  // Water plane
+  var water=new THREE.Mesh(
+    new THREE.PlaneGeometry(WORLD*4,WORLD*4),
+    new THREE.MeshStandardMaterial({color:0x1a3a5c,transparent:true,opacity:0.7,roughness:0.2,metalness:0.3})
+  );
+  water.rotation.x=-Math.PI/2;water.position.y=-2;
+  scene.add(water);
+
+  // Trees
+  for(var i=0;i<300;i++){
+    var tx=(Math.random()-0.5)*WORLD*1.6;
+    var tz=(Math.random()-0.5)*WORLD*1.6;
+    var th=getHeight(tx,tz);
+    if(th>2&&th<16){
+      var trunk=new THREE.Mesh(new THREE.CylinderGeometry(0.15,0.2,2,6),new THREE.MeshStandardMaterial({color:0x5c3a1e}));
+      trunk.position.set(tx,th+1,tz);
+      var leaves=new THREE.Mesh(new THREE.ConeGeometry(1.2,3,6),new THREE.MeshStandardMaterial({color:0x2d6b30+Math.floor(Math.random()*0x101010),flatShading:true}));
+      leaves.position.y=2.5;trunk.add(leaves);
+      scene.add(trunk);
+    }
+  }
+
+  // Rocks
+  for(var i=0;i<80;i++){
+    var rx=(Math.random()-0.5)*WORLD*1.6;
+    var rz=(Math.random()-0.5)*WORLD*1.6;
+    var rh=getHeight(rx,rz);
+    if(rh>10){
+      var rock=new THREE.Mesh(
+        new THREE.DodecahedronGeometry(0.5+Math.random()*1.5,0),
+        new THREE.MeshStandardMaterial({color:0x555555+Math.floor(Math.random()*0x222222),flatShading:true,roughness:0.9})
+      );
+      rock.position.set(rx,rh+0.3,rz);
+      rock.rotation.set(Math.random()*3,Math.random()*3,Math.random()*3);
+      scene.add(rock);
+    }
+  }
+
+  // Place artifacts
+  for(var i=0;i<12;i++){
+    var ax,az,ah;
+    do{ax=(Math.random()-0.5)*WORLD*1.5;az=(Math.random()-0.5)*WORLD*1.5;ah=getHeight(ax,az);}while(ah<0);
+    var at=ART_TYPES[i];
+    var artGeo=new THREE.OctahedronGeometry(0.6,0);
+    var artMat=new THREE.MeshStandardMaterial({color:at.color,emissive:at.color,emissiveIntensity:0.5,metalness:0.8,roughness:0.2});
+    var artMesh=new THREE.Mesh(artGeo,artMat);
+    artMesh.position.set(ax,ah+1.5,az);
+
+    // Glow ring
+    var ring=new THREE.Mesh(new THREE.TorusGeometry(1.2,0.05,8,32),new THREE.MeshBasicMaterial({color:at.color,transparent:true,opacity:0.3}));
+    ring.rotation.x=Math.PI/2;artMesh.add(ring);
+
+    // Light pillar
+    var pillar=new THREE.Mesh(new THREE.CylinderGeometry(0.02,0.3,8,8),new THREE.MeshBasicMaterial({color:at.color,transparent:true,opacity:0.15}));
+    pillar.position.y=4;artMesh.add(pillar);
+
+    scene.add(artMesh);
+    artifacts.push({mesh:artMesh,type:at,collected:false});
+  }
+
+  // Events
+  addEventListener('resize',function(){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+  addEventListener('keydown',function(e){keys[e.code]=true;
+    if(e.code==='Space'&&onGround&&canJump){velY=8;onGround=false;canJump=false;}
+    if(e.code==='KeyE')tryCollect();
+  });
+  addEventListener('keyup',function(e){keys[e.code]=false;if(e.code==='Space')canJump=true;});
+  document.addEventListener('mousemove',function(e){
+    if(!isLocked)return;
+    euler.y-=e.movementX*0.002;euler.x-=e.movementY*0.002;
+    euler.x=Math.max(-1.4,Math.min(1.4,euler.x));
+    camera.quaternion.setFromEuler(euler);
+  });
+  renderer.domElement.addEventListener('click',function(){if(gameStarted)renderer.domElement.requestPointerLock();});
+  document.addEventListener('pointerlockchange',function(){isLocked=document.pointerLockElement===renderer.domElement;});
+  renderer.render(scene,camera);
+}
+
+function showMsg(txt){
+  var m=document.getElementById('msg');m.textContent=txt;m.classList.add('show');
+  clearTimeout(msgTimer);msgTimer=setTimeout(function(){m.classList.remove('show');},2500);
+}
+
+function tryCollect(){
+  for(var i=0;i<artifacts.length;i++){
+    var a=artifacts[i];
+    if(a.collected)continue;
+    if(camera.position.distanceTo(a.mesh.position)<4){
+      a.collected=true;scene.remove(a.mesh);
+      collected.push(a.type);
+      showMsg('✨ Found: '+a.type.icon+' '+a.type.name+'!');
+      document.getElementById('hArt').textContent=collected.length+' / 12';
+      renderInv();
+      if(collected.length===12)showMsg('🏆 ALL ARTIFACTS COLLECTED! You solved the ancient mystery!');
+      return;
+    }
+  }
+}
+
+function renderInv(){
+  var bar=document.getElementById('invBar');
+  bar.innerHTML='';
+  collected.forEach(function(t){
+    bar.innerHTML+='<div class="inv-slot" title="'+t.name+'">'+t.icon+'</div>';
+  });
+}
+
+function startGame(){
+  gameStarted=true;
+  document.getElementById('splash').classList.add('hidden');
+  ['hudTop','compass','coords','invBar','backLink','cross'].forEach(function(id){document.getElementById(id).classList.remove('hidden');});
+  renderer.domElement.requestPointerLock();
+  animate();
+}
+
+function animate(){
+  requestAnimationFrame(animate);
+  var dt=Math.min(clock.getDelta(),0.05);
+
+  var fwd=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);fwd.y=0;fwd.normalize();
+  var right=new THREE.Vector3(1,0,0).applyQuaternion(camera.quaternion);right.y=0;right.normalize();
+  var spd=(keys.ShiftLeft||keys.ShiftRight)?12:6;
+  var move=new THREE.Vector3();
+  if(keys.KeyW)move.add(fwd);if(keys.KeyS)move.sub(fwd);
+  if(keys.KeyA)move.sub(right);if(keys.KeyD)move.add(right);
+  if(move.length()>0)move.normalize().multiplyScalar(spd*dt);
+  camera.position.add(move);
+
+  // Gravity
+  velY-=20*dt;playerY+=velY*dt;
+  var terrH=getHeight(camera.position.x,camera.position.z)+2;
+  if(playerY<=terrH){playerY=terrH;velY=0;onGround=true;}
+  camera.position.y=playerY;
+
+  // Clamp to world
+  camera.position.x=Math.max(-WORLD*1.5,Math.min(WORLD*1.5,camera.position.x));
+  camera.position.z=Math.max(-WORLD*1.5,Math.min(WORLD*1.5,camera.position.z));
+
+  // Animate artifacts
+  var t=clock.elapsedTime;
+  artifacts.forEach(function(a){
+    if(!a.collected){
+      a.mesh.rotation.y=t*1.5;
+      a.mesh.position.y=getHeight(a.mesh.position.x,a.mesh.position.z)+1.5+Math.sin(t*2)*0.3;
+    }
+  });
+
+  // HUD
+  var h=getHeight(camera.position.x,camera.position.z);
+  var biome=getBiome(h);
+  document.getElementById('hBiome').textContent=biome.name;
+  document.getElementById('hAlt').textContent=Math.round(h)+'m';
+  document.getElementById('coords').textContent='X: '+Math.round(camera.position.x)+' Z: '+Math.round(camera.position.z);
+
+  // Nearby artifact hint
+  var nearA=null,nearD=Infinity;
+  artifacts.forEach(function(a){
+    if(a.collected)return;
+    var d=camera.position.distanceTo(a.mesh.position);
+    if(d<nearD){nearD=d;nearA=a;}
+  });
+  if(nearA&&nearD<4){
+    document.getElementById('msg').textContent='Press E to collect '+nearA.type.icon+' '+nearA.type.name;
+    document.getElementById('msg').classList.add('show');
+  }
+
+  drawCompass();
+  renderer.render(scene,camera);
+}
+
+function drawCompass(){
+  var cv=document.getElementById('compC'),cx=cv.getContext('2d'),w=cv.width,h=cv.height;
+  cx.clearRect(0,0,w,h);
+  cx.save();cx.translate(w/2,h/2);cx.rotate(euler.y);
+  // N
+  cx.fillStyle='#ef4444';cx.beginPath();cx.moveTo(0,-30);cx.lineTo(-6,-18);cx.lineTo(6,-18);cx.closePath();cx.fill();
+  // S
+  cx.fillStyle='rgba(255,255,255,0.3)';cx.beginPath();cx.moveTo(0,30);cx.lineTo(-6,18);cx.lineTo(6,18);cx.closePath();cx.fill();
+  cx.fillStyle='#ef4444';cx.font='bold 10px sans-serif';cx.textAlign='center';cx.fillText('N',0,-33);
+  cx.fillStyle='rgba(255,255,255,0.3)';cx.fillText('S',0,40);
+  cx.restore();
+  // Artifact pings
+  cx.save();cx.translate(w/2,h/2);
+  artifacts.forEach(function(a){
+    if(a.collected)return;
+    var dx=a.mesh.position.x-camera.position.x;
+    var dz=a.mesh.position.z-camera.position.z;
+    var dist=Math.sqrt(dx*dx+dz*dz);
+    if(dist>150)return;
+    var ang=Math.atan2(dx,dz)+euler.y;
+    var r=Math.min(32,dist*0.2);
+    cx.fillStyle='#'+a.type.color.toString(16).padStart(6,'0');
+    cx.beginPath();cx.arc(Math.sin(ang)*r,-Math.cos(ang)*r,2.5,0,Math.PI*2);cx.fill();
+  });
+  cx.restore();
+}
+
+init();
+</script>
+</body>
+</html>

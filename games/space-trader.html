@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Space Trader — InThisWorld</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#050510;color:#e0e0f0;font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden}
+canvas#gameCanvas{display:block;position:fixed;top:0;left:0}
+
+.hud{position:fixed;z-index:10;pointer-events:none}
+.hud-top{top:10px;left:10px;right:10px;display:flex;justify-content:space-between;align-items:flex-start}
+.hud-stat{background:rgba(10,10,30,0.85);border:1px solid rgba(139,92,246,0.3);border-radius:10px;padding:10px 16px;backdrop-filter:blur(6px);pointer-events:auto}
+.hud-stat .label{font-size:0.7rem;color:#8b5cf6;text-transform:uppercase;letter-spacing:1px}
+.hud-stat .val{font-size:1.4rem;font-weight:800;font-family:'Courier New',monospace;color:#ffd700}
+.hud-stat .val.cyan{color:#06b6d4}
+.hud-stat .val.green{color:#4ade80}
+
+.hud-center{top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+.crosshair{width:20px;height:20px;border:2px solid rgba(139,92,246,0.5);border-radius:50%;margin:0 auto}
+.target-info{margin-top:8px;font-size:0.85rem;color:rgba(255,255,255,0.7);text-shadow:0 0 10px rgba(0,0,0,0.8);white-space:pre-line}
+
+.hud-bottom{bottom:10px;left:10px;right:10px;display:flex;justify-content:center;gap:10px}
+.hud-btn{pointer-events:auto;background:rgba(139,92,246,0.2);border:1px solid rgba(139,92,246,0.4);color:#c4b5fd;padding:8px 18px;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:700;font-size:0.85rem;transition:all 0.2s}
+.hud-btn:hover{background:rgba(139,92,246,0.4);color:#fff}
+
+.speed-bar{position:fixed;bottom:60px;left:50%;transform:translateX(-50%);z-index:10;pointer-events:none;text-align:center}
+.speed-bar .spd{font-family:'Courier New',monospace;font-size:0.8rem;color:rgba(255,255,255,0.5)}
+
+/* Trade Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;display:none;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#0c0c1e;border:1px solid rgba(139,92,246,0.3);border-radius:16px;padding:28px;max-width:520px;width:92%;max-height:82vh;overflow-y:auto;box-shadow:0 0 60px rgba(139,92,246,0.2)}
+.modal h2{font-size:1.4rem;margin-bottom:4px;background:linear-gradient(135deg,#8b5cf6,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.modal .sub{font-size:0.82rem;color:rgba(255,255,255,0.5);margin-bottom:18px}
+.trade-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.05);gap:8px}
+.trade-row .item-name{font-weight:700;min-width:90px;font-size:0.9rem}
+.trade-row .item-price{font-family:'Courier New',monospace;color:#ffd700;min-width:55px;text-align:right;font-size:0.85rem}
+.trade-row .item-stock{font-size:0.75rem;color:rgba(255,255,255,0.4);min-width:35px;text-align:center}
+.trade-btn{padding:4px 11px;border-radius:6px;border:1px solid rgba(139,92,246,0.3);background:rgba(139,92,246,0.1);color:#c4b5fd;cursor:pointer;font-family:inherit;font-weight:700;font-size:0.78rem;transition:all 0.15s}
+.trade-btn:hover{background:rgba(139,92,246,0.3)}
+.trade-btn.sell{border-color:rgba(6,182,212,0.3);background:rgba(6,182,212,0.1);color:#67e8f9}
+.trade-btn.sell:hover{background:rgba(6,182,212,0.3)}
+.cargo-section{margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.1)}
+.cargo-section h3{font-size:1rem;color:#06b6d4;margin-bottom:10px}
+.modal-close{display:block;width:100%;margin-top:18px;padding:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;cursor:pointer;font-family:inherit;font-weight:700;font-size:0.95rem}
+.modal-close:hover{background:rgba(255,255,255,0.1)}
+
+/* Minimap */
+.minimap{position:fixed;bottom:60px;right:10px;z-index:10;pointer-events:none}
+.minimap canvas{border:1px solid rgba(139,92,246,0.3);border-radius:10px}
+
+/* Splash */
+.splash{position:fixed;inset:0;z-index:200;background:radial-gradient(ellipse at 50% 40%,#1a1040,#050510);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px}
+.splash h1{font-size:clamp(2rem,6vw,3.5rem);background:linear-gradient(135deg,#8b5cf6,#06b6d4,#ffd700);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:12px}
+.splash p{color:rgba(255,255,255,0.6);max-width:480px;margin-bottom:28px;line-height:1.7}
+.splash .start-btn{padding:16px 48px;background:linear-gradient(135deg,#8b5cf6,#a855f7);border:none;border-radius:14px;color:#fff;font-size:1.1rem;font-weight:800;cursor:pointer;font-family:inherit;transition:all 0.3s;box-shadow:0 4px 30px rgba(139,92,246,0.4)}
+.splash .start-btn:hover{transform:translateY(-3px);box-shadow:0 8px 40px rgba(139,92,246,0.6)}
+.splash .controls{margin-top:28px;font-size:0.8rem;color:rgba(255,255,255,0.3);line-height:1.9}
+.splash .controls kbd{background:rgba(255,255,255,0.1);padding:2px 8px;border-radius:4px;font-family:'Courier New',monospace}
+.hidden{display:none!important}
+.back-link{position:fixed;top:10px;right:10px;z-index:20;color:rgba(255,255,255,0.5);text-decoration:none;font-size:0.85rem;pointer-events:auto;background:rgba(10,10,30,0.7);padding:6px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.1)}
+.back-link:hover{color:#fff}
+</style>
+</head>
+<body>
+
+<div class="splash" id="splash">
+  <h1>🚀 Space Trader</h1>
+  <p>Fly between planets, trade commodities, and build your fortune across the galaxy. Buy low, sell high, and refuel at each port.</p>
+  <button class="start-btn" onclick="startGame()">Launch into Space</button>
+  <div class="controls">
+    <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> Move &nbsp;|&nbsp;
+    <kbd>Mouse</kbd> Look &nbsp;|&nbsp;
+    <kbd>Shift</kbd> Boost &nbsp;|&nbsp;
+    <kbd>E</kbd> Dock &nbsp;|&nbsp;
+    <kbd>Space</kbd> Brake
+  </div>
+</div>
+
+<a href="../index.html" class="back-link hidden" id="backLink">← InThisWorld</a>
+
+<div class="hud hud-top hidden" id="hudTop">
+  <div class="hud-stat"><div class="label">Credits</div><div class="val" id="hCredits">1000</div></div>
+  <div class="hud-stat"><div class="label">Cargo</div><div class="val cyan" id="hCargo">0/20</div></div>
+  <div class="hud-stat"><div class="label">Fuel</div><div class="val green" id="hFuel">100</div></div>
+</div>
+<div class="hud hud-center hidden" id="hudCenter">
+  <div class="crosshair"></div>
+  <div class="target-info" id="targetInfo"></div>
+</div>
+<div class="speed-bar hidden" id="speedBar"><div class="spd" id="speedText">SPD: 0</div></div>
+<div class="hud hud-bottom hidden" id="hudBottom">
+  <button class="hud-btn" onclick="openTrade()" id="dockBtn" style="display:none">📦 Dock & Trade (E)</button>
+</div>
+<div class="minimap hidden" id="minimap"><canvas id="mapC" width="150" height="150"></canvas></div>
+
+<div class="modal-overlay" id="tradeModal">
+  <div class="modal">
+    <h2 id="tName">Planet</h2>
+    <div class="sub" id="tDesc"></div>
+    <div id="tList"></div>
+    <div class="cargo-section"><h3>Your Cargo</h3><div id="tCargo"><em style="color:rgba(255,255,255,0.3)">Empty</em></div></div>
+    <button class="modal-close" onclick="closeTrade()">Undock & Continue</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+var scene,camera,renderer,clock;
+var ship={speed:0,maxSpeed:2.5,boostMax:5,fuel:100,credits:1000,cargo:[],cargoMax:20};
+var keys={},planets=[],nearPlanet=null,isDocked=false;
+var euler=new THREE.Euler(0,0,0,'YXZ'),isLocked=false,gameStarted=false;
+
+var GOODS=[
+  {name:'Crystals',base:50,vol:0.4,icon:'💎'},
+  {name:'Fuel Cells',base:30,vol:0.3,icon:'⚡'},
+  {name:'Food',base:15,vol:0.2,icon:'🌾'},
+  {name:'Metals',base:40,vol:0.35,icon:'⛏️'},
+  {name:'Tech Parts',base:80,vol:0.5,icon:'🔧'},
+  {name:'Medicine',base:60,vol:0.45,icon:'💊'},
+  {name:'Textiles',base:20,vol:0.25,icon:'🧵'},
+  {name:'Luxuries',base:120,vol:0.6,icon:'👑'}
+];
+
+var PLANETS=[
+  {name:'Solara Prime',color:0xffa500,size:8,pos:[0,0,0],desc:'Capital — balanced prices',type:'capital'},
+  {name:'Glacius',color:0x06b6d4,size:6,pos:[120,20,-80],desc:'Ice world — cheap fuel',type:'ice'},
+  {name:'Verdana',color:0x22c55e,size:7,pos:[-100,-10,60],desc:'Agri — cheap food & textiles',type:'agri'},
+  {name:'Ferrox',color:0xef4444,size:9,pos:[80,-30,150],desc:'Mining — cheap metals & crystals',type:'mining'},
+  {name:'Nexus Station',color:0x8b5cf6,size:5,pos:[-60,40,-140],desc:'Tech hub — cheap tech parts',type:'tech'},
+  {name:'Aurelion',color:0xffd700,size:10,pos:[200,10,50],desc:'Luxury world — buys high',type:'luxury'},
+  {name:'Medica',color:0xf472b6,size:5.5,pos:[-150,-20,-60],desc:'Hospital — cheap medicine',type:'medical'},
+  {name:'Void Outpost',color:0x6366f1,size:4,pos:[50,60,-200],desc:'Remote — extreme prices',type:'outpost'}
+];
+
+var MODS={
+  capital:{Crystals:1,'Fuel Cells':1,Food:1,Metals:1,'Tech Parts':1,Medicine:1,Textiles:1,Luxuries:1},
+  ice:{Crystals:1.3,'Fuel Cells':0.5,Food:1.5,Metals:1.1,'Tech Parts':1.2,Medicine:1.3,Textiles:1.4,Luxuries:1.6},
+  agri:{Crystals:1.2,'Fuel Cells':1.1,Food:0.4,Metals:1.3,'Tech Parts':1.4,Medicine:0.9,Textiles:0.5,Luxuries:1.8},
+  mining:{Crystals:0.4,'Fuel Cells':1.2,Food:1.5,Metals:0.4,'Tech Parts':1.1,Medicine:1.4,Textiles:1.3,Luxuries:1.5},
+  tech:{Crystals:1.3,'Fuel Cells':0.8,Food:2.0,Metals:0.8,'Tech Parts':0.3,Medicine:1.1,Textiles:1.5,Luxuries:1.2},
+  luxury:{Crystals:1.5,'Fuel Cells':1.3,Food:1.4,Metals:1.4,'Tech Parts':1.3,Medicine:1.2,Textiles:1.3,Luxuries:0.6},
+  medical:{Crystals:1.1,'Fuel Cells':1.0,Food:0.9,Metals:1.2,'Tech Parts':1.0,Medicine:0.3,Textiles:1.0,Luxuries:1.4},
+  outpost:{Crystals:0.6,'Fuel Cells':2.0,Food:2.5,Metals:0.7,'Tech Parts':0.5,Medicine:2.0,Textiles:0.8,Luxuries:0.4}
+};
+
+function getPrice(g,ptype){var m=(MODS[ptype]&&MODS[ptype][g.name])||1;var r=1+(Math.random()-0.5)*g.vol*0.3;return Math.max(1,Math.round(g.base*m*r));}
+
+function init(){
+  scene=new THREE.Scene();
+  scene.fog=new THREE.FogExp2(0x050510,0.0018);
+  camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,0.1,2000);
+  camera.position.set(0,5,30);
+  renderer=new THREE.WebGLRenderer({antialias:true,canvas:document.createElement('canvas')});
+  renderer.setSize(innerWidth,innerHeight);
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.setClearColor(0x050510);
+  renderer.domElement.id='gameCanvas';
+  document.body.insertBefore(renderer.domElement,document.body.firstChild);
+  clock=new THREE.Clock();
+
+  scene.add(new THREE.AmbientLight(0x222244,0.6));
+  var sun=new THREE.PointLight(0xffffff,1.5,600);sun.position.set(100,100,100);scene.add(sun);
+
+  // Stars
+  var sv=[];for(var i=0;i<6000;i++)sv.push((Math.random()-0.5)*1500,(Math.random()-0.5)*1500,(Math.random()-0.5)*1500);
+  var sg=new THREE.BufferGeometry();sg.setAttribute('position',new THREE.Float32BufferAttribute(sv,3));
+  scene.add(new THREE.Points(sg,new THREE.PointsMaterial({color:0xffffff,size:0.8,transparent:true,opacity:0.7})));
+
+  // Planets
+  PLANETS.forEach(function(pd){
+    var mesh=new THREE.Mesh(
+      new THREE.SphereGeometry(pd.size,32,32),
+      new THREE.MeshStandardMaterial({color:pd.color,roughness:0.7,metalness:0.2,emissive:pd.color,emissiveIntensity:0.15})
+    );
+    mesh.position.set(pd.pos[0],pd.pos[1],pd.pos[2]);
+
+    // Glow
+    var gm=new THREE.Mesh(new THREE.SphereGeometry(pd.size*1.3,32,32),new THREE.MeshBasicMaterial({color:pd.color,transparent:true,opacity:0.08,side:THREE.BackSide}));
+    mesh.add(gm);
+
+    // Ring on big planets
+    if(pd.size>7){
+      var rm=new THREE.Mesh(new THREE.RingGeometry(pd.size*1.4,pd.size*2,64),new THREE.MeshBasicMaterial({color:pd.color,transparent:true,opacity:0.15,side:THREE.DoubleSide}));
+      rm.rotation.x=Math.PI/2.5;mesh.add(rm);
+    }
+
+    // Label
+    var c=document.createElement('canvas');c.width=256;c.height=64;
+    var cx=c.getContext('2d');cx.font='bold 28px Segoe UI';cx.fillStyle='#ffffff';cx.textAlign='center';cx.fillText(pd.name,128,40);
+    var sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true,opacity:0.7}));
+    sp.position.set(0,pd.size+4,0);sp.scale.set(20,5,1);mesh.add(sp);
+
+    scene.add(mesh);
+    planets.push({mesh:mesh,data:pd,prices:null});
+  });
+
+  addEventListener('resize',function(){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+  addEventListener('keydown',function(e){keys[e.code]=true;if(e.code==='KeyE'&&nearPlanet&&!isDocked)openTrade();});
+  addEventListener('keyup',function(e){keys[e.code]=false;});
+  document.addEventListener('mousemove',function(e){
+    if(!isLocked)return;
+    euler.y-=e.movementX*0.002;euler.x-=e.movementY*0.002;
+    euler.x=Math.max(-1.4,Math.min(1.4,euler.x));
+    camera.quaternion.setFromEuler(euler);
+  });
+  renderer.domElement.addEventListener('click',function(){if(gameStarted&&!isDocked)renderer.domElement.requestPointerLock();});
+  document.addEventListener('pointerlockchange',function(){isLocked=document.pointerLockElement===renderer.domElement;});
+  renderer.render(scene,camera);
+}
+
+function startGame(){
+  gameStarted=true;
+  document.getElementById('splash').classList.add('hidden');
+  ['hudTop','hudCenter','hudBottom','speedBar','minimap','backLink'].forEach(function(id){document.getElementById(id).classList.remove('hidden');});
+  renderer.domElement.requestPointerLock();
+  animate();
+}
+
+function animate(){
+  requestAnimationFrame(animate);
+  if(isDocked){renderer.render(scene,camera);return;}
+  var dt=Math.min(clock.getDelta(),0.05);
+  var fwd=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
+  var right=new THREE.Vector3(1,0,0).applyQuaternion(camera.quaternion);
+
+  var mx=(keys.ShiftLeft||keys.ShiftRight)?ship.boostMax:ship.maxSpeed;
+  if(keys.KeyW&&ship.fuel>0){ship.speed=Math.min(ship.speed+3*dt,mx);ship.fuel=Math.max(0,ship.fuel-dt*(keys.ShiftLeft?3:1));}
+  if(keys.KeyS)ship.speed=Math.max(ship.speed-4*dt,-ship.maxSpeed*0.3);
+  if(keys.Space)ship.speed*=(1-3*dt);
+  if(keys.KeyA)camera.position.add(right.clone().multiplyScalar(-1.5*dt));
+  if(keys.KeyD)camera.position.add(right.clone().multiplyScalar(1.5*dt));
+  ship.speed*=(1-0.3*dt);if(Math.abs(ship.speed)<0.01)ship.speed=0;
+  camera.position.add(fwd.multiplyScalar(ship.speed));
+
+  planets.forEach(function(p){p.mesh.rotation.y+=dt*0.1;});
+
+  nearPlanet=null;var closestD=Infinity;
+  planets.forEach(function(p){
+    var d=camera.position.distanceTo(p.mesh.position);
+    if(d<p.data.size+15&&d<closestD){closestD=d;nearPlanet=p;}
+  });
+
+  var db=document.getElementById('dockBtn');
+  if(nearPlanet){
+    document.getElementById('targetInfo').textContent=nearPlanet.data.name+'\n'+nearPlanet.data.desc+'\nPress E to dock';
+    db.style.display='block';
+  }else{
+    var cl=null,cd=Infinity;planets.forEach(function(p){var d=camera.position.distanceTo(p.mesh.position);if(d<cd){cd=d;cl=p;}});
+    if(cl)document.getElementById('targetInfo').textContent=cl.data.name+' — '+Math.round(cd)+' units';
+    db.style.display='none';
+  }
+
+  if(nearPlanet&&closestD<nearPlanet.data.size+20)ship.fuel=Math.min(100,ship.fuel+dt*5);
+
+  document.getElementById('hCredits').textContent=ship.credits.toLocaleString();
+  var cc=ship.cargo.reduce(function(s,c){return s+c.qty;},0);
+  document.getElementById('hCargo').textContent=cc+'/'+ship.cargoMax;
+  document.getElementById('hFuel').textContent=Math.round(ship.fuel);
+  document.getElementById('speedText').textContent='SPD: '+Math.abs(ship.speed).toFixed(1);
+  drawMap();
+  renderer.render(scene,camera);
+}
+
+function drawMap(){
+  var cv=document.getElementById('mapC'),cx=cv.getContext('2d'),w=cv.width,h=cv.height;
+  cx.clearRect(0,0,w,h);cx.fillStyle='rgba(10,10,30,0.9)';cx.fillRect(0,0,w,h);
+  var sc=0.28,mx=w/2,my=h/2,px=camera.position.x,pz=camera.position.z;
+  planets.forEach(function(p){
+    var x=mx+(p.data.pos[0]-px)*sc,y=my+(p.data.pos[2]-pz)*sc;
+    if(x<-5||x>w+5||y<-5||y>h+5)return;
+    var r=Math.max(2,p.data.size*sc*0.5);
+    cx.beginPath();cx.arc(x,y,r,0,Math.PI*2);
+    cx.fillStyle='#'+p.data.color.toString(16).padStart(6,'0');cx.fill();
+    cx.fillStyle='rgba(255,255,255,0.4)';cx.font='7px sans-serif';cx.textAlign='center';
+    cx.fillText(p.data.name.split(' ')[0],x,y+r+8);
+  });
+  cx.save();cx.translate(mx,my);cx.rotate(-euler.y);
+  cx.beginPath();cx.moveTo(0,-5);cx.lineTo(-3,4);cx.lineTo(3,4);cx.closePath();cx.fillStyle='#fff';cx.fill();cx.restore();
+}
+
+function openTrade(){
+  if(!nearPlanet)return;isDocked=true;document.exitPointerLock();ship.speed=0;
+  nearPlanet.prices=GOODS.map(function(g){
+    return{name:g.name,icon:g.icon,buy:getPrice(g,nearPlanet.data.type),sell:Math.round(getPrice(g,nearPlanet.data.type)*0.85),stock:5+Math.floor(Math.random()*15)};
+  });
+  ship.fuel=100;renderTrade();document.getElementById('tradeModal').classList.add('open');
+}
+function closeTrade(){isDocked=false;document.getElementById('tradeModal').classList.remove('open');setTimeout(function(){renderer.domElement.requestPointerLock();},200);}
+
+function renderTrade(){
+  var p=nearPlanet;
+  document.getElementById('tName').textContent='📦 '+p.data.name;
+  document.getElementById('tDesc').textContent=p.data.desc+' | Fuel restored to 100%';
+  var h='';
+  p.prices.forEach(function(item,i){
+    h+='<div class="trade-row"><span class="item-name">'+item.icon+' '+item.name+'</span><span class="item-price">$'+item.buy+'</span><span class="item-stock">×'+item.stock+'</span><button class="trade-btn" onclick="buyItem('+i+')">Buy</button></div>';
+  });
+  document.getElementById('tList').innerHTML=h;
+  var ch='';
+  if(!ship.cargo.length){ch='<em style="color:rgba(255,255,255,0.3)">Empty</em>';}
+  else{ship.cargo.forEach(function(c,i){
+    var sp=0;p.prices.forEach(function(pp){if(pp.name===c.name)sp=pp.sell;});
+    var pr=sp-c.paid,col=pr>=0?'#4ade80':'#ef4444';
+    ch+='<div class="trade-row"><span class="item-name">'+c.icon+' '+c.name+' ×'+c.qty+'</span><span class="item-price" style="color:'+col+'">$'+sp+' ('+(pr>=0?'+':'')+pr+')</span><button class="trade-btn sell" onclick="sellItem('+i+')">Sell 1</button><button class="trade-btn sell" onclick="sellAll('+i+')">All</button></div>';
+  });}
+  document.getElementById('tCargo').innerHTML=ch;
+}
+
+function buyItem(idx){
+  var item=nearPlanet.prices[idx];
+  var cc=ship.cargo.reduce(function(s,c){return s+c.qty;},0);
+  if(ship.credits<item.buy||cc>=ship.cargoMax||item.stock<=0)return;
+  ship.credits-=item.buy;item.stock--;
+  var ex=null;ship.cargo.forEach(function(c){if(c.name===item.name)ex=c;});
+  if(ex){ex.paid=Math.round((ex.paid*(ex.qty)+item.buy)/(ex.qty+1));ex.qty++;}
+  else ship.cargo.push({name:item.name,icon:item.icon,qty:1,paid:item.buy});
+  renderTrade();
+}
+function sellItem(idx){
+  var c=ship.cargo[idx],sp=0;nearPlanet.prices.forEach(function(pp){if(pp.name===c.name)sp=pp.sell;});
+  ship.credits+=sp;c.qty--;if(c.qty<=0)ship.cargo.splice(idx,1);renderTrade();
+}
+function sellAll(idx){
+  var c=ship.cargo[idx],sp=0;nearPlanet.prices.forEach(function(pp){if(pp.name===c.name)sp=pp.sell;});
+  ship.credits+=sp*c.qty;ship.cargo.splice(idx,1);renderTrade();
+}
+
+init();
+</script>
+</body>
+</html>
