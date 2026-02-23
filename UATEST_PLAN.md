@@ -124,7 +124,8 @@
 | 2.0.0 | Feb 15, 2026 | Attempted 3D games (files not persisted) |
 | 2.1.0 | Feb 16, 2026 | Rebuilt 3 games via MCP: Space Trader, World Explorer, Arena FPS + games hub |
 | 3.0.0 | Feb 16, 2026 | Added 4 3D chat rooms: Living Room, Bedroom, Gym, Space Station Lounge. Rooms hub, index integration, games↔rooms cross-linking |
+| 3.0.1 | Feb 22, 2026 | Webring highlight fix: standardized to .aiunites-bar-active class with white (#fff) + underline styling |
 
 ---
 
-*Last tested: February 16, 2026*
+*Last tested: February 22, 2026*
