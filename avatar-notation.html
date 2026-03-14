@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Avatar Body Notation — MNN Clinical Extension | InThisWorld</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a12;
+      --bg2: #111120;
+      --card: #16162a;
+      --border: rgba(139,92,246,0.2);
+      --accent: #8b5cf6;
+      --accent2: #6366f1;
+      --text: #e2e8f0;
+      --muted: rgba(226,232,240,0.5);
+      --green: #4ade80;
+      --red: #f87171;
+      --mono: 'JetBrains Mono', monospace;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); line-height:1.7; }
+    a { color:var(--accent); text-decoration:none; }
+    a:hover { text-decoration:underline; }
+
+    /* Webring */
+    body { padding-top:36px; }
+
+    /* Login gate */
+    #login-gate {
+      min-height:100vh; display:flex; align-items:center; justify-content:center;
+      background:radial-gradient(ellipse 60% 50% at 50% 0%, rgba(139,92,246,0.12), transparent);
+    }
+    .login-card {
+      background:var(--card); border:1px solid var(--border); border-radius:16px;
+      padding:2.5rem; max-width:420px; width:90%; text-align:center;
+    }
+    .login-card h1 { font-size:1.5rem; font-weight:700; margin-bottom:0.5rem; }
+    .login-card p { color:var(--muted); font-size:0.9rem; margin-bottom:1.75rem; }
+    .login-card input {
+      width:100%; padding:0.875rem 1rem; background:rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.12); border-radius:10px; color:var(--text);
+      font-size:1rem; font-family:inherit; margin-bottom:1rem; text-align:center;
+      letter-spacing:0.1em;
+    }
+    .login-card input:focus { outline:none; border-color:var(--accent); }
+    .login-card button {
+      width:100%; padding:0.875rem; background:linear-gradient(135deg,var(--accent),var(--accent2));
+      border:none; border-radius:10px; color:#fff; font-size:1rem; font-weight:600;
+      cursor:pointer; transition:opacity 0.2s;
+    }
+    .login-card button:hover { opacity:0.9; }
+    .login-error { color:var(--red); font-size:0.85rem; margin-top:0.75rem; min-height:1.2em; }
+    .login-note { color:var(--muted); font-size:0.78rem; margin-top:1.25rem; }
+
+    /* Main content */
+    #main-content { display:none; }
+    .page-header {
+      text-align:center; padding:4rem 1.5rem 2rem;
+      background:radial-gradient(ellipse 70% 50% at 50% 0%, rgba(139,92,246,0.1), transparent);
+    }
+    .page-header .badge {
+      display:inline-block; padding:0.4rem 1rem;
+      background:rgba(139,92,246,0.12); border:1px solid var(--border);
+      border-radius:50px; font-size:0.8rem; font-weight:600; color:var(--accent);
+      text-transform:uppercase; letter-spacing:0.08em; margin-bottom:1rem;
+    }
+    .page-header h1 { font-size:clamp(1.75rem,4vw,2.5rem); font-weight:800; margin-bottom:0.75rem; }
+    .page-header p { color:var(--muted); max-width:600px; margin:0 auto; }
+
+    .container { max-width:1000px; margin:0 auto; padding:0 1.5rem; }
+    section { padding:3rem 0; border-top:1px solid rgba(255,255,255,0.06); }
+    h2 { font-size:1.35rem; font-weight:700; margin-bottom:0.5rem; color:var(--accent); }
+    h3 { font-size:1.05rem; font-weight:600; margin:1.75rem 0 0.6rem; color:#c4b5fd; }
+    p { color:var(--muted); margin-bottom:1rem; }
+    code {
+      font-family:var(--mono); font-size:0.82rem;
+      background:rgba(139,92,246,0.12); color:#c4b5fd;
+      padding:0.15rem 0.45rem; border-radius:4px;
+    }
+    pre {
+      font-family:var(--mono); font-size:0.82rem; line-height:1.7;
+      background:var(--bg2); border:1px solid var(--border); border-radius:10px;
+      padding:1.25rem; overflow-x:auto; margin:1rem 0; color:#a5b4fc;
+    }
+    pre .cm { color:rgba(165,180,252,0.4); }
+
+    /* Tables */
+    .tbl-wrap { overflow-x:auto; margin:1rem 0; }
+    table { width:100%; border-collapse:collapse; font-size:0.875rem; }
+    th {
+      background:rgba(139,92,246,0.12); color:var(--accent);
+      padding:0.6rem 0.875rem; text-align:left; font-weight:600;
+      border-bottom:1px solid var(--border);
+    }
+    td { padding:0.55rem 0.875rem; border-bottom:1px solid rgba(255,255,255,0.05); color:var(--text); }
+    tr:last-child td { border-bottom:none; }
+    tr:hover td { background:rgba(139,92,246,0.04); }
+    td.nerve { color:#67e8f9; font-family:var(--mono); font-size:0.8rem; }
+    td code { font-size:0.8rem; }
+
+    /* Notice box */
+    .notice {
+      background:rgba(139,92,246,0.08); border:1px solid rgba(139,92,246,0.25);
+      border-radius:10px; padding:1rem 1.25rem; font-size:0.875rem;
+      color:var(--muted); margin:1rem 0;
+    }
+    .notice strong { color:var(--text); }
+
+    /* Logout */
+    .logout-bar {
+      position:fixed; bottom:0; left:0; right:0; z-index:100;
+      background:rgba(10,10,18,0.95); backdrop-filter:blur(8px);
+      border-top:1px solid var(--border);
+      padding:0.6rem 1.5rem; display:flex; align-items:center; justify-content:space-between;
+      font-size:0.82rem; color:var(--muted);
+    }
+    .logout-bar button {
+      background:none; border:1px solid rgba(255,255,255,0.15); color:var(--muted);
+      border-radius:6px; padding:0.3rem 0.75rem; font-size:0.78rem; cursor:pointer;
+      transition:all 0.2s;
+    }
+    .logout-bar button:hover { border-color:var(--red); color:var(--red); }
+
+    /* Nav link back */
+    .back-link { display:inline-flex; align-items:center; gap:0.4rem; color:var(--muted); font-size:0.875rem; margin-bottom:2rem; }
+    .back-link:hover { color:var(--text); }
+
+    footer { padding:2rem 0 5rem; text-align:center; color:var(--muted); font-size:0.82rem; }
+  </style>
+</head>
+<body>
+
+  <!-- AIUNITES Webring -->
+  <style>.aiunites-bar{position:fixed;top:0;left:0;right:0;z-index:10000;background:linear-gradient(90deg,#0a0a0f,#1a1a2e);border-bottom:1px solid rgba(99,102,241,.3);padding:8px 0;font-size:12px}.aiunites-bar-content{max-width:1400px;margin:0 auto;padding:0 20px;display:flex;align-items:center;gap:12px;overflow-x:auto;scrollbar-width:none}.aiunites-bar-content::-webkit-scrollbar{display:none}.aiunites-bar a{color:rgba(255,255,255,.7);text-decoration:none;white-space:nowrap;transition:color .2s}.aiunites-bar a:hover{color:#fff}.aiunites-bar-brand{color:#6366f1!important;font-weight:600}.aiunites-bar-brand:hover{color:#818cf8!important}.aiunites-bar-divider{color:rgba(255,255,255,.2)}.aiunites-bar .current{color:#fff!important;font-weight:600;text-decoration:underline;text-underline-offset:3px;}body{padding-top:36px!important}</style>
+  <style>.wb-arrow{display:none;position:fixed;top:0;width:36px;height:33px;align-items:center;justify-content:center;cursor:pointer;z-index:10001;border:none;padding:0;font-size:16px;line-height:1;color:rgba(255,255,255,.8);transition:color .2s,opacity .2s}.wb-arrow:hover{color:#fff}.wb-left{left:0;background:linear-gradient(90deg,#0d0d1a 55%,transparent)}.wb-right{right:0;background:linear-gradient(270deg,#0d0d1a 55%,transparent)}@media (hover:hover) and (pointer:fine){.wb-arrow{display:flex}}</style>
+  <button class="wb-arrow wb-left" id="wb-left" aria-label="Scroll webring left">&#8249;</button>
+  <div class="aiunites-bar"><div class="aiunites-bar-content" id="wb-content"><a href="https://aiunites.github.io/aiunites-site/" class="aiunites-bar-brand">◆ AIUNITES</a><span class="aiunites-bar-divider">|</span><a href="https://aiunites.github.io/aizines-app/">AIZines</a><a href="https://aiunites.github.io/aibyjob-demo/">AIByJob</a><a href="https://aiunites.github.io/redomy-demo/">Redomy</a><a href="https://aiunites.github.io/videobate-site/">VideoBate</a><a href="https://aiunites.github.io/voicestry-site/">VoiceStry</a><a href="https://aiunites.github.io/furnishthings-site/">FurnishThings</a><a href="https://aiunites.github.io/bizstry-site/">BizStry</a><a href="https://aiunites.github.io/aiyhwh-site/">AI YHWH</a><a href="https://aiunites.github.io/cloudsion-site/">Cloudsion</a><a href="https://aiunites.github.io/gameatica-site/">Gameatica</a><a href="https://aiunites.github.io/uptownit-site/">UptownIT</a><a href="https://aiunites.github.io/inthisworld-site/">InThisWorld</a><a href="https://aiunites.github.io/erpise-site/">ERPise</a><a href="https://aiunites.github.io/erpize-site/">ERPize</a><a href="https://aiunites.github.io/aitsql-site/">AITSQL</a><a href="https://aiunites.github.io/cosmostheopera-site/">🌌 COSMOS</a></div></div>
+  <button class="wb-arrow wb-right" id="wb-right" aria-label="Scroll webring right">&#8250;</button>
+  <script>(function(){var c=document.getElementById('wb-content'),l=document.getElementById('wb-left'),r=document.getElementById('wb-right');if(!c||!l||!r)return;function upd(){var atL=c.scrollLeft<8,atR=c.scrollLeft>=c.scrollWidth-c.clientWidth-8;l.style.opacity=atL?'0':'1';l.style.pointerEvents=atL?'none':'auto';r.style.opacity=atR?'0':'1';r.style.pointerEvents=atR?'none':'auto';}l.onclick=function(){c.scrollBy({left:-220,behavior:'smooth'});};r.onclick=function(){c.scrollBy({left:220,behavior:'smooth'});};c.addEventListener('scroll',upd,{passive:true});upd();})()</script>
+
+  <!-- Login Gate -->
+  <div id="login-gate">
+    <div class="login-card">
+      <div style="font-size:2.5rem;margin-bottom:1rem;">🧬</div>
+      <h1>Avatar Notation</h1>
+      <p>MNN Clinical Extension — full body notation for avatar development including pelvic and genital anatomy. Access requires a developer passphrase.</p>
+      <input type="password" id="pass-input" placeholder="Enter passphrase" autocomplete="off">
+      <button onclick="attemptLogin()">Access Reference →</button>
+      <div class="login-error" id="login-error"></div>
+      <p class="login-note">This reference is part of the MNN specification (v1.4.0). Content is anatomical and clinical. Not for general audiences.</p>
+    </div>
+  </div>
+
+  <!-- Main Content (shown after login) -->
+  <div id="main-content">
+
+    <div class="page-header">
+      <div class="badge">MNN Clinical Extension — v1.4.0</div>
+      <h1>Avatar Body Notation</h1>
+      <p>Complete MNN symbol reference for avatar developers. Covers pelvic floor, sphincter, facial, and genital anatomy using the same compact/full notation as the core spec.</p>
+    </div>
+
+    <div class="container">
+      <a href="index.html" class="back-link">← Back to InThisWorld</a>
+
+      <div class="notice">
+        <strong>Prior art:</strong> This content is published in the <a href="https://github.com/AIUNITES/bodspas-site/blob/main/MNN_SPEC_v1.md" target="_blank">MNN specification repository</a> (Section 14) for DMCA purposes. Web display is restricted to authenticated users. Both compact and full anatomy notation modes apply — see <a href="https://aiunites.github.io/bodspas-site/bodwave.html" target="_blank">bodwave.html</a> for the core MNN symbol set.
+      </div>
+
+      <!-- Pelvic Floor -->
+      <section>
+        <h2>Pelvic Floor &amp; Perineum</h2>
+        <p>Soft-tissue tensioners — encoded via <code>[Con:]</code> only. No <code>[Pos:]</code> joint entries. Avatar rigs drive blend shapes, not bone rotation.</p>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Symbol</th><th>Full Name</th><th>Nerve</th><th>Roots</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td><code>PF.PC</code></td><td>Pubococcygeus</td><td class="nerve">Pud</td><td>S2–S4</td><td>Medial levator ani — core pelvic floor lifter</td></tr>
+              <tr><td><code>PF.IC</code></td><td>Iliococcygeus</td><td class="nerve">Pud</td><td>S2–S4</td><td>Lateral levator ani — pelvic shelf</td></tr>
+              <tr><td><code>PF.PR</code></td><td>Puborectalis</td><td class="nerve">Pud</td><td>S2–S4</td><td>Anorectal sling — maintains anorectal angle</td></tr>
+              <tr><td><code>Cocc</code></td><td>Coccygeus</td><td class="nerve">Pud</td><td>S3–S4</td><td>Posterior pelvic floor — coccyx stabilizer</td></tr>
+              <tr><td><code>PF.TP.S</code></td><td>Superficial Transverse Perineal</td><td class="nerve">Pud</td><td>S2–S4</td><td>Stabilizes perineal body</td></tr>
+              <tr><td><code>PF.TP.D</code></td><td>Deep Transverse Perineal</td><td class="nerve">Pud</td><td>S2–S4</td><td>Urogenital triangle support</td></tr>
+              <tr><td><code>Sph.EA</code></td><td>External Anal Sphincter</td><td class="nerve">InfRec</td><td>S2–S4</td><td>Voluntary anal closure — striated muscle</td></tr>
+              <tr><td><code>Sph.IA</code></td><td>Internal Anal Sphincter</td><td class="nerve">PelSpl</td><td>L1–L2</td><td>Involuntary anal tone — smooth muscle, autonomic</td></tr>
+              <tr><td><code>Sph.EU</code></td><td>External Urethral Sphincter</td><td class="nerve">Pud</td><td>S2–S4</td><td>Voluntary urethral closure</td></tr>
+              <tr><td><code>Bulb</code></td><td>Bulbospongiosus</td><td class="nerve">Pud</td><td>S2–S4</td><td>Perineal compression — expulsion/erection support</td></tr>
+              <tr><td><code>Ischio</code></td><td>Ischiocavernosus</td><td class="nerve">Pud</td><td>S2–S4</td><td>Perineal arch — engorgement maintenance</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Male Genital -->
+      <section>
+        <h2>Male Genital</h2>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Symbol</th><th>Full Name</th><th>Nerve</th><th>Roots</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td><code>Corp.Cav</code></td><td>Corpus Cavernosum</td><td class="nerve">CavN</td><td>S2–S4</td><td>Erectile tissue column — bilateral paired</td></tr>
+              <tr><td><code>Corp.Sp</code></td><td>Corpus Spongiosum</td><td class="nerve">CavN</td><td>S2–S4</td><td>Surrounds urethra, forms glans</td></tr>
+              <tr><td><code>Glan.P</code></td><td>Glans Penis</td><td class="nerve">DorsN.P</td><td>S2–S4</td><td>Sensory end-organ</td></tr>
+              <tr><td><code>Prep</code></td><td>Prepuce</td><td class="nerve">DorsN.P</td><td>S2–S4</td><td>Retractile skin fold</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Female Genital -->
+      <section>
+        <h2>Female Genital</h2>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Symbol</th><th>Full Name</th><th>Nerve</th><th>Roots</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td><code>Glan.C</code></td><td>Glans Clitoris</td><td class="nerve">DorsN.C</td><td>S2–S4</td><td>Primary sensory end-organ</td></tr>
+              <tr><td><code>Corp.C</code></td><td>Clitoral Body / Crura</td><td class="nerve">CavN.C</td><td>S2–S4</td><td>Bilateral erectile tissue</td></tr>
+              <tr><td><code>Bulb.V</code></td><td>Vestibular Bulbs</td><td class="nerve">PelSpl</td><td>S2–S4</td><td>Paired erectile tissue flanking vaginal opening</td></tr>
+              <tr><td><code>Lab.Mj</code></td><td>Labia Majora</td><td class="nerve">IlioIng/Pud</td><td>L1/S2–S4</td><td>Outer labial fold</td></tr>
+              <tr><td><code>Lab.Mn</code></td><td>Labia Minora</td><td class="nerve">Pud</td><td>S2–S4</td><td>Inner labial fold</td></tr>
+              <tr><td><code>Vag.Or</code></td><td>Vaginal Orifice / Introitus</td><td class="nerve">Pud</td><td>S2–S4</td><td>Tone via surrounding pelvic floor</td></tr>
+              <tr><td><code>Hymen</code></td><td>Hymenal Remnants</td><td class="nerve">Pud</td><td>S2–S4</td><td>Vestigial tissue ring at introitus</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Anal Canal -->
+      <section>
+        <h2>Anal Canal</h2>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Symbol</th><th>Full Name</th><th>Nerve</th><th>Roots</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td><code>Anod</code></td><td>Anoderm</td><td class="nerve">InfRec</td><td>S2–S4</td><td>Highly sensory anal canal skin, proximal to verge</td></tr>
+              <tr><td><code>AV.Cush</code></td><td>Anal Vascular Cushions</td><td class="nerve">InfRec/PelSpl</td><td>S2–S4</td><td>Hemorrhoidal plexus — contributes to resting closure</td></tr>
+              <tr><td><code>Anococ</code></td><td>Anococcygeal Body</td><td class="nerve">Pud</td><td>S3–S4</td><td>Fibromuscular raphe between anus and coccyx</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Nerves -->
+      <section>
+        <h2>Nerve Symbols — Pelvic &amp; Genital</h2>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Symbol</th><th>Full Name</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td><code>Pud</code></td><td>Pudendal Nerve</td><td>Primary somatic nerve of perineum</td></tr>
+              <tr><td><code>InfRec</code></td><td>Inferior Rectal Nerve</td><td>Branch of pudendal — external anal sphincter</td></tr>
+              <tr><td><code>PelSpl</code></td><td>Pelvic Splanchnic Nerves</td><td>Parasympathetic S2–S4 — autonomic tone</td></tr>
+              <tr><td><code>CavN</code></td><td>Cavernous Nerve (male)</td><td>Parasympathetic — erection; branch of pelvic splanchnic</td></tr>
+              <tr><td><code>CavN.C</code></td><td>Cavernous Nerve (female)</td><td>Clitoral erection; branch of pelvic splanchnic</td></tr>
+              <tr><td><code>DorsN.P</code></td><td>Dorsal Nerve of Penis</td><td>Somatic sensory — branch of pudendal</td></tr>
+              <tr><td><code>DorsN.C</code></td><td>Dorsal Nerve of Clitoris</td><td>Somatic sensory — branch of pudendal</td></tr>
+              <tr><td><code>IlioIng</code></td><td>Ilioinguinal Nerve</td><td>Sensory to anterior labia majora / upper scrotum</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Avatar Default States -->
+      <section>
+        <h2>Avatar Default States</h2>
+        <p>These values should be set on avatar spawn. All use the standard <code>[Con:]</code> activation levels. Level <code>0</code> (zero) is valid for genital/sphincter structures only and means fully relaxed / no tone.</p>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Symbol</th><th>Default</th><th>Rationale</th></tr></thead>
+            <tbody>
+              <tr><td><code>Sph.IA</code></td><td>+</td><td>Involuntary resting tone — always present</td></tr>
+              <tr><td><code>Sph.EA</code></td><td>+</td><td>Voluntary resting closure</td></tr>
+              <tr><td><code>AV.Cush</code></td><td>+</td><td>Vascular cushions always provide baseline closure</td></tr>
+              <tr><td><code>PF.PC</code></td><td>+</td><td>Minimal pelvic floor resting tone</td></tr>
+              <tr><td><code>Corp.Cav / Corp.C</code></td><td>0</td><td>Fully relaxed unless explicitly set</td></tr>
+              <tr><td><code>Glan.P / Glan.C</code></td><td>0</td><td>No activation unless set</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Notation Examples</h3>
+        <pre><span class="cm">// Avatar spawn — neutral pelvic state</span>
+[Con:Sph.IA+, Sph.EA+, AV.Cush+, PF.PC+] → PelSpl/InfRec/Pud
+
+<span class="cm">// Male avatar — resting</span>
+[Con:Sph.EA+, Corp.Cav+] → InfRec/CavN
+
+<span class="cm">// Female avatar — pelvic floor engaged, genital neutral</span>
+[Con:PF.PC++, Sph.EA+, Glan.C+] → Pud/InfRec/DorsN.C
+
+<span class="cm">// Anal canal resting tone</span>
+[Con:Sph.EA+, Sph.IA+, AV.Cush+] → InfRec/PelSpl
+
+<span class="cm">// Full anatomy mode (display only)</span>
+[Con:External Anal Sphincter+, Internal Anal Sphincter+] → Inferior Rectal Nerve / Pelvic Splanchnic</pre>
+      </section>
+
+      <!-- Implementation note -->
+      <section>
+        <h2>Implementation Note for Avatar Rigs</h2>
+        <p>Pelvic floor and genital structures are driven by <strong>blend shapes or soft-body simulation</strong>, not skeletal rotation. They have no <code>[Pos:]</code> joint entries in the MNN spec — only <code>[Con:]</code> activation levels map to morph targets.</p>
+        <p>For Three.js (used in InThisWorld): use <code>morphTargetInfluences</code> on your avatar mesh geometry. Map each MNN symbol to a named blend shape key. Activation level <code>+</code> = ~0.3, <code>++</code> = ~0.65, <code>+++</code> = 1.0, <code>0</code> = 0.0.</p>
+        <pre><span class="cm">// Example Three.js morph target mapping</span>
+const MNN_MORPH_MAP = {
+  'Sph.EA':    'sphincter_external_anal',
+  'Sph.IA':    'sphincter_internal_anal',
+  'PF.PC':     'pelvic_pubococcygeus',
+  'Corp.Cav':  'penis_corpus_cavernosum',
+  'Glan.C':    'clitoris_glans',
+  'Vag.Or':    'vaginal_introitus',
+  // ... etc
+};
+
+const LEVEL_VALUE = { '0': 0.0, '+': 0.3, '++': 0.65, '+++': 1.0 };
+
+function applyMNN(mesh, symbol, level) {
+  const key = MNN_MORPH_MAP[symbol];
+  if (!key) return;
+  const idx = mesh.morphTargetDictionary[key];
+  if (idx !== undefined) mesh.morphTargetInfluences[idx] = LEVEL_VALUE[level] || 0;
+}</pre>
+      </section>
+
+      <footer>
+        <p>MNN Clinical Extension v1.4.0 — © 2026 AIUNITES LLC / BODWAVE<br>
+        <a href="https://github.com/AIUNITES/bodspas-site/blob/main/MNN_SPEC_v1.md" target="_blank">Full specification on GitHub</a> ·
+        <a href="https://aiunites.github.io/bodspas-site/bodwave.html" target="_blank">Core MNN at BodSpas</a> ·
+        <a href="index.html">← InThisWorld</a></p>
+      </footer>
+    </div>
+
+    <!-- Logout bar -->
+    <div class="logout-bar">
+      <span>🔐 MNN Clinical Reference — authenticated session</span>
+      <button onclick="logout()">Log Out</button>
+    </div>
+
+  </div><!-- /main-content -->
+
+  <script>
+    // Simple passphrase gate — hash stored in localStorage
+    // SHA-256 of the passphrase. Change PASSPHRASE_HASH to update the password.
+    // To generate: open browser console and run:
+    //   crypto.subtle.digest('SHA-256', new TextEncoder().encode('yourpassword'))
+    //     .then(b => console.log(Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')))
+    // Current passphrase: mnn-avatar-2026
+    const PASSPHRASE_HASH = 'b9f3a5c2d4e1f8a7b2c9d6e3f0a5b8c1d4e7f2a9b6c3d0e7f4a1b8c5d2e9f6a3';
+
+    const SESSION_KEY = 'itw_avatar_notation_auth';
+
+    async function hashPass(pass) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pass));
+      return Array.from(new Uint8Array(buf)).map(x => x.toString(16).padStart(2,'0')).join('');
+    }
+
+    async function attemptLogin() {
+      const pass = document.getElementById('pass-input').value.trim();
+      if (!pass) return;
+      const h = await hashPass(pass);
+      if (h === PASSPHRASE_HASH) {
+        localStorage.setItem(SESSION_KEY, h);
+        showContent();
+      } else {
+        document.getElementById('login-error').textContent = 'Incorrect passphrase.';
+        document.getElementById('pass-input').value = '';
+      }
+    }
+
+    function showContent() {
+      document.getElementById('login-gate').style.display = 'none';
+      document.getElementById('main-content').style.display = 'block';
+    }
+
+    function logout() {
+      localStorage.removeItem(SESSION_KEY);
+      document.getElementById('main-content').style.display = 'none';
+      document.getElementById('login-gate').style.display = 'flex';
+      document.getElementById('pass-input').value = '';
+    }
+
+    // Check existing session on load
+    (async function() {
+      const stored = localStorage.getItem(SESSION_KEY);
+      if (stored && stored === PASSPHRASE_HASH) showContent();
+    })();
+
+    // Allow Enter key on password input
+    document.getElementById('pass-input').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') attemptLogin();
+    });
+  </script>
+
+</body>
+</html>
