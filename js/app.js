@@ -263,23 +263,40 @@ const ITWUI = {
     document.getElementById('itw-signup-form').style.display = tab === 'signup' ? '' : 'none';
     document.getElementById('itw-login-err').textContent  = '';
     document.getElementById('itw-signup-err').textContent = '';
+    if (tab === 'signup') this.injectGeneratedPassword();
   },
 
-  doLogin() {
+  injectGeneratedPassword() {
+    if (typeof PasswordUtils === 'undefined') return;
+    const pw = document.getElementById('itw-su-pass');
+    if (!pw || pw.value) return;
+    const v = PasswordUtils.generate();
+    pw.value = v;
+    pw.type = 'text';
+    document.getElementById('pw-suggest-bar')?.remove();
+    const bar = document.createElement('div'); bar.id = 'pw-suggest-bar';
+    bar.style.cssText = 'margin-top:8px;background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.3);border-radius:8px;padding:8px 12px;font-size:0.8rem;color:#c4b5fd;display:flex;align-items:center;gap:8px;flex-wrap:wrap';
+    bar.innerHTML = '<span>🔐 Secure password generated.</span><span style="flex:1"></span><button type="button" id="pw-copy-btn" style="background:rgba(139,92,246,0.25);border:1px solid rgba(139,92,246,0.4);color:#e9d5ff;border-radius:6px;padding:3px 10px;font-size:0.78rem;cursor:pointer;font-family:inherit;">📋 Copy</button><button type="button" id="pw-regen-btn" style="background:rgba(139,92,246,0.25);border:1px solid rgba(139,92,246,0.4);color:#e9d5ff;border-radius:6px;padding:3px 10px;font-size:0.78rem;cursor:pointer;font-family:inherit;">🔄 New</button>';
+    pw.parentElement.appendChild(bar);
+    document.getElementById('pw-copy-btn').addEventListener('click', () => { navigator.clipboard.writeText(pw.value).then(() => { const b = document.getElementById('pw-copy-btn'); if(b){b.textContent='✅ Copied!';setTimeout(()=>{b.textContent='📋 Copy';},2000);} }); });
+    document.getElementById('pw-regen-btn').addEventListener('click', () => { const n = PasswordUtils.generate(); pw.value = n; });
+  },
+
+  async doLogin() {
     const u = document.getElementById('itw-login-user').value.trim();
     const p = document.getElementById('itw-login-pass').value;
     const err = document.getElementById('itw-login-err');
     try {
-      ITWAuth.login(u, p);
+      await ITWAuth.login(u, p);
       this.closeAuth();
       this.updateNav();
       this.showToast('Welcome back, ' + ITWAuth.getCurrentUser().displayName + '! 🌍');
     } catch(e) { err.textContent = e.message; }
   },
 
-  doDemo() {
+  async doDemo() {
     try {
-      ITWAuth.loginDemo();
+      await ITWAuth.loginDemo();
       this.closeAuth();
       this.updateNav();
       this.showToast('Logged in as Demo Explorer 👁️');
@@ -288,14 +305,14 @@ const ITWUI = {
     }
   },
 
-  doSignup() {
+  async doSignup() {
     const name  = document.getElementById('itw-su-name').value.trim();
     const user  = document.getElementById('itw-su-user').value.trim();
     const email = document.getElementById('itw-su-email').value.trim();
     const pass  = document.getElementById('itw-su-pass').value;
     const err   = document.getElementById('itw-signup-err');
     try {
-      ITWAuth.signup(name, user, email, pass);
+      await ITWAuth.signup(name, user, email, pass);
       this.closeAuth();
       this.updateNav();
       this.showToast('Welcome to InThisWorld, ' + name + '! 🎉');
