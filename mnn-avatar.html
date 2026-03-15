@@ -816,8 +816,8 @@ function render() {
   if (mouthPath) {
     const mx = hx, my = hy + 10 + jawOpen;
     const mouthCurve = smile - frown;
-    // Negative Y = upward curve in SVG = smile; positive = downward = frown
-        mouthPath.setAttribute('d', `M${mx-10},${my} Q${mx},${my-mouthCurve*2} ${mx+10},${my}`);
+    // SVG Y increases downward: control point BELOW endpoints (my+) = ∪ = smile; ABOVE (my-) = ∩ = frown
+        mouthPath.setAttribute('d', `M${mx-10},${my} Q${mx},${my+mouthCurve*2} ${mx+10},${my}`);
   }
 
   const nose = document.getElementById('nose');
