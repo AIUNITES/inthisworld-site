@@ -492,7 +492,7 @@
     // ── Rooms ───────────────────────────────────────────────────────────────
 
     renderRooms() {
-      const rooms = ChatStore.getRooms();
+      const rooms = Chat.getRooms();
       document.getElementById('room-list').innerHTML = rooms.map(r => `
         <div class="room-item ${r.id === this.currentRoom ? 'active' : ''}"
              onclick="Community.selectRoom('${r.id}')">
@@ -501,27 +501,27 @@
             <div class="room-name">${r.name}</div>
             <div class="room-meta">${r.desc}</div>
           </div>
-          <div class="room-count">${ChatStore.getMessageCount(r.id)}</div>
+          <div class="room-count">${Chat.getMessageCount(r.id)}</div>
         </div>
       `).join('');
     },
 
-    selectRoom(roomId) {
+    async selectRoom(roomId) {
       this.currentRoom = roomId;
       this.lastCount = -1; // force re-render
-      const room = ChatStore.getRooms().find(r => r.id === roomId);
+      const room = Chat.getRooms().find(r => r.id === roomId);
       document.getElementById('chat-room-icon').textContent = room.icon;
       document.getElementById('chat-room-name').textContent = room.name;
       document.getElementById('chat-room-desc').textContent = room.desc;
       this.renderRooms();
-      this.renderMessages(true);
+      await this.renderMessages(true);
       this.renderInput();
     },
 
     // ── Messages ─────────────────────────────────────────────────────────────
 
-    renderMessages(scrollToBottom = true) {
-      const msgs = ChatStore.getMessages(this.currentRoom);
+    async renderMessages(scrollToBottom = true) {
+      const msgs = await Chat.getMessages(this.currentRoom);
       if (msgs.length === this.lastCount) return;
       this.lastCount = msgs.length;
 
@@ -586,17 +586,16 @@
       const text = input.value.trim();
       if (!text) return;
 
-      ChatStore.addMessage(this.currentRoom, {
+      input.value = '';
+      input.style.height = 'auto';
+      await Chat.addMessage(this.currentRoom, {
         type: 'text',
         username: user.username,
         displayName: user.displayName,
         text,
         ts: Date.now()
       });
-
-      input.value = '';
-      input.style.height = 'auto';
-      this.renderMessages(true);
+      await this.renderMessages(true);
       this.renderRooms();
     },
 
@@ -666,7 +665,7 @@
     // ── Online users ─────────────────────────────────────────────────────────
 
     renderOnlineUsers() {
-      const onlineUsers = ChatStore.getOnlineUsers();
+      const onlineUsers = Chat.getOnlineUsers();
       const count = onlineUsers.length;
       document.getElementById('online-count').textContent = count;
 
@@ -831,7 +830,7 @@
     shareScore(gameId, gameName, score) {
       const user = ITWAuth.getCurrentUser();
       if (!user) return;
-      ChatStore.addMessage('games', {
+      Chat.addMessage('games', {
         type: 'score',
         username: user.username,
         displayName: user.displayName,
@@ -855,7 +854,7 @@
       Community.renderInput();
       // Start heartbeat on login
       const u = ITWAuth.getCurrentUser();
-      if (u) ChatStore.heartbeat(u.username, u.displayName);
+      if (u) GitHubChat.heartbeat(u.username, u.displayName);
     };
 
     // Close profile on overlay click

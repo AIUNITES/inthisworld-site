@@ -37,7 +37,7 @@ const GitHubChat = {
 
   isConfigured() {
     const rooms = this.roomIssues;
-    return this.token && Object.values(rooms).some(n => n > 0);
+    return !!(this.token && Object.values(rooms).some(n => n > 0));
   },
 
   // ── Room definitions (mirrors ChatStore.getRooms) ────────────────────────

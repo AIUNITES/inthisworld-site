@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>World Explorer — InThisWorld</title>
+<script src="../js/config.js"></script>
+<script src="../js/storage.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/app.js"></script>
+<script src="../js/github-chat-token.js" onerror=""></script>
+<script src="../js/github-chat.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#050510;color:#e0e0f0;font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden}
@@ -43,6 +49,11 @@ canvas#gameCanvas{display:block;position:fixed;top:0;left:0}
 .hidden{display:none!important}
 .back-link{position:fixed;top:10px;right:100px;z-index:20;color:rgba(255,255,255,0.5);text-decoration:none;font-size:0.85rem;pointer-events:auto;background:rgba(10,10,30,0.7);padding:6px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.1)}
 .back-link:hover{color:#fff}
+.auth-hud{position:fixed;bottom:10px;right:10px;z-index:20;display:flex;align-items:center;gap:8px;background:rgba(10,10,30,0.85);border:1px solid rgba(34,197,94,0.3);border-radius:8px;padding:6px 12px;font-size:0.78rem;color:rgba(255,255,255,0.6);pointer-events:auto}
+.auth-hud .au{font-weight:700;color:#86efac}
+.auth-hud a{color:#22c55e;font-size:0.72rem;margin-left:4px}
+.score-toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);z-index:30;background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.4);border-radius:8px;padding:8px 18px;font-size:0.82rem;color:#4ade80;opacity:0;transition:opacity 0.4s;pointer-events:none;white-space:nowrap}
+.score-toast.show{opacity:1}
 </style>
 </head>
 <body>
@@ -62,6 +73,8 @@ canvas#gameCanvas{display:block;position:fixed;top:0;left:0}
 </div>
 
 <a href="../index.html" class="back-link hidden" id="backLink">← InThisWorld</a>
+<div class="auth-hud" id="authHud"></div>
+<div class="score-toast" id="scoreToast"></div>
 <div class="crosshair hidden" id="cross"></div>
 
 <div class="hud hud-top hidden" id="hudTop">

@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Arena FPS — InThisWorld</title>
+<script src="../js/config.js"></script>
+<script src="../js/storage.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/app.js"></script>
+<script src="../js/github-chat-token.js" onerror=""></script>
+<script src="../js/github-chat.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#050510;color:#e0e0f0;font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden}
@@ -67,6 +73,16 @@ canvas#gameCanvas{display:block;position:fixed;top:0;left:0}
 .hidden{display:none!important}
 .back-link{position:fixed;top:10px;right:10px;z-index:20;color:rgba(255,255,255,0.5);text-decoration:none;font-size:0.85rem;pointer-events:auto;background:rgba(10,10,30,0.7);padding:6px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.1)}
 .back-link:hover{color:#fff}
+/* Auth HUD + Game Over */
+.auth-hud{position:fixed;bottom:10px;left:10px;z-index:20;display:flex;align-items:center;gap:8px;background:rgba(10,10,30,0.85);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:6px 12px;font-size:0.78rem;color:rgba(255,255,255,0.6);pointer-events:auto}
+.auth-hud .au{font-weight:700;color:#fca5a5}
+.auth-hud a{color:#ef4444;font-size:0.72rem;margin-left:4px}
+.game-over-overlay{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.85);display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:1rem}
+.game-over-overlay.show{display:flex}
+.game-over-overlay h2{font-size:3rem;background:linear-gradient(135deg,#ef4444,#ffd700);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.game-over-overlay .final-score{font-size:1.5rem;font-weight:800;font-family:'Courier New',monospace;color:#ffd700}
+.game-over-overlay .score-msg{font-size:0.9rem;color:rgba(255,255,255,0.5)}
+.game-over-overlay button{padding:14px 36px;background:linear-gradient(135deg,#ef4444,#dc2626);border:none;border-radius:12px;color:#fff;font-size:1rem;font-weight:800;cursor:pointer;font-family:inherit;margin-top:0.5rem}
 </style>
 </head>
 <body>
@@ -87,6 +103,17 @@ canvas#gameCanvas{display:block;position:fixed;top:0;left:0}
 </div>
 
 <a href="../index.html" class="back-link hidden" id="backLink">← InThisWorld</a>
+<div class="auth-hud" id="authHud"></div>
+<div class="game-over-overlay" id="gameOverOverlay">
+  <div style="font-size:3rem">☠️</div>
+  <h2>Game Over</h2>
+  <div class="final-score" id="goScore">0</div>
+  <div class="score-msg" id="goMsg">Log in to save your score!</div>
+  <div style="display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;margin-top:0.5rem">
+    <button onclick="restartGame()">Play Again</button>
+    <a href="../community.html" style="padding:14px 28px;background:rgba(139,92,246,0.2);border:1px solid rgba(139,92,246,0.4);border-radius:12px;color:#c4b5fd;font-size:1rem;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;">Community</a>
+  </div>
+</div>
 
 <div class="crosshair hidden" id="cross">
   <div class="dot"></div><div class="h l"></div><div class="h r"></div><div class="v t"></div><div class="v b"></div>
@@ -401,6 +428,7 @@ function animate(){
         if(player.hp<=0){
           addKillMsg('☠️ You died! Score: '+player.score);
           document.exitPointerLock();
+          showGameOver();
         }
       }
     }
@@ -429,6 +457,52 @@ function animate(){
 }
 
 init();
+
+// ── Auth & Score Integration ──────────────────────────────────────────────
+function updateAuthHud() {
+  var el = document.getElementById('authHud');
+  if (!el) return;
+  var user = (typeof ITWAuth !== 'undefined') ? ITWAuth.getCurrentUser() : null;
+  if (user) {
+    el.innerHTML = '<span>🔫</span><span class="au">' + user.displayName + '</span><a href="../community.html">Community</a>';
+  } else {
+    el.innerHTML = '<span>Not logged in</span><a href="#" onclick="if(typeof ITWUI!==\'undefined\')ITWUI.openAuth();return false;">Log In</a>';
+  }
+}
+
+function showGameOver() {
+  var overlay = document.getElementById('gameOverOverlay');
+  var goScore = document.getElementById('goScore');
+  var goMsg   = document.getElementById('goMsg');
+  if (!overlay) return;
+
+  goScore.textContent = player.score.toLocaleString() + ' pts — Wave ' + wave + ' — ' + player.kills + ' kills';
+
+  if (typeof ITW !== 'undefined' && ITW.isLoggedIn()) {
+    ITW.submitScore('arena-fps', 'Arena FPS', player.score, { wave: wave, kills: player.kills });
+    goMsg.textContent = '✅ Score saved to leaderboard!';
+    goMsg.style.color = '#4ade80';
+  } else {
+    goMsg.innerHTML = 'Log in to save your score — <a href="#" onclick="if(typeof ITWUI!==\'undefined\')ITWUI.openAuth();return false;" style="color:#ef4444">Log In</a>';
+  }
+
+  overlay.classList.add('show');
+}
+
+function restartGame() {
+  document.getElementById('gameOverOverlay').classList.remove('show');
+  // Reset state
+  player.hp=100;player.score=0;player.kills=0;player.ammo=30;
+  wave=1;enemies=[];enemiesAlive=0;waveDelay=0;
+  // Remove enemy meshes
+  enemies.forEach(function(e){if(e.mesh)scene.remove(e.mesh);});
+  enemies=[];
+  spawnWave();
+  renderer.domElement.requestPointerLock();
+}
+
+document.addEventListener('DOMContentLoaded', updateAuthHud);
+setTimeout(updateAuthHud, 500);
 </script>
 </body>
 </html>
