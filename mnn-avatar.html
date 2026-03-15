@@ -30,8 +30,13 @@
   .view-tag{position:absolute;top:12px;left:16px;font-size:9px;color:var(--text-dim);letter-spacing:3px;border:1px solid var(--cyan-faint);padding:3px 8px;}
   .movement-display{position:absolute;top:12px;right:16px;font-size:11px;color:var(--cyan);opacity:0.7;text-shadow:0 0 8px var(--cyan);}
 
-  /* Style selector */
-  .style-selector{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:10;}
+  /* Style + 3D controls */
+  .style-selector{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:5px;z-index:10;}
+  .style-row{display:flex;gap:5px;}
+  .rot-row{display:none;align-items:center;gap:6px;background:rgba(0,10,30,0.85);border:1px solid rgba(0,229,255,0.2);border-radius:4px;padding:4px 10px;}
+  .rot-slider{width:120px;height:3px;-webkit-appearance:none;appearance:none;background:var(--cyan-faint);outline:none;cursor:pointer;border-radius:2px;}
+  .rot-slider::-webkit-slider-thumb{-webkit-appearance:none;width:10px;height:10px;background:var(--cyan);border-radius:50%;cursor:pointer;}
+  .rot-label{font-size:8px;color:var(--text-dim);letter-spacing:1px;}
   .style-btn{padding:5px 14px;font-size:9px;letter-spacing:2px;font-family:var(--font-head);background:rgba(0,10,30,0.85);border:1px solid rgba(0,229,255,0.2);color:var(--text-dim);cursor:pointer;transition:all 0.15s;border-radius:2px;}
   .style-btn:hover{color:var(--cyan);border-color:var(--cyan);}
   .style-btn.active{color:var(--cyan);border-color:var(--cyan);background:rgba(0,229,255,0.12);text-shadow:0 0 8px var(--cyan);}
@@ -141,11 +146,20 @@
       </rect>
     </svg>
 
-    <!-- Style selector -->
+    <!-- Style + 3D selector -->
     <div class="style-selector">
-      <button class="style-btn active" onclick="setStyle('wire')">WIRE</button>
-      <button class="style-btn style-vitruv" onclick="setStyle('vitruv')">VITRUV</button>
-      <button class="style-btn style-bulk" onclick="setStyle('bulk')">BULK</button>
+      <div class="style-row">
+        <button class="style-btn active" onclick="setStyle('wire')">WIRE</button>
+        <button class="style-btn style-vitruv" onclick="setStyle('vitruv')">VITRUV</button>
+        <button class="style-btn style-bulk" onclick="setStyle('bulk')">BULK</button>
+        <button class="style-btn" id="btn-3d" onclick="toggle3D(this)" title="Toggle 3D rotation">3D ▶</button>
+      </div>
+      <div class="rot-row" id="rot-row">
+        <span class="rot-label">ROT</span>
+        <input type="range" id="rot-slider" class="rot-slider" min="-180" max="180" value="0" oninput="setRotY(this.value)">
+        <span class="rot-label" id="rot-deg">0°</span>
+        <button class="style-btn" id="btn-auto" onclick="toggleAutoRotate(this)" style="padding:3px 10px;font-size:8px">▶ AUTO</button>
+      </div>
     </div>
   </div>
 
@@ -239,6 +253,13 @@ let joints = JSON.parse(JSON.stringify(defaultState));
 let muscles = {};
 let currentMovement = '';
 
+// 3D rotation state
+let is3D = false;
+let rotY = 0;        // Y-axis rotation in radians
+let autoRotate = false;
+let rafId = null;
+let rawCache = null; // pre-projection positions, used by face renderer
+
 // ═══════════════════════════════════════════════════════
 // STYLE SWITCHER
 // ═══════════════════════════════════════════════════════
@@ -250,6 +271,114 @@ function setStyle(name, btn) {
   const labels = {wire:'WIRE · ANTERIOR', vitruv:'VITRUV · ANTERIOR', bulk:'BULK · ANTERIOR'};
   document.getElementById('view-tag').textContent = labels[name];
   render();
+}
+
+// ═══════════════════════════════════════════════════════
+// 3D PROJECTION
+// ═══════════════════════════════════════════════════════
+function applyProjection(positions) {
+  if (!is3D && rotY === 0) return positions;
+  const CX = 230, P = 520;
+  const cos = Math.cos(rotY), sin = Math.sin(rotY);
+  const proj = pt => {
+    if (!pt || typeof pt !== 'object' || !('x' in pt)) return pt;
+    const z = pt.z || 0;
+    const dx = pt.x - CX;
+    const x3 = dx*cos - z*sin;
+    const z3 = dx*sin + z*cos;
+    const s = P / (P + z3);
+    return { x: CX + x3*s, y: pt.y, z: z3 };
+  };
+  const out = {};
+  for (const [k,v] of Object.entries(positions)) {
+    out[k] = (v && typeof v === 'object' && 'x' in v && 'y' in v) ? proj(v) : v;
+  }
+  return out;
+}
+
+function toggle3D(btn) {
+  is3D = !is3D;
+  btn.textContent = is3D ? '3D ■' : '3D ▶';
+  btn.style.color  = is3D ? 'var(--cyan)' : '';
+  btn.style.borderColor = is3D ? 'var(--cyan)' : '';
+  btn.style.background  = is3D ? 'rgba(0,229,255,0.12)' : '';
+  const rotRow = document.getElementById('rot-row');
+  if (rotRow) rotRow.style.display = is3D ? 'flex' : 'none';
+  if (!is3D) { rotY = 0; updateViewTag(); stopAutoRotate(); }
+  render();
+}
+
+function setRotY(deg) {
+  rotY = parseFloat(deg) * Math.PI / 180;
+  const d = document.getElementById('rot-deg');
+  if (d) d.textContent = Math.round(deg) + '°';
+  updateViewTag();
+  render();
+}
+
+function toggleAutoRotate(btn) {
+  autoRotate = !autoRotate;
+  btn.textContent = autoRotate ? '⏹ STOP' : '▶ AUTO';
+  btn.style.color = autoRotate ? 'var(--orange)' : '';
+  if (autoRotate) startAutoRotate(); else stopAutoRotate();
+}
+
+function startAutoRotate() {
+  if (rafId) return;
+  let last = null;
+  function loop(ts) {
+    if (last !== null) rotY += (ts - last) * 0.0008;
+    last = ts;
+    if (rotY > Math.PI) rotY -= Math.PI * 2;
+    const sl = document.getElementById('rot-slider');
+    if (sl) sl.value = Math.round(rotY * 180 / Math.PI);
+    updateViewTag();
+    render();
+    if (autoRotate) rafId = requestAnimationFrame(loop);
+  }
+  rafId = requestAnimationFrame(loop);
+}
+
+function stopAutoRotate() {
+  autoRotate = false;
+  if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+}
+
+// Project a face-local offset through the same Y-rotation + perspective as applyProjection.
+// lx/ly/lz = local offset from head center (lz+ = toward viewer, face surface Z ≈ +24..+30)
+function projectFacePoint(lx, ly, lz) {
+  if (!rawCache) return { x: 230 + lx, y: 260 + ly };
+  const hcx = rawCache.headCenter.x;
+  const hcy = rawCache.headCenter.y;
+  const hcz = rawCache.headCenter.z || 0;
+  const CX = 230, P = 520;
+  if (!is3D && rotY === 0) return { x: hcx + lx, y: hcy + ly };
+  // World position of this face point
+  const wx = hcx + lx;
+  const wz = hcz + lz;
+  // Identical transform to applyProjection
+  const cos = Math.cos(rotY), sin = Math.sin(rotY);
+  const dx = wx - CX;
+  const x3 = dx * cos - wz * sin;
+  const z3 = dx * sin + wz * cos;
+  const s  = P / (P + z3);
+  return { x: CX + x3 * s, y: hcy + ly };
+}
+
+// Opacity of face features: 1 = facing viewer, 0 = facing away (back of head)
+function getFaceOpacity() {
+  if (!is3D) return 1;
+  return Math.max(0, Math.cos(rotY));
+}
+
+function updateViewTag() {
+  const deg = Math.round(rotY * 180 / Math.PI);
+  const labels = {wire:'WIRE', vitruv:'VITRUV', bulk:'BULK'};
+  const label = labels[currentStyle] || 'WIRE';
+  const viewLabel = is3D
+    ? `${label} · 3D ${deg}°`
+    : `${label} · ANTERIOR`;
+  document.getElementById('view-tag').textContent = viewLabel;
 }
 
 // ═══════════════════════════════════════════════════════
@@ -320,6 +449,22 @@ function calcPositions(j) {
   const rLLA = rULA + rKnFlex*0.5*DEG;
   const rAnk = {x:rKn.x+95*Math.cos(rLLA), y:rKn.y+95*Math.sin(rLLA)};
   const rFootEnd = {x:rAnk.x+36*Math.cos(rLLA-Math.PI/2), y:rAnk.y+36*Math.sin(rLLA-Math.PI/2)};
+
+  // ── Z depths for 3D projection (positive = toward viewer) ──
+  const lShF  = j['L.Sh']?.Flex ?? 0;
+  const rShF  = j['R.Sh']?.Flex ?? 0;
+  lEl.z  = Math.sin(lShF * DEG) * 82;
+  rEl.z  = Math.sin(rShF * DEG) * 82;
+  lWr.z  = lEl.z  + Math.sin(lElFlex * DEG) * -18;
+  rWr.z  = rEl.z  + Math.sin(rElFlex * DEG) * -18;
+  lHand.z = lWr.z; rHand.z = rWr.z;
+  lKn.z  = Math.sin(lHipFlex * DEG) * 65;
+  rKn.z  = Math.sin(rHipFlex * DEG) * 65;
+  lAnk.z = lKn.z + Math.sin(lKnFlex * DEG) * -55;
+  rAnk.z = rKn.z + Math.sin(rKnFlex * DEG) * -55;
+  lFootEnd.z = lAnk.z; rFootEnd.z = rAnk.z;
+  headCenter.z = 12; neck.z = 5;
+  [pelvis,lumbar,thoracic,lSh,rSh,lHip,rHip].forEach(pt => { pt.z = 0; });
 
   return {pelvis,lumbar,thoracic,neck,headCenter,lSh,rSh,lEl,rEl,lWr,rWr,lHand,rHand,
     lHip,rHip,lKn,rKn,lAnk,rAnk,lFootEnd,rFootEnd,
@@ -434,16 +579,32 @@ function renderWire(p, fp) {
   jc(p.lAnk.x,p.lAnk.y,4,Cd,'0.6');
   jc(p.rAnk.x,p.rAnk.y,4,Cd,'0.6');
 
-  // Face
-  const fg = svgEl('g', {filter:'url(#glow-sm)'});
-  const hx = p.headCenter.x, hy = p.headCenter.y;
-  const mc = fp.smile - fp.frown;
-  svgEl('ellipse',{cx:(hx-10).toFixed(1),cy:(hy-7).toFixed(1),rx:'4',ry:(2.5*fp.eyeOpenness).toFixed(1),fill:C,opacity:'0.8'},fg);
-  svgEl('ellipse',{cx:(hx+10).toFixed(1),cy:(hy-7).toFixed(1),rx:'4',ry:(2.5*fp.eyeOpenness).toFixed(1),fill:C,opacity:'0.8'},fg);
-  svgEl('path',{d:`M${hx-16},${hy-16-fp.browRaise} Q${hx-10},${hy-19-fp.browRaise+fp.browFurrow} ${hx-4},${hy-16-fp.browRaise+fp.browFurrow}`,fill:'none',stroke:C,'stroke-width':'1.5','stroke-linecap':'round'},fg);
-  svgEl('path',{d:`M${hx+16},${hy-16-fp.browRaise} Q${hx+10},${hy-19-fp.browRaise+fp.browFurrow} ${hx+4},${hy-16-fp.browRaise+fp.browFurrow}`,fill:'none',stroke:C,'stroke-width':'1.5','stroke-linecap':'round'},fg);
-  svgEl('line',{x1:hx,y1:hy-4,x2:hx,y2:hy+3,stroke:C,'stroke-width':'1',opacity:'0.5'},fg);
-  svgEl('path',{d:`M${hx-10},${hy+10+fp.jawOpen} Q${hx},${hy+10+fp.jawOpen+mc*2} ${hx+10},${hy+10+fp.jawOpen}`,fill:'none',stroke:C,'stroke-width':'1.5','stroke-linecap':'round'},fg);
+  // Face — 3D-projected
+  const faceOp = getFaceOpacity();
+  if (faceOp > 0.02) {
+    const fg = svgEl('g', {filter:'url(#glow-sm)', opacity:faceOp.toFixed(2)});
+    const mc = fp.smile - fp.frown;
+    const f = n => n.toFixed(1);
+    const eL  = projectFacePoint(-10, -7,  26);
+    const eR  = projectFacePoint( 10, -7,  26);
+    const bL1 = projectFacePoint(-16, -16-fp.browRaise, 22);
+    const bLm = projectFacePoint(-10, -19-fp.browRaise+fp.browFurrow, 23);
+    const bL2 = projectFacePoint( -4, -16-fp.browRaise+fp.browFurrow, 25);
+    const bR1 = projectFacePoint( 16, -16-fp.browRaise, 22);
+    const bRm = projectFacePoint( 10, -19-fp.browRaise+fp.browFurrow, 23);
+    const bR2 = projectFacePoint(  4, -16-fp.browRaise+fp.browFurrow, 25);
+    const ns1 = projectFacePoint(  0,  -4, 30);
+    const ns2 = projectFacePoint(  0,   3, 30);
+    const mL  = projectFacePoint(-10,  10+fp.jawOpen, 24);
+    const mM  = projectFacePoint(  0,  10+fp.jawOpen+mc*2, 27);
+    const mR  = projectFacePoint( 10,  10+fp.jawOpen, 24);
+    svgEl('ellipse',{cx:f(eL.x),cy:f(eL.y),rx:'4',ry:(2.5*fp.eyeOpenness).toFixed(1),fill:C,opacity:'0.8'},fg);
+    svgEl('ellipse',{cx:f(eR.x),cy:f(eR.y),rx:'4',ry:(2.5*fp.eyeOpenness).toFixed(1),fill:C,opacity:'0.8'},fg);
+    svgEl('path',{d:`M${f(bL1.x)},${f(bL1.y)} Q${f(bLm.x)},${f(bLm.y)} ${f(bL2.x)},${f(bL2.y)}`,fill:'none',stroke:C,'stroke-width':'1.5','stroke-linecap':'round'},fg);
+    svgEl('path',{d:`M${f(bR1.x)},${f(bR1.y)} Q${f(bRm.x)},${f(bRm.y)} ${f(bR2.x)},${f(bR2.y)}`,fill:'none',stroke:C,'stroke-width':'1.5','stroke-linecap':'round'},fg);
+    svgEl('line',{x1:f(ns1.x),y1:f(ns1.y),x2:f(ns2.x),y2:f(ns2.y),stroke:C,'stroke-width':'1',opacity:'0.5'},fg);
+    svgEl('path',{d:`M${f(mL.x)},${f(mL.y)} Q${f(mM.x)},${f(mM.y)} ${f(mR.x)},${f(mR.y)}`,fill:'none',stroke:C,'stroke-width':'1.5','stroke-linecap':'round'},fg);
+  }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -660,8 +821,10 @@ function renderMuscleOverlays(p, style) {
 // MAIN RENDER DISPATCHER
 // ═══════════════════════════════════════════════════════
 function render() {
-  const p = calcPositions(joints);
-  const fp = getFaceParams();
+  const raw = calcPositions(joints);
+  rawCache = raw;       // store for face point projection
+  const p   = applyProjection(raw);
+  const fp  = getFaceParams();
 
   document.getElementById('avatar-render').innerHTML = '';
 
