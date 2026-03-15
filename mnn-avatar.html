@@ -666,16 +666,36 @@ function renderVitruvian(p, fp) {
   // Muscle overlays
   renderMuscleOverlays(p, 'vitruv');
 
-  // Face — fine detail
-  const hx=p.headCenter.x, hy=p.headCenter.y, mc=fp.smile-fp.frown;
-  svgEl('ellipse',{fill:goldD,cx:(hx-9).toFixed(1),cy:(hy-7).toFixed(1),rx:'3',ry:(2.5*fp.eyeOpenness).toFixed(1)});
-  svgEl('ellipse',{fill:goldD,cx:(hx+9).toFixed(1),cy:(hy-7).toFixed(1),rx:'3',ry:(2.5*fp.eyeOpenness).toFixed(1)});
-  svgEl('path',{d:`M${hx-14},${hy-15-fp.browRaise} Q${hx-9},${hy-18-fp.browRaise+fp.browFurrow} ${hx-4},${hy-15-fp.browRaise+fp.browFurrow}`,fill:'none',stroke:goldD,'stroke-width':'1.1','stroke-linecap':'round'});
-  svgEl('path',{d:`M${hx+14},${hy-15-fp.browRaise} Q${hx+9},${hy-18-fp.browRaise+fp.browFurrow} ${hx+4},${hy-15-fp.browRaise+fp.browFurrow}`,fill:'none',stroke:goldD,'stroke-width':'1.1','stroke-linecap':'round'});
-  svgEl('line',{x1:hx,y1:hy-3,x2:hx,y2:hy+4,stroke:goldD,'stroke-width':'1',opacity:'0.55'});
-  svgEl('path',{d:`M${hx-9},${hy+10+fp.jawOpen} Q${hx},${hy+10+fp.jawOpen+mc*2} ${hx+9},${hy+10+fp.jawOpen}`,fill:'none',stroke:goldD,'stroke-width':'1.5','stroke-linecap':'round'});
-  // Hair line hint
-  svgEl('path',{d:`M${hx-28},${hy-16} Q${hx},${hy-42} ${hx+28},${hy-16}`,fill:'none',stroke:goldD,'stroke-width':'0.8',opacity:'0.35'});
+  // Face — fine detail, 3D-projected
+  const faceOp = getFaceOpacity();
+  const ff = n => n.toFixed(1);
+  if (faceOp > 0.02) {
+    const mc = fp.smile - fp.frown;
+    const foStr = faceOp.toFixed(2);
+    const eL  = projectFacePoint(-9,  -7, 24);
+    const eR  = projectFacePoint( 9,  -7, 24);
+    const bL1 = projectFacePoint(-14, -15-fp.browRaise, 21);
+    const bLm = projectFacePoint( -9, -18-fp.browRaise+fp.browFurrow, 22);
+    const bL2 = projectFacePoint( -4, -15-fp.browRaise+fp.browFurrow, 23);
+    const bR1 = projectFacePoint( 14, -15-fp.browRaise, 21);
+    const bRm = projectFacePoint(  9, -18-fp.browRaise+fp.browFurrow, 22);
+    const bR2 = projectFacePoint(  4, -15-fp.browRaise+fp.browFurrow, 23);
+    const ns1 = projectFacePoint(  0,  -3, 28);
+    const ns2 = projectFacePoint(  0,   4, 28);
+    const mL  = projectFacePoint(-9,   10+fp.jawOpen, 22);
+    const mM  = projectFacePoint( 0,   10+fp.jawOpen+mc*2, 25);
+    const mR  = projectFacePoint( 9,   10+fp.jawOpen, 22);
+    const hL  = projectFacePoint(-28, -16, 16);
+    const hM  = projectFacePoint(  0, -40,  8);
+    const hR  = projectFacePoint( 28, -16, 16);
+    svgEl('ellipse',{fill:goldD,opacity:foStr,cx:ff(eL.x),cy:ff(eL.y),rx:'3',ry:(2.5*fp.eyeOpenness).toFixed(1)});
+    svgEl('ellipse',{fill:goldD,opacity:foStr,cx:ff(eR.x),cy:ff(eR.y),rx:'3',ry:(2.5*fp.eyeOpenness).toFixed(1)});
+    svgEl('path',{d:`M${ff(bL1.x)},${ff(bL1.y)} Q${ff(bLm.x)},${ff(bLm.y)} ${ff(bL2.x)},${ff(bL2.y)}`,fill:'none',stroke:goldD,'stroke-width':'1.1','stroke-linecap':'round',opacity:foStr});
+    svgEl('path',{d:`M${ff(bR1.x)},${ff(bR1.y)} Q${ff(bRm.x)},${ff(bRm.y)} ${ff(bR2.x)},${ff(bR2.y)}`,fill:'none',stroke:goldD,'stroke-width':'1.1','stroke-linecap':'round',opacity:foStr});
+    svgEl('line',{x1:ff(ns1.x),y1:ff(ns1.y),x2:ff(ns2.x),y2:ff(ns2.y),stroke:goldD,'stroke-width':'1',opacity:(faceOp*0.55).toFixed(2)});
+    svgEl('path',{d:`M${ff(mL.x)},${ff(mL.y)} Q${ff(mM.x)},${ff(mM.y)} ${ff(mR.x)},${ff(mR.y)}`,fill:'none',stroke:goldD,'stroke-width':'1.5','stroke-linecap':'round',opacity:foStr});
+    svgEl('path',{d:`M${ff(hL.x)},${ff(hL.y)} Q${ff(hM.x)},${ff(hM.y)} ${ff(hR.x)},${ff(hR.y)}`,fill:'none',stroke:goldD,'stroke-width':'0.8',opacity:(faceOp*0.35).toFixed(2)});
+  }
   // Navel + body centreline hint
   svgEl('line',{x1:p.thoracic.x.toFixed(1),y1:p.thoracic.y.toFixed(1),x2:p.pelvis.x.toFixed(1),y2:p.pelvis.y.toFixed(1),stroke:goldD,'stroke-width':'0.6',opacity:'0.3','stroke-dasharray':'3,4'});
 }
@@ -749,16 +769,28 @@ function renderBulk(p, fp) {
   // Head
   svgEl('circle',{...B,cx:f(p.headCenter.x),cy:f(p.headCenter.y),r:'33'});
 
-  // Face — bold
-  const hx=p.headCenter.x, hy=p.headCenter.y, mc=fp.smile-fp.frown;
-  const eyeStroke = stroke;
-  svgEl('ellipse',{fill:stroke,cx:f(hx-11),cy:f(hy-8),rx:'5',ry:f(4*fp.eyeOpenness)});
-  svgEl('ellipse',{fill:stroke,cx:f(hx+11),cy:f(hy-8),rx:'5',ry:f(4*fp.eyeOpenness)});
-  // Brows (thick)
-  svgEl('path',{d:`M${hx-17},${hy-17-fp.browRaise} Q${hx-10},${hy-21-fp.browRaise+fp.browFurrow} ${hx-3},${hy-17-fp.browRaise+fp.browFurrow}`,fill:'none',stroke:eyeStroke,'stroke-width':'2.5','stroke-linecap':'round'});
-  svgEl('path',{d:`M${hx+17},${hy-17-fp.browRaise} Q${hx+10},${hy-21-fp.browRaise+fp.browFurrow} ${hx+3},${hy-17-fp.browRaise+fp.browFurrow}`,fill:'none',stroke:eyeStroke,'stroke-width':'2.5','stroke-linecap':'round'});
-  // Mouth
-  svgEl('path',{d:`M${hx-11},${hy+10+fp.jawOpen} Q${hx},${hy+10+fp.jawOpen+mc*2} ${hx+11},${hy+10+fp.jawOpen}`,fill:'none',stroke:eyeStroke,'stroke-width':'2.2','stroke-linecap':'round'});
+  // Face — bold, 3D-projected
+  const faceOp = getFaceOpacity();
+  if (faceOp > 0.02) {
+    const mc = fp.smile - fp.frown;
+    const foStr = faceOp.toFixed(2);
+    const eL  = projectFacePoint(-11, -8,  26);
+    const eR  = projectFacePoint( 11, -8,  26);
+    const bL1 = projectFacePoint(-17, -17-fp.browRaise, 22);
+    const bLm = projectFacePoint(-10, -21-fp.browRaise+fp.browFurrow, 23);
+    const bL2 = projectFacePoint( -3, -17-fp.browRaise+fp.browFurrow, 25);
+    const bR1 = projectFacePoint( 17, -17-fp.browRaise, 22);
+    const bRm = projectFacePoint( 10, -21-fp.browRaise+fp.browFurrow, 23);
+    const bR2 = projectFacePoint(  3, -17-fp.browRaise+fp.browFurrow, 25);
+    const mL  = projectFacePoint(-11,  10+fp.jawOpen, 24);
+    const mM  = projectFacePoint(  0,  10+fp.jawOpen+mc*2, 27);
+    const mR  = projectFacePoint( 11,  10+fp.jawOpen, 24);
+    svgEl('ellipse',{fill:stroke,opacity:foStr,cx:f(eL.x),cy:f(eL.y),rx:'5',ry:f(4*fp.eyeOpenness)});
+    svgEl('ellipse',{fill:stroke,opacity:foStr,cx:f(eR.x),cy:f(eR.y),rx:'5',ry:f(4*fp.eyeOpenness)});
+    svgEl('path',{d:`M${f(bL1.x)},${f(bL1.y)} Q${f(bLm.x)},${f(bLm.y)} ${f(bL2.x)},${f(bL2.y)}`,fill:'none',stroke,opacity:foStr,'stroke-width':'2.5','stroke-linecap':'round'});
+    svgEl('path',{d:`M${f(bR1.x)},${f(bR1.y)} Q${f(bRm.x)},${f(bRm.y)} ${f(bR2.x)},${f(bR2.y)}`,fill:'none',stroke,opacity:foStr,'stroke-width':'2.5','stroke-linecap':'round'});
+    svgEl('path',{d:`M${f(mL.x)},${f(mL.y)} Q${f(mM.x)},${f(mM.y)} ${f(mR.x)},${f(mR.y)}`,fill:'none',stroke,opacity:foStr,'stroke-width':'2.2','stroke-linecap':'round'});
+  }
 
   // Glow frame around bulk figure
   svgEl('rect',{x:'5',y:'5',width:'450',height:'510',fill:'none',stroke:'#00e5ff','stroke-width':'0.5',opacity:'0.07',rx:'4'});
