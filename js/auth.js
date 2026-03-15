@@ -28,8 +28,8 @@ const ITWAuth = {
       // Legacy migration
       valid = (user.password === password);
       if (valid) {
-        const migrated = await PasswordUtils.migrate(user, password);
-        ITWStorage.updateUser(user.username, migrated);
+        const hash = await PasswordUtils.hash(password);
+        ITWStorage.updateUser(user.username, { passwordHash: hash, password: null });
       }
     }
     if (!valid) throw new Error('Incorrect password');
