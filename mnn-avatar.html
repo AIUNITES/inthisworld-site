@@ -242,10 +242,11 @@ let currentMovement = '';
 // ═══════════════════════════════════════════════════════
 // STYLE SWITCHER
 // ═══════════════════════════════════════════════════════
-function setStyle(name) {
+function setStyle(name, btn) {
   currentStyle = name;
   document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('active'));
-  event.target.classList.add('active');
+  const target = btn || (typeof event !== 'undefined' && event?.target) || document.querySelector(`.style-btn[onclick*="'${name}'"]`);
+  if (target) target.classList.add('active');
   const labels = {wire:'WIRE · ANTERIOR', vitruv:'VITRUV · ANTERIOR', bulk:'BULK · ANTERIOR'};
   document.getElementById('view-tag').textContent = labels[name];
   render();
