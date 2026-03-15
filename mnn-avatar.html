@@ -6,306 +6,95 @@
 <title>MNN Avatar Viewer — AIUNITES / InThisWorld</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700&display=swap');
-
   :root {
-    --bg:        #04060f;
-    --panel:     #080f1e;
-    --card:      #0c1628;
-    --border:    rgba(0, 229, 255, 0.18);
-    --cyan:      #00e5ff;
-    --cyan-dim:  #40c8e0;
-    --cyan-faint:#1a3040;
-    --orange:    #ff6b35;
-    --red-hot:   #ff2800;
-    --green:     #39ff14;
-    --text:      #aaddee;
-    --text-dim:  #4a7a8a;
-    --font-mono: 'Share Tech Mono', 'Courier New', monospace;
-    --font-head: 'Orbitron', sans-serif;
+    --bg:#04060f; --panel:#080f1e; --card:#0c1628;
+    --border:rgba(0,229,255,0.18); --cyan:#00e5ff; --cyan-dim:#40c8e0;
+    --cyan-faint:#1a3040; --orange:#ff6b35; --red-hot:#ff2800;
+    --green:#39ff14; --text:#aaddee; --text-dim:#4a7a8a;
+    --gold:#c8a84b; --gold-light:#e8d5a3; --gold-dark:#7a5010;
+    --font-mono:'Share Tech Mono','Courier New',monospace;
+    --font-head:'Orbitron',sans-serif;
   }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:var(--font-mono);height:100vh;overflow:hidden;user-select:none;}
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  .header{display:flex;align-items:center;gap:20px;padding:8px 20px;background:linear-gradient(90deg,#000a18,#061020);border-bottom:1px solid var(--border);height:42px;}
+  .header-logo{font-family:var(--font-head);font-size:13px;color:var(--cyan);letter-spacing:3px;text-shadow:0 0 12px var(--cyan);}
+  .header-sub{font-size:10px;color:var(--text-dim);letter-spacing:1px;}
+  .header-version{margin-left:auto;font-size:10px;color:var(--cyan-dim);border:1px solid var(--border);padding:2px 8px;border-radius:2px;}
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--font-mono);
-    height: 100vh;
-    overflow: hidden;
-    user-select: none;
-  }
+  .main{display:flex;height:calc(100vh - 42px);}
 
-  /* ── Header ─────────────────────────────────── */
-  .header {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    padding: 8px 20px;
-    background: linear-gradient(90deg, #000a18, #061020);
-    border-bottom: 1px solid var(--border);
-    height: 42px;
-  }
-  .header-logo {
-    font-family: var(--font-head);
-    font-size: 13px;
-    color: var(--cyan);
-    letter-spacing: 3px;
-    text-shadow: 0 0 12px var(--cyan);
-  }
-  .header-sub {
-    font-size: 10px;
-    color: var(--text-dim);
-    letter-spacing: 1px;
-  }
-  .header-version {
-    margin-left: auto;
-    font-size: 10px;
-    color: var(--cyan-dim);
-    border: 1px solid var(--border);
-    padding: 2px 8px;
-    border-radius: 2px;
-  }
+  .avatar-panel{flex:0 0 480px;background:radial-gradient(ellipse at 50% 30%,#061428 0%,#04060f 70%);border-right:1px solid var(--border);position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;}
+  .avatar-panel::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(0,229,255,0.04) 39px,rgba(0,229,255,0.04) 40px),repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(0,229,255,0.04) 39px,rgba(0,229,255,0.04) 40px);pointer-events:none;}
+  .view-tag{position:absolute;top:12px;left:16px;font-size:9px;color:var(--text-dim);letter-spacing:3px;border:1px solid var(--cyan-faint);padding:3px 8px;}
+  .movement-display{position:absolute;top:12px;right:16px;font-size:11px;color:var(--cyan);opacity:0.7;text-shadow:0 0 8px var(--cyan);}
 
-  /* ── Layout ─────────────────────────────────── */
-  .main {
-    display: flex;
-    height: calc(100vh - 42px);
-  }
+  /* Style selector */
+  .style-selector{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:10;}
+  .style-btn{padding:5px 14px;font-size:9px;letter-spacing:2px;font-family:var(--font-head);background:rgba(0,10,30,0.85);border:1px solid rgba(0,229,255,0.2);color:var(--text-dim);cursor:pointer;transition:all 0.15s;border-radius:2px;}
+  .style-btn:hover{color:var(--cyan);border-color:var(--cyan);}
+  .style-btn.active{color:var(--cyan);border-color:var(--cyan);background:rgba(0,229,255,0.12);text-shadow:0 0 8px var(--cyan);}
+  .style-btn.style-bulk.active{color:#b8fff8;border-color:#80ffee;background:rgba(0,229,255,0.15);}
+  .style-btn.style-vitruv.active{color:var(--gold-light);border-color:var(--gold);background:rgba(200,168,75,0.15);text-shadow:0 0 8px var(--gold);}
 
-  /* ── Avatar Panel ───────────────────────────── */
-  .avatar-panel {
-    flex: 0 0 480px;
-    background: radial-gradient(ellipse at 50% 30%, #061428 0%, #04060f 70%);
-    border-right: 1px solid var(--border);
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-  }
-  .avatar-panel::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: repeating-linear-gradient(
-      0deg, transparent, transparent 39px,
-      rgba(0,229,255,0.04) 39px, rgba(0,229,255,0.04) 40px
-    ),
-    repeating-linear-gradient(
-      90deg, transparent, transparent 39px,
-      rgba(0,229,255,0.04) 39px, rgba(0,229,255,0.04) 40px
-    );
-    pointer-events: none;
-  }
-  .view-tag {
-    position: absolute;
-    top: 12px;
-    left: 16px;
-    font-size: 9px;
-    color: var(--text-dim);
-    letter-spacing: 3px;
-    border: 1px solid var(--cyan-faint);
-    padding: 3px 8px;
-  }
-  .movement-display {
-    position: absolute;
-    top: 12px;
-    right: 16px;
-    font-size: 11px;
-    color: var(--cyan);
-    opacity: 0.7;
-    text-shadow: 0 0 8px var(--cyan);
-  }
-  #avatar-svg {
-    width: 460px;
-    height: 560px;
-    overflow: visible;
-  }
-  .corner-tl, .corner-tr, .corner-bl, .corner-br {
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    border-color: var(--cyan);
-    border-style: solid;
-    opacity: 0.5;
-  }
-  .corner-tl { top: 6px; left: 6px; border-width: 1px 0 0 1px; }
-  .corner-tr { top: 6px; right: 6px; border-width: 1px 1px 0 0; }
-  .corner-bl { bottom: 6px; left: 6px; border-width: 0 0 1px 1px; }
-  .corner-br { bottom: 6px; right: 6px; border-width: 0 1px 1px 0; }
+  #avatar-svg{width:460px;height:510px;overflow:visible;}
+  .corner-tl,.corner-tr,.corner-bl,.corner-br{position:absolute;width:20px;height:20px;border-color:var(--cyan);border-style:solid;opacity:0.5;}
+  .corner-tl{top:6px;left:6px;border-width:1px 0 0 1px;}
+  .corner-tr{top:6px;right:6px;border-width:1px 1px 0 0;}
+  .corner-bl{bottom:6px;left:6px;border-width:0 0 1px 1px;}
+  .corner-br{bottom:6px;right:6px;border-width:0 1px 1px 0;}
 
-  /* ── Control Panel ──────────────────────────── */
-  .control-panel {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    overflow: hidden;
-  }
-  .tabs {
-    display: flex;
-    border-bottom: 1px solid var(--border);
-    background: var(--panel);
-  }
-  .tab {
-    padding: 10px 18px;
-    font-size: 10px;
-    letter-spacing: 2px;
-    color: var(--text-dim);
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition: all 0.15s;
-  }
-  .tab:hover { color: var(--text); }
-  .tab.active { color: var(--cyan); border-bottom-color: var(--cyan); background: rgba(0,229,255,0.04); }
-  .tab-content { display: none; flex: 1; overflow: hidden; }
-  .tab-content.active { display: flex; flex-direction: column; overflow: auto; }
+  .control-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+  .tabs{display:flex;border-bottom:1px solid var(--border);background:var(--panel);}
+  .tab{padding:10px 18px;font-size:10px;letter-spacing:2px;color:var(--text-dim);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;}
+  .tab:hover{color:var(--text);}
+  .tab.active{color:var(--cyan);border-bottom-color:var(--cyan);background:rgba(0,229,255,0.04);}
+  .tab-content{display:none;flex:1;overflow:hidden;}
+  .tab-content.active{display:flex;flex-direction:column;overflow:auto;}
 
-  /* ── Cards / Sections ───────────────────────── */
-  .section {
-    padding: 14px 18px;
-    border-bottom: 1px solid var(--border);
-  }
-  .section-title {
-    font-size: 9px;
-    letter-spacing: 3px;
-    color: var(--text-dim);
-    margin-bottom: 10px;
-  }
+  .section{padding:14px 18px;border-bottom:1px solid var(--border);}
+  .section-title{font-size:9px;letter-spacing:3px;color:var(--text-dim);margin-bottom:10px;}
 
-  /* ── MNN Input ──────────────────────────────── */
-  #mnn-input {
-    width: 100%;
-    height: 90px;
-    background: rgba(0,20,40,0.8);
-    border: 1px solid var(--border);
-    color: var(--cyan);
-    font-family: var(--font-mono);
-    font-size: 11px;
-    padding: 10px;
-    resize: none;
-    outline: none;
-    line-height: 1.6;
-  }
-  #mnn-input:focus { border-color: var(--cyan); box-shadow: 0 0 10px rgba(0,229,255,0.15) inset; }
-  #mnn-input::placeholder { color: var(--text-dim); }
-  .btn-row { display: flex; gap: 8px; margin-top: 8px; }
-  .btn {
-    padding: 6px 16px;
-    background: rgba(0,229,255,0.08);
-    border: 1px solid var(--border);
-    color: var(--cyan);
-    font-family: var(--font-mono);
-    font-size: 10px;
-    letter-spacing: 2px;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .btn:hover { background: rgba(0,229,255,0.18); box-shadow: 0 0 10px rgba(0,229,255,0.2); }
-  .btn-dim { color: var(--text-dim); border-color: rgba(0,229,255,0.08); }
-  .btn-dim:hover { color: var(--text); }
+  #mnn-input{width:100%;height:90px;background:rgba(0,20,40,0.8);border:1px solid var(--border);color:var(--cyan);font-family:var(--font-mono);font-size:11px;padding:10px;resize:none;outline:none;line-height:1.6;}
+  #mnn-input:focus{border-color:var(--cyan);}
+  #mnn-input::placeholder{color:var(--text-dim);}
+  .btn-row{display:flex;gap:8px;margin-top:8px;}
+  .btn{padding:6px 16px;background:rgba(0,229,255,0.08);border:1px solid var(--border);color:var(--cyan);font-family:var(--font-mono);font-size:10px;letter-spacing:2px;cursor:pointer;transition:all 0.15s;}
+  .btn:hover{background:rgba(0,229,255,0.18);}
+  .btn-dim{color:var(--text-dim);border-color:rgba(0,229,255,0.08);}
+  .btn-dim:hover{color:var(--text);}
 
-  /* ── Presets ────────────────────────────────── */
-  .preset-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
-  }
-  .preset-btn {
-    padding: 8px 4px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    color: var(--text-dim);
-    font-family: var(--font-mono);
-    font-size: 9px;
-    letter-spacing: 1px;
-    cursor: pointer;
-    text-align: center;
-    transition: all 0.15s;
-  }
-  .preset-btn:hover { border-color: var(--cyan); color: var(--cyan); background: rgba(0,229,255,0.06); }
-  .preset-btn.active-preset { border-color: var(--cyan); color: var(--cyan); background: rgba(0,229,255,0.1); }
+  .preset-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+  .preset-btn{padding:8px 4px;background:var(--card);border:1px solid var(--border);color:var(--text-dim);font-family:var(--font-mono);font-size:9px;letter-spacing:1px;cursor:pointer;text-align:center;transition:all 0.15s;}
+  .preset-btn:hover{border-color:var(--cyan);color:var(--cyan);background:rgba(0,229,255,0.06);}
+  .preset-btn.active-preset{border-color:var(--cyan);color:var(--cyan);background:rgba(0,229,255,0.1);}
 
-  /* ── Sliders ────────────────────────────────── */
-  .slider-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px 16px;
-  }
-  .slider-row {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-  }
-  .slider-label {
-    display: flex;
-    justify-content: space-between;
-    font-size: 9px;
-    color: var(--text-dim);
-    letter-spacing: 1px;
-  }
-  .slider-label .val { color: var(--cyan); min-width: 28px; text-align: right; }
-  input[type=range] {
-    width: 100%;
-    height: 3px;
-    -webkit-appearance: none;
-    background: var(--cyan-faint);
-    outline: none;
-    border-radius: 0;
-  }
-  input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 10px;
-    height: 10px;
-    background: var(--cyan);
-    cursor: pointer;
-    box-shadow: 0 0 6px var(--cyan);
-  }
+  .slider-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;}
+  .slider-row{display:flex;flex-direction:column;gap:3px;}
+  .slider-label{display:flex;justify-content:space-between;font-size:9px;color:var(--text-dim);letter-spacing:1px;}
+  .slider-label .val{color:var(--cyan);min-width:28px;text-align:right;}
+  input[type=range]{width:100%;height:3px;-webkit-appearance:none;background:var(--cyan-faint);outline:none;border-radius:0;}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:10px;height:10px;background:var(--cyan);cursor:pointer;box-shadow:0 0 6px var(--cyan);}
 
-  /* ── Muscle Activation ──────────────────────── */
-  .muscle-list { display: flex; flex-direction: column; gap: 5px; }
-  .muscle-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 10px;
-  }
-  .muscle-name { width: 80px; color: var(--cyan-dim); }
-  .muscle-bar-bg { flex: 1; height: 6px; background: var(--card); border: 1px solid var(--border); }
-  .muscle-bar { height: 100%; background: var(--orange); transition: width 0.3s; }
-  .muscle-level { width: 24px; text-align: right; font-size: 9px; }
-  .muscle-level.l1 { color: rgba(255,165,0,0.7); }
-  .muscle-level.l2 { color: var(--orange); }
-  .muscle-level.l3 { color: var(--red-hot); text-shadow: 0 0 6px var(--red-hot); }
-  .muscle-empty { color: var(--text-dim); font-size: 10px; font-style: italic; }
+  .muscle-list{display:flex;flex-direction:column;gap:5px;}
+  .muscle-row{display:flex;align-items:center;gap:8px;font-size:10px;}
+  .muscle-name{width:80px;color:var(--cyan-dim);}
+  .muscle-bar-bg{flex:1;height:6px;background:var(--card);border:1px solid var(--border);}
+  .muscle-bar{height:100%;background:var(--orange);transition:width 0.3s;}
+  .muscle-level{width:24px;text-align:right;font-size:9px;}
+  .muscle-level.l1{color:rgba(255,165,0,0.7);}
+  .muscle-level.l2{color:var(--orange);}
+  .muscle-level.l3{color:var(--red-hot);text-shadow:0 0 6px var(--red-hot);}
+  .muscle-empty{color:var(--text-dim);font-size:10px;font-style:italic;}
 
-  /* ── MNN Output ─────────────────────────────── */
-  .mnn-out {
-    font-size: 10px;
-    color: var(--cyan-dim);
-    line-height: 1.8;
-    padding: 10px;
-    background: rgba(0,20,40,0.5);
-    border: 1px solid var(--border);
-    min-height: 60px;
-    white-space: pre-wrap;
-    word-break: break-all;
-  }
-  .mnn-out .tag-pos { color: #69d4ff; }
-  .mnn-out .tag-con { color: var(--orange); }
-  .mnn-out .tag-mov { color: var(--green); }
+  .mnn-out{font-size:10px;color:var(--cyan-dim);line-height:1.8;padding:10px;background:rgba(0,20,40,0.5);border:1px solid var(--border);min-height:60px;white-space:pre-wrap;word-break:break-all;}
+  .mnn-out .tag-pos{color:#69d4ff;}
+  .mnn-out .tag-con{color:var(--orange);}
+  .mnn-out .tag-mov{color:var(--green);}
 
-  /* ── Info box ───────────────────────────────── */
-  .info-row {
-    font-size: 9px;
-    color: var(--text-dim);
-    display: flex;
-    justify-content: space-between;
-    padding: 4px 0;
-    border-bottom: 1px solid rgba(0,229,255,0.04);
-  }
-  .info-row .info-val { color: var(--text); }
+  .info-row{font-size:9px;color:var(--text-dim);display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(0,229,255,0.04);}
+  .info-row .info-val{color:var(--text);}
 </style>
 </head>
 <body>
@@ -313,19 +102,18 @@
 <div class="header">
   <div class="header-logo">◆ MNN AVATAR</div>
   <div class="header-sub">MUSCULAR NEURO NOTATION · INTHISWORLD / AIUNITES</div>
-  <div class="header-version">v1.5.0 · LOD 1</div>
+  <div class="header-version">v1.5.1 · LOD 1</div>
 </div>
 
 <div class="main">
-
-  <!-- ── Avatar Panel ── -->
+  <!-- Avatar Panel -->
   <div class="avatar-panel">
     <div class="corner-tl"></div><div class="corner-tr"></div>
     <div class="corner-bl"></div><div class="corner-br"></div>
-    <div class="view-tag">ANTERIOR · LOD 1</div>
+    <div class="view-tag" id="view-tag">WIRE · ANTERIOR</div>
     <div class="movement-display" id="movement-display"></div>
 
-    <svg id="avatar-svg" viewBox="0 0 460 560" xmlns="http://www.w3.org/2000/svg">
+    <svg id="avatar-svg" viewBox="0 0 460 520" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
           <feGaussianBlur stdDeviation="2.5" result="b"/>
@@ -339,87 +127,29 @@
           <feGaussianBlur stdDeviation="8" result="b"/>
           <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
         </filter>
-        <radialGradient id="muscle-grad" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#ff6b35" stop-opacity="0.9"/>
-          <stop offset="100%" stop-color="#ff2800" stop-opacity="0.1"/>
-        </radialGradient>
+        <filter id="glow-bulk" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="4" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
       </defs>
-
-      <!-- Centerline -->
-      <line x1="230" y1="0" x2="230" y2="560" stroke="#00e5ff" stroke-width="0.3" opacity="0.12" stroke-dasharray="4,8"/>
-
-      <!-- Muscle overlays (behind skeleton) -->
-      <g id="muscle-overlays"></g>
-
-      <!-- Skeleton bones -->
-      <g id="bones" filter="url(#glow)">
-        <line id="bone-spine"        stroke="#00e5ff" stroke-width="2.5" stroke-linecap="round"/>
-        <line id="bone-neck"         stroke="#00e5ff" stroke-width="2"   stroke-linecap="round"/>
-        <line id="bone-l-clav"       stroke="#00e5ff" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
-        <line id="bone-r-clav"       stroke="#00e5ff" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
-        <line id="bone-l-upper-arm"  stroke="#00e5ff" stroke-width="3"   stroke-linecap="round"/>
-        <line id="bone-l-forearm"    stroke="#00e5ff" stroke-width="2.5" stroke-linecap="round"/>
-        <line id="bone-l-hand"       stroke="#00e5ff" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
-        <line id="bone-r-upper-arm"  stroke="#00e5ff" stroke-width="3"   stroke-linecap="round"/>
-        <line id="bone-r-forearm"    stroke="#00e5ff" stroke-width="2.5" stroke-linecap="round"/>
-        <line id="bone-r-hand"       stroke="#00e5ff" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
-        <line id="bone-pelvis-l"     stroke="#00e5ff" stroke-width="2"   stroke-linecap="round" opacity="0.6"/>
-        <line id="bone-pelvis-r"     stroke="#00e5ff" stroke-width="2"   stroke-linecap="round" opacity="0.6"/>
-        <line id="bone-l-upper-leg"  stroke="#00e5ff" stroke-width="3.5" stroke-linecap="round"/>
-        <line id="bone-l-lower-leg"  stroke="#00e5ff" stroke-width="3"   stroke-linecap="round"/>
-        <line id="bone-l-foot"       stroke="#00e5ff" stroke-width="2"   stroke-linecap="round"/>
-        <line id="bone-r-upper-leg"  stroke="#00e5ff" stroke-width="3.5" stroke-linecap="round"/>
-        <line id="bone-r-lower-leg"  stroke="#00e5ff" stroke-width="3"   stroke-linecap="round"/>
-        <line id="bone-r-foot"       stroke="#00e5ff" stroke-width="2"   stroke-linecap="round"/>
-      </g>
-
-      <!-- Rib cage hint -->
-      <g id="ribs" opacity="0.15" filter="url(#glow-sm)">
-        <ellipse id="rib-cage" fill="none" stroke="#00e5ff" stroke-width="1"/>
-      </g>
-
-      <!-- Joint circles -->
-      <g id="joints" filter="url(#glow-sm)">
-        <circle id="joint-head"   r="36" fill="none" stroke="#40c8e0" stroke-width="1.5"/>
-        <circle id="joint-l-sh"   r="7"  fill="#00e5ff" opacity="0.85"/>
-        <circle id="joint-r-sh"   r="7"  fill="#00e5ff" opacity="0.85"/>
-        <circle id="joint-l-el"   r="5"  fill="#40c8e0" opacity="0.7"/>
-        <circle id="joint-r-el"   r="5"  fill="#40c8e0" opacity="0.7"/>
-        <circle id="joint-l-wr"   r="3.5" fill="#40c8e0" opacity="0.6"/>
-        <circle id="joint-r-wr"   r="3.5" fill="#40c8e0" opacity="0.6"/>
-        <circle id="joint-pelvis" r="9"  fill="none" stroke="#00e5ff" stroke-width="1.5" opacity="0.6"/>
-        <circle id="joint-l-hip"  r="6"  fill="#00e5ff" opacity="0.8"/>
-        <circle id="joint-r-hip"  r="6"  fill="#00e5ff" opacity="0.8"/>
-        <circle id="joint-l-kn"   r="5"  fill="#40c8e0" opacity="0.7"/>
-        <circle id="joint-r-kn"   r="5"  fill="#40c8e0" opacity="0.7"/>
-        <circle id="joint-l-ank"  r="4"  fill="#40c8e0" opacity="0.6"/>
-        <circle id="joint-r-ank"  r="4"  fill="#40c8e0" opacity="0.6"/>
-      </g>
-
-      <!-- Face features -->
-      <g id="face" filter="url(#glow-sm)">
-        <ellipse id="eye-l"   ry="2.5" rx="4" fill="#00e5ff" opacity="0.8"/>
-        <ellipse id="eye-r"   ry="2.5" rx="4" fill="#00e5ff" opacity="0.8"/>
-        <path id="brow-l"    fill="none" stroke="#00e5ff" stroke-width="1.5" stroke-linecap="round"/>
-        <path id="brow-r"    fill="none" stroke="#00e5ff" stroke-width="1.5" stroke-linecap="round"/>
-        <path id="mouth"     fill="none" stroke="#00e5ff" stroke-width="1.5" stroke-linecap="round"/>
-        <line id="nose"      stroke="#00e5ff" stroke-width="1" opacity="0.5"/>
-      </g>
-
-      <!-- Spine segment markers -->
-      <g id="spine-marks" opacity="0.3" filter="url(#glow-sm)"></g>
-
-      <!-- Scanning line animation -->
-      <rect x="0" y="-2" width="460" height="1.5" fill="#00e5ff" opacity="0.07">
-        <animate attributeName="y" from="-10" to="570" dur="5s" repeatCount="indefinite"/>
+      <line x1="230" y1="0" x2="230" y2="520" stroke="#00e5ff" stroke-width="0.3" opacity="0.1" stroke-dasharray="4,8"/>
+      <!-- Dynamic render layer — cleared and redrawn on each frame -->
+      <g id="avatar-render"></g>
+      <!-- Scan line -->
+      <rect x="0" y="-2" width="460" height="1.5" fill="#00e5ff" opacity="0.06">
+        <animate attributeName="y" from="-10" to="530" dur="5s" repeatCount="indefinite"/>
       </rect>
-
-      <!-- Joint labels (toggle-able) -->
-      <g id="joint-labels" opacity="0.5" font-family="'Share Tech Mono', monospace" font-size="8" fill="#40c8e0"></g>
     </svg>
+
+    <!-- Style selector -->
+    <div class="style-selector">
+      <button class="style-btn active" onclick="setStyle('wire')">WIRE</button>
+      <button class="style-btn style-vitruv" onclick="setStyle('vitruv')">VITRUV</button>
+      <button class="style-btn style-bulk" onclick="setStyle('bulk')">BULK</button>
+    </div>
   </div>
 
-  <!-- ── Control Panel ── -->
+  <!-- Control Panel -->
   <div class="control-panel">
     <div class="tabs">
       <div class="tab active" onclick="switchTab('pose')">POSE</div>
@@ -428,29 +158,26 @@
       <div class="tab" onclick="switchTab('info')">INFO</div>
     </div>
 
-    <!-- POSE tab -->
     <div class="tab-content active" id="tab-pose">
       <div class="section">
         <div class="section-title">PRESET POSES</div>
         <div class="preset-grid">
-          <button class="preset-btn active-preset" onclick="applyPreset('tpose')">T-Pose</button>
-          <button class="preset-btn" onclick="applyPreset('anatomical')">Stand</button>
-          <button class="preset-btn" onclick="applyPreset('squat')">Squat</button>
-          <button class="preset-btn" onclick="applyPreset('pushup')">Push-up</button>
-          <button class="preset-btn" onclick="applyPreset('ohpress')">OH Press</button>
-          <button class="preset-btn" onclick="applyPreset('curl')">Curl</button>
-          <button class="preset-btn" onclick="applyPreset('run')">Run</button>
-          <button class="preset-btn" onclick="applyPreset('wave')">Wave</button>
+          <button class="preset-btn active-preset" onclick="applyPreset('tpose',event)">T-Pose</button>
+          <button class="preset-btn" onclick="applyPreset('anatomical',event)">Stand</button>
+          <button class="preset-btn" onclick="applyPreset('squat',event)">Squat</button>
+          <button class="preset-btn" onclick="applyPreset('pushup',event)">Push-up</button>
+          <button class="preset-btn" onclick="applyPreset('ohpress',event)">OH Press</button>
+          <button class="preset-btn" onclick="applyPreset('curl',event)">Curl</button>
+          <button class="preset-btn" onclick="applyPreset('run',event)">Run</button>
+          <button class="preset-btn" onclick="applyPreset('wave',event)">Wave</button>
         </div>
       </div>
-
       <div class="section" style="flex:1;overflow-y:auto">
         <div class="section-title">JOINT CONTROLS</div>
         <div class="slider-grid" id="slider-grid"></div>
       </div>
     </div>
 
-    <!-- MUSCLES tab -->
     <div class="tab-content" id="tab-muscles">
       <div class="section" style="flex:1;overflow-y:auto">
         <div class="section-title">ACTIVE MUSCLES</div>
@@ -460,7 +187,6 @@
       </div>
     </div>
 
-    <!-- MNN tab -->
     <div class="tab-content" id="tab-mnn">
       <div class="section">
         <div class="section-title">MNN INPUT STRING</div>
@@ -481,7 +207,6 @@
       </div>
     </div>
 
-    <!-- INFO tab -->
     <div class="tab-content" id="tab-info">
       <div class="section" style="flex:1;overflow-y:auto">
         <div class="section-title">SYSTEM INFO</div>
@@ -494,626 +219,560 @@
 </div>
 
 <script>
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 // STATE
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 const DEG = Math.PI / 180;
+let currentStyle = 'wire'; // 'wire' | 'vitruv' | 'bulk'
 
 const defaultState = {
-  'Sp.L':  { Flex:0, Lat:0, Rot:0 },
-  'Sp.T':  { Flex:0, Lat:0, Rot:0 },
-  'Sp.C':  { Flex:0, Lat:0, Rot:0 },
-  'L.Sh':  { Flex:0, Abd:90, IR:0, ER:0 },   // T-pose default
-  'R.Sh':  { Flex:0, Abd:90, IR:0, ER:0 },
-  'L.El':  { Flex:0 },
-  'R.El':  { Flex:0 },
-  'L.Wr':  { Flex:0, Rad:0, Uln:0 },
-  'R.Wr':  { Flex:0, Rad:0, Uln:0 },
-  'L.Hip': { Flex:0, Abd:5,  IR:0, ER:0 },
-  'R.Hip': { Flex:0, Abd:5,  IR:0, ER:0 },
-  'L.Kn':  { Flex:0 },
-  'R.Kn':  { Flex:0 },
-  'L.Ank': { Dors:0, Plan:5 },
-  'R.Ank': { Dors:0, Plan:5 },
-  'TMJ':   { Open:0 },
+  'Sp.L': {Flex:0,Lat:0,Rot:0}, 'Sp.T': {Flex:0,Lat:0,Rot:0}, 'Sp.C': {Flex:0,Lat:0,Rot:0},
+  'L.Sh': {Flex:0,Abd:90,IR:0,ER:0}, 'R.Sh': {Flex:0,Abd:90,IR:0,ER:0},
+  'L.El': {Flex:0}, 'R.El': {Flex:0},
+  'L.Wr': {Flex:0,Rad:0,Uln:0}, 'R.Wr': {Flex:0,Rad:0,Uln:0},
+  'L.Hip': {Flex:0,Abd:5,IR:0,ER:0}, 'R.Hip': {Flex:0,Abd:5,IR:0,ER:0},
+  'L.Kn': {Flex:0}, 'R.Kn': {Flex:0},
+  'L.Ank': {Dors:0,Plan:5}, 'R.Ank': {Dors:0,Plan:5},
+  'TMJ': {Open:0},
 };
-
 let joints = JSON.parse(JSON.stringify(defaultState));
-let muscles = {}; // { 'Pec.S': 3, 'Dlt.A': 1, ... }
+let muscles = {};
 let currentMovement = '';
-let currentPreset = 'tpose';
 
-// ══════════════════════════════════════════════════════════
-// KINEMATIC SOLVER  — direct position calculation
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// STYLE SWITCHER
+// ═══════════════════════════════════════════════════════
+function setStyle(name) {
+  currentStyle = name;
+  document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  const labels = {wire:'WIRE · ANTERIOR', vitruv:'VITRUV · ANTERIOR', bulk:'BULK · ANTERIOR'};
+  document.getElementById('view-tag').textContent = labels[name];
+  render();
+}
+
+// ═══════════════════════════════════════════════════════
+// KINEMATICS
+// ═══════════════════════════════════════════════════════
 function calcPositions(j) {
-  const cx = 230, pelvisY = 380;
-
-  // Spine lateral tilt (Lat) in radians — bends the whole torso
-  const spLat  = (j['Sp.L']?.Lat  || 0) * DEG;
+  const cx = 230, pelvisY = 365;
+  const spLat = (j['Sp.L']?.Lat || 0) * DEG;
   const spCFlex = (j['Sp.C']?.Flex || 0) * DEG;
+  const spineBaseAngle = -Math.PI/2 + spLat;
+  const pelvis = {x:cx, y:pelvisY};
+  const lumbar = {x:pelvis.x+45*Math.cos(spineBaseAngle), y:pelvis.y+45*Math.sin(spineBaseAngle)};
+  const thoracic = {x:lumbar.x+72*Math.cos(spineBaseAngle), y:lumbar.y+72*Math.sin(spineBaseAngle)};
+  const neckAngle = spineBaseAngle + spCFlex*0.5;
+  const neck = {x:thoracic.x+26*Math.cos(neckAngle), y:thoracic.y+26*Math.sin(neckAngle)};
+  const headCenter = {x:neck.x+18*Math.cos(neckAngle), y:neck.y+18*Math.sin(neckAngle)};
+  const perpAngle = spineBaseAngle + Math.PI/2;
+  const shW = 58;
+  const lSh = {x:thoracic.x+shW*Math.cos(perpAngle+Math.PI), y:thoracic.y+shW*Math.sin(perpAngle+Math.PI)+8};
+  const rSh = {x:thoracic.x+shW*Math.cos(perpAngle), y:thoracic.y+shW*Math.sin(perpAngle)+8};
+  const hipW = 30;
+  const lHip = {x:pelvis.x+hipW*Math.cos(perpAngle+Math.PI), y:pelvis.y+hipW*Math.sin(perpAngle+Math.PI)};
+  const rHip = {x:pelvis.x+hipW*Math.cos(perpAngle), y:pelvis.y+hipW*Math.sin(perpAngle)};
 
-  // Spine: from pelvis going UP (SVG angle = -90° from positive X = pointing up)
-  const spineBaseAngle = -Math.PI/2 + spLat; // -π/2 = straight up; +Lat tilts right
-
-  const lumbarLen = 45, thoracicLen = 75;
-  const pelvis    = { x: cx, y: pelvisY };
-  const lumbar    = {
-    x: pelvis.x + lumbarLen * Math.cos(spineBaseAngle),
-    y: pelvis.y + lumbarLen * Math.sin(spineBaseAngle)
-  };
-  const thoracic  = {
-    x: lumbar.x + thoracicLen * Math.cos(spineBaseAngle),
-    y: lumbar.y + thoracicLen * Math.sin(spineBaseAngle)
-  };
-
-  // Cervical / neck direction (can flex independently)
-  const neckBaseAngle = spineBaseAngle + spCFlex * 0.5;
-  const neckLen = 28;
-  const neck = {
-    x: thoracic.x + neckLen * Math.cos(neckBaseAngle),
-    y: thoracic.y + neckLen * Math.sin(neckBaseAngle)
-  };
-  const headCenter = {
-    x: neck.x + 18 * Math.cos(neckBaseAngle),
-    y: neck.y + 18 * Math.sin(neckBaseAngle)
-  };
-
-  // Shoulder joint positions: perpendicular to spine at thoracic level
-  const perpAngle = spineBaseAngle + Math.PI/2; // perpendicular to spine
-  const shWidth = 68;
-  const lSh = {
-    x: thoracic.x + (shWidth - 10) * Math.cos(perpAngle + Math.PI),
-    y: thoracic.y + (shWidth - 10) * Math.sin(perpAngle + Math.PI)
-  };
-  const rSh = {
-    x: thoracic.x + (shWidth - 10) * Math.cos(perpAngle),
-    y: thoracic.y + (shWidth - 10) * Math.sin(perpAngle)
-  };
-  // Adjust shoulders to be slightly below thoracic top
-  lSh.y += 8; rSh.y += 8;
-
-  // Hip joint positions
-  const hipWidth = 32;
-  const lHip = {
-    x: pelvis.x + hipWidth * Math.cos(perpAngle + Math.PI),
-    y: pelvis.y + hipWidth * Math.sin(perpAngle + Math.PI)
-  };
-  const rHip = {
-    x: pelvis.x + hipWidth * Math.cos(perpAngle),
-    y: pelvis.y + hipWidth * Math.sin(perpAngle)
-  };
-
-  // ── LEFT ARM ──────────────────────────────────
-  // Shoulder Abd: 0=arm down (90°), 90=arm horizontal-left (180°), 180=arm up (270°)
-  // SVG angle from positive X: 90 + Abd degrees → pointing down when Abd=0
-  const lShAbd  = j['L.Sh']?.Abd  ?? 90;
-  const lShFlex = j['L.Sh']?.Flex ?? 0;
+  // Left arm
+  const lShAbd = j['L.Sh']?.Abd ?? 90;
   const lElFlex = j['L.El']?.Flex ?? 0;
   const lWrFlex = j['L.Wr']?.Flex ?? 0;
+  const lSpT = (j['Sp.L']?.Lat || 0) * 0.3;
+  const lUAA = (90 + lShAbd + lSpT) * DEG;
+  const lEl = {x:lSh.x+82*Math.cos(lUAA), y:lSh.y+82*Math.sin(lUAA)};
+  const lFA = lUAA + lElFlex*DEG;
+  const lWr = {x:lEl.x+68*Math.cos(lFA), y:lEl.y+68*Math.sin(lFA)};
+  const lHA = lFA + lWrFlex*DEG;
+  const lHand = {x:lWr.x+30*Math.cos(lHA), y:lWr.y+30*Math.sin(lHA)};
 
-  // Add spine tilt to arm angles
-  const lSpineTilt = (j['Sp.L']?.Lat || 0) * 0.3; // partial spine propagation
-
-  // Left upper arm direction (SVG angle degrees from +X):
-  // Abd=0: arm at side pointing DOWN = 90°
-  // Abd=90: arm horizontal pointing LEFT = 180°
-  // Formula: angle = 90 + Abd (for left arm, going clockwise from down to left to up)
-  const lUpperArmAngle = (90 + lShAbd + lSpineTilt) * DEG;
-  const upperArmLen = 85;
-  const lEl = {
-    x: lSh.x + upperArmLen * Math.cos(lUpperArmAngle),
-    y: lSh.y + upperArmLen * Math.sin(lUpperArmAngle)
-  };
-
-  // Left forearm: flex adds to arm angle (bends toward body = sweeps counterclockwise from arm dir)
-  // From arm pointing left (180°), flex 90° → forearm points up (270°) = 180° + 90° = 270° ✓
-  const lForearmAngle = lUpperArmAngle + lElFlex * DEG;
-  const forearmLen = 72;
-  const lWr = {
-    x: lEl.x + forearmLen * Math.cos(lForearmAngle),
-    y: lEl.y + forearmLen * Math.sin(lForearmAngle)
-  };
-
-  const lHandAngle = lForearmAngle + lWrFlex * DEG;
-  const handLen = 32;
-  const lHand = {
-    x: lWr.x + handLen * Math.cos(lHandAngle),
-    y: lWr.y + handLen * Math.sin(lHandAngle)
-  };
-
-  // ── RIGHT ARM ─────────────────────────────────
-  const rShAbd  = j['R.Sh']?.Abd  ?? 90;
+  // Right arm
+  const rShAbd = j['R.Sh']?.Abd ?? 90;
   const rElFlex = j['R.El']?.Flex ?? 0;
   const rWrFlex = j['R.Wr']?.Flex ?? 0;
+  const rSpT = -(j['Sp.L']?.Lat || 0) * 0.3;
+  const rUAA = (90 - rShAbd + rSpT) * DEG;
+  const rEl = {x:rSh.x+82*Math.cos(rUAA), y:rSh.y+82*Math.sin(rUAA)};
+  const rFA = rUAA - rElFlex*DEG;
+  const rWr = {x:rEl.x+68*Math.cos(rFA), y:rEl.y+68*Math.sin(rFA)};
+  const rHA = rFA - rWrFlex*DEG;
+  const rHand = {x:rWr.x+30*Math.cos(rHA), y:rWr.y+30*Math.sin(rHA)};
 
-  const rSpineTilt = -(j['Sp.L']?.Lat || 0) * 0.3;
-
-  // Right arm: Abd=0: 90° (down), Abd=90: 0° (right)
-  // angle = 90 - Abd (going CCW from down to right to up)
-  const rUpperArmAngle = (90 - rShAbd + rSpineTilt) * DEG;
-  const rEl = {
-    x: rSh.x + upperArmLen * Math.cos(rUpperArmAngle),
-    y: rSh.y + upperArmLen * Math.sin(rUpperArmAngle)
-  };
-
-  // Right forearm: flex subtracts (bends toward body = CW from arm dir)
-  // From arm pointing right (0°), flex 90° → forearm points up (270° = -90°) = 0° - 90° = -90° ✓
-  const rForearmAngle = rUpperArmAngle - rElFlex * DEG;
-  const rWr = {
-    x: rEl.x + forearmLen * Math.cos(rForearmAngle),
-    y: rEl.y + forearmLen * Math.sin(rForearmAngle)
-  };
-
-  const rHandAngle = rForearmAngle - rWrFlex * DEG;
-  const rHand = {
-    x: rWr.x + handLen * Math.cos(rHandAngle),
-    y: rWr.y + handLen * Math.sin(rHandAngle)
-  };
-
-  // ── LEFT LEG ──────────────────────────────────
-  const lHipAbd  = j['L.Hip']?.Abd  ?? 5;
+  // Left leg
+  const lHipAbd = j['L.Hip']?.Abd ?? 5;
   const lHipFlex = j['L.Hip']?.Flex ?? 0;
-  const lKnFlex  = j['L.Kn']?.Flex  ?? 0;
+  const lKnFlex = j['L.Kn']?.Flex ?? 0;
   const lAnkPlan = j['L.Ank']?.Plan ?? 5;
   const lAnkDors = j['L.Ank']?.Dors ?? 0;
+  const lULA = (90 + lHipAbd + lHipFlex*0.15) * DEG;
+  const lKn = {x:lHip.x+105*Math.cos(lULA), y:lHip.y+105*Math.sin(lULA)};
+  const lLLA = lULA - lKnFlex*0.5*DEG;
+  const lAnk = {x:lKn.x+95*Math.cos(lLLA), y:lKn.y+95*Math.sin(lLLA)};
+  const lFootEnd = {x:lAnk.x-36*Math.cos(lLLA-Math.PI/2), y:lAnk.y-36*Math.sin(lLLA-Math.PI/2)};
 
-  // Upper leg: Abd=0 → 90°(down), Abd=45 → 135°(down-left)
-  // Hip flex: raises leg forward — in front view, represent as slight inward shift
-  const lUpperLegAngle = (90 + lHipAbd + lHipFlex * 0.15) * DEG;
-  const upperLegLen = 108;
-  const lKn = {
-    x: lHip.x + upperLegLen * Math.cos(lUpperLegAngle),
-    y: lHip.y + upperLegLen * Math.sin(lUpperLegAngle)
-  };
-
-  // Lower leg: knee flex bends toward midline (in front view = reduces angle for left leg)
-  const lLowerLegAngle = lUpperLegAngle - lKnFlex * 0.5 * DEG;
-  const lowerLegLen = 98;
-  const lAnk = {
-    x: lKn.x + lowerLegLen * Math.cos(lLowerLegAngle),
-    y: lKn.y + lowerLegLen * Math.sin(lLowerLegAngle)
-  };
-
-  // Foot: perpendicular outward from lower leg direction
-  const lFootAngle = lLowerLegAngle + (Math.PI/2 - (lAnkPlan - lAnkDors) * DEG * 0.5);
-  const footLen = 38;
-  // Left foot goes LEFT (negative X direction from ankle)
-  const lFootEnd = {
-    x: lAnk.x - footLen * Math.cos(lLowerLegAngle - Math.PI/2),
-    y: lAnk.y - footLen * Math.sin(lLowerLegAngle - Math.PI/2)
-  };
-
-  // ── RIGHT LEG ─────────────────────────────────
-  const rHipAbd  = j['R.Hip']?.Abd  ?? 5;
+  // Right leg
+  const rHipAbd = j['R.Hip']?.Abd ?? 5;
   const rHipFlex = j['R.Hip']?.Flex ?? 0;
-  const rKnFlex  = j['R.Kn']?.Flex  ?? 0;
+  const rKnFlex = j['R.Kn']?.Flex ?? 0;
   const rAnkPlan = j['R.Ank']?.Plan ?? 5;
-  const rAnkDors = j['R.Ank']?.Dors ?? 0;
+  const rULA = (90 - rHipAbd - rHipFlex*0.15) * DEG;
+  const rKn = {x:rHip.x+105*Math.cos(rULA), y:rHip.y+105*Math.sin(rULA)};
+  const rLLA = rULA + rKnFlex*0.5*DEG;
+  const rAnk = {x:rKn.x+95*Math.cos(rLLA), y:rKn.y+95*Math.sin(rLLA)};
+  const rFootEnd = {x:rAnk.x+36*Math.cos(rLLA-Math.PI/2), y:rAnk.y+36*Math.sin(rLLA-Math.PI/2)};
 
-  const rUpperLegAngle = (90 - rHipAbd - rHipFlex * 0.15) * DEG;
-  const rKn = {
-    x: rHip.x + upperLegLen * Math.cos(rUpperLegAngle),
-    y: rHip.y + upperLegLen * Math.sin(rUpperLegAngle)
-  };
+  return {pelvis,lumbar,thoracic,neck,headCenter,lSh,rSh,lEl,rEl,lWr,rWr,lHand,rHand,
+    lHip,rHip,lKn,rKn,lAnk,rAnk,lFootEnd,rFootEnd,
+    spineBaseAngle,neckAngle,lUAA,rUAA,lULA,rULA,lFA,rFA,lLLA,rLLA};
+}
 
-  const rLowerLegAngle = rUpperLegAngle + rKnFlex * 0.5 * DEG;
-  const rAnk = {
-    x: rKn.x + lowerLegLen * Math.cos(rLowerLegAngle),
-    y: rKn.y + lowerLegLen * Math.sin(rLowerLegAngle)
-  };
+// ═══════════════════════════════════════════════════════
+// SVG HELPERS (shared)
+// ═══════════════════════════════════════════════════════
+function svgEl(tag, attrs, parent) {
+  const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const [k,v] of Object.entries(attrs)) e.setAttribute(k, v);
+  (parent || document.getElementById('avatar-render')).appendChild(e);
+  return e;
+}
 
-  const rFootEnd = {
-    x: rAnk.x + footLen * Math.cos(rLowerLegAngle - Math.PI/2),
-    y: rAnk.y + footLen * Math.sin(rLowerLegAngle - Math.PI/2)
-  };
+// Tapered quadrilateral path between two points
+function limbPath(p1, p2, w1, w2) {
+  const dx = p2.x-p1.x, dy = p2.y-p1.y;
+  const len = Math.sqrt(dx*dx+dy*dy) || 1;
+  const nx = -dy/len, ny = dx/len;
+  const f = n => n.toFixed(1);
+  return `M${f(p1.x+nx*w1)},${f(p1.y+ny*w1)} L${f(p2.x+nx*w2)},${f(p2.y+ny*w2)} `+
+         `L${f(p2.x-nx*w2)},${f(p2.y-ny*w2)} L${f(p1.x-nx*w1)},${f(p1.y-ny*w1)} Z`;
+}
 
+// Rounded capped limb (smoother version using ellipses at ends)
+function limbPathRound(p1, p2, w1, w2) {
+  return limbPath(p1, p2, w1, w2); // base version, enhance per-style
+}
+
+function getFaceParams() {
   return {
-    pelvis, lumbar, thoracic, neck, headCenter,
-    lSh, rSh, lEl, rEl, lWr, rWr, lHand, rHand,
-    lHip, rHip, lKn, rKn, lAnk, rAnk,
-    lFootEnd, rFootEnd,
-    spineBaseAngle, neckBaseAngle,
-    lUpperArmAngle, rUpperArmAngle,
-    lUpperLegAngle, rUpperLegAngle,
+    jawOpen: (joints['TMJ']?.Open || 0) * 0.2,
+    eyeOpenness: Math.max(0.4, 1 - (muscles['Orb.Oc'] || 0) * 0.4),
+    browRaise: (muscles['Front'] || 0) * 4,
+    browFurrow: (muscles['Corr'] || 0) * 2.5,
+    smile: (muscles['Zyg.Mj'] || 0) * 3,
+    frown: (muscles['Dep.Ang'] || 0) * 2.5,
   };
 }
 
-// ══════════════════════════════════════════════════════════
-// RENDERER
-// ══════════════════════════════════════════════════════════
-function setLine(id, p1, p2) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.setAttribute('x1', p1.x.toFixed(1));
-  el.setAttribute('y1', p1.y.toFixed(1));
-  el.setAttribute('x2', p2.x.toFixed(1));
-  el.setAttribute('y2', p2.y.toFixed(1));
-}
-function setCircle(id, p, r) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.setAttribute('cx', p.x.toFixed(1));
-  el.setAttribute('cy', p.y.toFixed(1));
-  if (r !== undefined) el.setAttribute('r', r);
-}
-function setEllipse(id, p, rx, ry) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.setAttribute('cx', p.x.toFixed(1));
-  el.setAttribute('cy', p.y.toFixed(1));
-  if (rx) el.setAttribute('rx', rx);
-  if (ry) el.setAttribute('ry', ry);
-}
+// ═══════════════════════════════════════════════════════
+// RENDERER — WIRE (original cyan stick)
+// ═══════════════════════════════════════════════════════
+function renderWire(p, fp) {
+  const g = document.getElementById('avatar-render');
+  const C = '#00e5ff', Cd = '#40c8e0';
 
-function render() {
-  const p = calcPositions(joints);
-
-  // Bones
-  setLine('bone-spine',        p.pelvis,   p.thoracic);
-  setLine('bone-neck',         p.thoracic, p.neck);
-  setLine('bone-l-clav',       p.thoracic, p.lSh);
-  setLine('bone-r-clav',       p.thoracic, p.rSh);
-  setLine('bone-l-upper-arm',  p.lSh,      p.lEl);
-  setLine('bone-l-forearm',    p.lEl,      p.lWr);
-  setLine('bone-l-hand',       p.lWr,      p.lHand);
-  setLine('bone-r-upper-arm',  p.rSh,      p.rEl);
-  setLine('bone-r-forearm',    p.rEl,      p.rWr);
-  setLine('bone-r-hand',       p.rWr,      p.rHand);
-  setLine('bone-pelvis-l',     p.pelvis,   p.lHip);
-  setLine('bone-pelvis-r',     p.pelvis,   p.rHip);
-  setLine('bone-l-upper-leg',  p.lHip,     p.lKn);
-  setLine('bone-l-lower-leg',  p.lKn,      p.lAnk);
-  setLine('bone-l-foot',       p.lAnk,     p.lFootEnd);
-  setLine('bone-r-upper-leg',  p.rHip,     p.rKn);
-  setLine('bone-r-lower-leg',  p.rKn,      p.rAnk);
-  setLine('bone-r-foot',       p.rAnk,     p.rFootEnd);
-
-  // Rib cage
-  const ribCx = (p.lSh.x + p.rSh.x) / 2;
-  const ribCy = p.lSh.y + (p.pelvis.y - p.lSh.y) * 0.4;
-  const ribRx = Math.abs(p.rSh.x - p.lSh.x) * 0.5;
-  const ribRy = (p.pelvis.y - p.thoracic.y) * 0.4;
-  const rc = document.getElementById('rib-cage');
-  if (rc) { rc.setAttribute('cx', ribCx); rc.setAttribute('cy', ribCy); rc.setAttribute('rx', ribRx); rc.setAttribute('ry', ribRy); }
-
-  // Joints
-  setCircle('joint-head',   p.headCenter, 36);
-  setCircle('joint-l-sh',   p.lSh);
-  setCircle('joint-r-sh',   p.rSh);
-  setCircle('joint-l-el',   p.lEl);
-  setCircle('joint-r-el',   p.rEl);
-  setCircle('joint-l-wr',   p.lWr);
-  setCircle('joint-r-wr',   p.rWr);
-  setCircle('joint-pelvis', p.pelvis);
-  setCircle('joint-l-hip',  p.lHip);
-  setCircle('joint-r-hip',  p.rHip);
-  setCircle('joint-l-kn',   p.lKn);
-  setCircle('joint-r-kn',   p.rKn);
-  setCircle('joint-l-ank',  p.lAnk);
-  setCircle('joint-r-ank',  p.rAnk);
-
-  // Face
-  const hx = p.headCenter.x, hy = p.headCenter.y;
-  const jawOpen = (joints['TMJ']?.Open || 0) * 0.2;
-  const eyeOpenness = Math.max(0.5, 1 - (muscles['Orb.Oc'] || 0) * 0.35);
-  const browRaise = (muscles['Front'] || 0) * 4;
-  const browFurrow = (muscles['Corr'] || 0) * 2;
-  const smile = (muscles['Zyg.Mj'] || 0) * 3;
-  const frown = (muscles['Dep.Ang'] || 0) * 2;
-
-  const eyeL = document.getElementById('eye-l');
-  const eyeR = document.getElementById('eye-r');
-  if (eyeL) { eyeL.setAttribute('cx', hx-10); eyeL.setAttribute('cy', hy-7); eyeL.setAttribute('ry', 2.5 * eyeOpenness); }
-  if (eyeR) { eyeR.setAttribute('cx', hx+10); eyeR.setAttribute('cy', hy-7); eyeR.setAttribute('ry', 2.5 * eyeOpenness); }
-
-  const browL = document.getElementById('brow-l');
-  const browR = document.getElementById('brow-r');
-  if (browL) browL.setAttribute('d', `M${hx-16},${hy-16-browRaise} Q${hx-10},${hy-19-browRaise+browFurrow} ${hx-4},${hy-16-browRaise+browFurrow}`);
-  if (browR) browR.setAttribute('d', `M${hx+16},${hy-16-browRaise} Q${hx+10},${hy-19-browRaise+browFurrow} ${hx+4},${hy-16-browRaise+browFurrow}`);
-
-  const mouthPath = document.getElementById('mouth');
-  if (mouthPath) {
-    const mx = hx, my = hy + 10 + jawOpen;
-    const mouthCurve = smile - frown;
-    // SVG Y increases downward: control point BELOW endpoints (my+) = ∪ = smile; ABOVE (my-) = ∩ = frown
-        mouthPath.setAttribute('d', `M${mx-10},${my} Q${mx},${my+mouthCurve*2} ${mx+10},${my}`);
-  }
-
-  const nose = document.getElementById('nose');
-  if (nose) { nose.setAttribute('x1', hx); nose.setAttribute('y1', hy-4); nose.setAttribute('x2', hx); nose.setAttribute('y2', hy+3); }
-
-  // Muscle overlays
-  renderMuscles(p);
+  // Muscle glow overlays first (behind skeleton)
+  renderMuscleOverlays(p, 'wire');
 
   // Spine marks
-  renderSpineMarks(p);
+  const sm = svgEl('g', {opacity:'0.3', filter:'url(#glow-sm)'});
+  for (let i=1; i<12; i++) {
+    const t = i/12;
+    const x = p.pelvis.x+(p.thoracic.x-p.pelvis.x)*t;
+    const y = p.pelvis.y+(p.thoracic.y-p.pelvis.y)*t;
+    const pa = p.spineBaseAngle+Math.PI/2;
+    svgEl('line', {stroke:C, 'stroke-width':'1',
+      x1:(x+4*Math.cos(pa)).toFixed(1), y1:(y+4*Math.sin(pa)).toFixed(1),
+      x2:(x-4*Math.cos(pa)).toFixed(1), y2:(y-4*Math.sin(pa)).toFixed(1)}, sm);
+  }
 
-  // Update MNN output
+  // Rib cage
+  const ribCx = (p.lSh.x+p.rSh.x)/2;
+  const ribCy = p.lSh.y + (p.pelvis.y-p.lSh.y)*0.38;
+  const ribRx = Math.abs(p.rSh.x-p.lSh.x)*0.5;
+  const ribRy = (p.pelvis.y-p.thoracic.y)*0.38;
+  svgEl('ellipse', {cx:ribCx.toFixed(1), cy:ribCy.toFixed(1), rx:ribRx.toFixed(1), ry:ribRy.toFixed(1),
+    fill:'none', stroke:C, 'stroke-width':'1', opacity:'0.13', filter:'url(#glow-sm)'});
+
+  // Bones
+  const bg = svgEl('g', {filter:'url(#glow)'});
+  const bone = (id, x1, y1, x2, y2, sw, op='1') =>
+    svgEl('line', {stroke:C,'stroke-width':sw,'stroke-linecap':'round',opacity:op,
+      x1:x1.toFixed(1),y1:y1.toFixed(1),x2:x2.toFixed(1),y2:y2.toFixed(1)}, bg);
+  bone('sp',   p.pelvis.x,p.pelvis.y,p.thoracic.x,p.thoracic.y,'2.5');
+  bone('nk',   p.thoracic.x,p.thoracic.y,p.neck.x,p.neck.y,'2');
+  bone('lc',   p.thoracic.x,p.thoracic.y,p.lSh.x,p.lSh.y,'1.5','0.7');
+  bone('rc',   p.thoracic.x,p.thoracic.y,p.rSh.x,p.rSh.y,'1.5','0.7');
+  bone('lua',  p.lSh.x,p.lSh.y,p.lEl.x,p.lEl.y,'3');
+  bone('lfa',  p.lEl.x,p.lEl.y,p.lWr.x,p.lWr.y,'2.5');
+  bone('lh',   p.lWr.x,p.lWr.y,p.lHand.x,p.lHand.y,'1.5','0.7');
+  bone('rua',  p.rSh.x,p.rSh.y,p.rEl.x,p.rEl.y,'3');
+  bone('rfa',  p.rEl.x,p.rEl.y,p.rWr.x,p.rWr.y,'2.5');
+  bone('rh',   p.rWr.x,p.rWr.y,p.rHand.x,p.rHand.y,'1.5','0.7');
+  bone('pl',   p.pelvis.x,p.pelvis.y,p.lHip.x,p.lHip.y,'2','0.6');
+  bone('pr',   p.pelvis.x,p.pelvis.y,p.rHip.x,p.rHip.y,'2','0.6');
+  bone('lul',  p.lHip.x,p.lHip.y,p.lKn.x,p.lKn.y,'3.5');
+  bone('lll',  p.lKn.x,p.lKn.y,p.lAnk.x,p.lAnk.y,'3');
+  bone('lft',  p.lAnk.x,p.lAnk.y,p.lFootEnd.x,p.lFootEnd.y,'2');
+  bone('rul',  p.rHip.x,p.rHip.y,p.rKn.x,p.rKn.y,'3.5');
+  bone('rll',  p.rKn.x,p.rKn.y,p.rAnk.x,p.rAnk.y,'3');
+  bone('rft',  p.rAnk.x,p.rAnk.y,p.rFootEnd.x,p.rFootEnd.y,'2');
+
+  // Joints
+  const jg = svgEl('g', {filter:'url(#glow-sm)'});
+  const jc = (cx,cy,r,fill,op='0.85') => svgEl('circle',{cx:cx.toFixed(1),cy:cy.toFixed(1),r,fill,opacity:op},jg);
+  svgEl('circle',{cx:p.headCenter.x.toFixed(1),cy:p.headCenter.y.toFixed(1),r:'34',fill:'none',stroke:Cd,'stroke-width':'1.5'},jg);
+  jc(p.lSh.x,p.lSh.y,7,C);
+  jc(p.rSh.x,p.rSh.y,7,C);
+  jc(p.lEl.x,p.lEl.y,5,Cd,'0.7');
+  jc(p.rEl.x,p.rEl.y,5,Cd,'0.7');
+  jc(p.lWr.x,p.lWr.y,3.5,Cd,'0.6');
+  jc(p.rWr.x,p.rWr.y,3.5,Cd,'0.6');
+  svgEl('circle',{cx:p.pelvis.x.toFixed(1),cy:p.pelvis.y.toFixed(1),r:'8',fill:'none',stroke:C,'stroke-width':'1.5',opacity:'0.6'},jg);
+  jc(p.lHip.x,p.lHip.y,6,C,'0.8');
+  jc(p.rHip.x,p.rHip.y,6,C,'0.8');
+  jc(p.lKn.x,p.lKn.y,5,Cd,'0.7');
+  jc(p.rKn.x,p.rKn.y,5,Cd,'0.7');
+  jc(p.lAnk.x,p.lAnk.y,4,Cd,'0.6');
+  jc(p.rAnk.x,p.rAnk.y,4,Cd,'0.6');
+
+  // Face
+  const fg = svgEl('g', {filter:'url(#glow-sm)'});
+  const hx = p.headCenter.x, hy = p.headCenter.y;
+  const mc = fp.smile - fp.frown;
+  svgEl('ellipse',{cx:(hx-10).toFixed(1),cy:(hy-7).toFixed(1),rx:'4',ry:(2.5*fp.eyeOpenness).toFixed(1),fill:C,opacity:'0.8'},fg);
+  svgEl('ellipse',{cx:(hx+10).toFixed(1),cy:(hy-7).toFixed(1),rx:'4',ry:(2.5*fp.eyeOpenness).toFixed(1),fill:C,opacity:'0.8'},fg);
+  svgEl('path',{d:`M${hx-16},${hy-16-fp.browRaise} Q${hx-10},${hy-19-fp.browRaise+fp.browFurrow} ${hx-4},${hy-16-fp.browRaise+fp.browFurrow}`,fill:'none',stroke:C,'stroke-width':'1.5','stroke-linecap':'round'},fg);
+  svgEl('path',{d:`M${hx+16},${hy-16-fp.browRaise} Q${hx+10},${hy-19-fp.browRaise+fp.browFurrow} ${hx+4},${hy-16-fp.browRaise+fp.browFurrow}`,fill:'none',stroke:C,'stroke-width':'1.5','stroke-linecap':'round'},fg);
+  svgEl('line',{x1:hx,y1:hy-4,x2:hx,y2:hy+3,stroke:C,'stroke-width':'1',opacity:'0.5'},fg);
+  svgEl('path',{d:`M${hx-10},${hy+10+fp.jawOpen} Q${hx},${hy+10+fp.jawOpen+mc*2} ${hx+10},${hy+10+fp.jawOpen}`,fill:'none',stroke:C,'stroke-width':'1.5','stroke-linecap':'round'},fg);
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDERER — VITRUV (Vitruvian proportions, warm gold)
+// ═══════════════════════════════════════════════════════
+function renderVitruvian(p, fp) {
+  const gold = '#c8a84b', goldL = '#e8d5a3', goldD = '#7a5010';
+
+  // Reference geometry (circle + square, da Vinci style)
+  const circleCy = (p.lSh.y + p.pelvis.y) / 2 + 10;
+  const circleR = Math.abs(p.rSh.x-p.lSh.x)*0.88 + 25;
+  svgEl('circle',{cx:p.headCenter.x.toFixed(1),cy:circleCy.toFixed(1),r:circleR.toFixed(1),
+    fill:'none',stroke:gold,'stroke-width':'0.7',opacity:'0.25'});
+  const sqTop = p.headCenter.y - 36, sqBot = p.lAnk.y + 22;
+  const sqH = sqBot - sqTop, sqW = circleR*2;
+  svgEl('rect',{x:(p.headCenter.x-sqW/2).toFixed(1),y:sqTop.toFixed(1),width:sqW.toFixed(1),height:sqH.toFixed(1),
+    fill:'none',stroke:gold,'stroke-width':'0.7',opacity:'0.18'});
+  // Horizontal proportion guides
+  [p.headCenter.y-32, p.thoracic.y-5, (p.thoracic.y+p.pelvis.y)/2, p.pelvis.y, p.lAnk.y].forEach(y => {
+    svgEl('line',{x1:(p.headCenter.x-circleR-12).toFixed(1),y1:y.toFixed(1),
+      x2:(p.headCenter.x+circleR+12).toFixed(1),y2:y.toFixed(1),
+      stroke:gold,'stroke-width':'0.5',opacity:'0.2'});
+  });
+  // Tick marks on sides
+  for(let i=0;i<8;i++){
+    const y = sqTop + i*(sqH/7);
+    svgEl('line',{x1:(p.headCenter.x-sqW/2-6).toFixed(1),y1:y.toFixed(1),x2:(p.headCenter.x-sqW/2).toFixed(1),y2:y.toFixed(1),stroke:gold,'stroke-width':'0.6',opacity:'0.3'});
+    svgEl('line',{x1:(p.headCenter.x+sqW/2).toFixed(1),y1:y.toFixed(1),x2:(p.headCenter.x+sqW/2+6).toFixed(1),y2:y.toFixed(1),stroke:gold,'stroke-width':'0.6',opacity:'0.3'});
+  }
+
+  // Body — filled warm shapes
+  const B = {fill:goldL, stroke:goldD, 'stroke-width':'1.2', opacity:'0.92'};
+
+  // Back layer
+  svgEl('path',{...B,d:limbPath(p.lHip,p.lKn,14,11)});
+  svgEl('path',{...B,d:limbPath(p.rHip,p.rKn,14,11)});
+  svgEl('path',{...B,d:limbPath(p.lKn,p.lAnk,11,7)});
+  svgEl('path',{...B,d:limbPath(p.rKn,p.rAnk,11,7)});
+  svgEl('ellipse',{...B,cx:(p.lAnk.x-6).toFixed(1),cy:(p.lAnk.y+7).toFixed(1),rx:'14',ry:'6'});
+  svgEl('ellipse',{...B,cx:(p.rAnk.x+6).toFixed(1),cy:(p.rAnk.y+7).toFixed(1),rx:'14',ry:'6'});
+  svgEl('path',{...B,d:limbPath(p.lSh,p.lEl,11,9)});
+  svgEl('path',{...B,d:limbPath(p.rSh,p.rEl,11,9)});
+  svgEl('path',{...B,d:limbPath(p.lEl,p.lWr,9,6)});
+  svgEl('path',{...B,d:limbPath(p.rEl,p.rWr,9,6)});
+  svgEl('ellipse',{...B,cx:p.lHand.x.toFixed(1),cy:p.lHand.y.toFixed(1),rx:'7',ry:'9'});
+  svgEl('ellipse',{...B,cx:p.rHand.x.toFixed(1),cy:p.rHand.y.toFixed(1),rx:'7',ry:'9'});
+
+  // Torso
+  const shW=13, hipW=10;
+  const f=n=>n.toFixed(1);
+  svgEl('path',{...B,d:`M${f(p.lSh.x-shW)},${f(p.lSh.y)} L${f(p.rSh.x+shW)},${f(p.rSh.y)} L${f(p.rHip.x+hipW)},${f(p.rHip.y)} L${f(p.lHip.x-hipW)},${f(p.lHip.y)} Z`});
+
+  // Neck
+  svgEl('rect',{...B,x:(p.thoracic.x-7).toFixed(1),y:p.thoracic.y.toFixed(1),width:'14',height:(p.neck.y-p.thoracic.y).toFixed(1),rx:'3'});
+
+  // Head
+  svgEl('circle',{...B,cx:p.headCenter.x.toFixed(1),cy:p.headCenter.y.toFixed(1),r:'30'});
+
+  // Muscle overlays
+  renderMuscleOverlays(p, 'vitruv');
+
+  // Face — fine detail
+  const hx=p.headCenter.x, hy=p.headCenter.y, mc=fp.smile-fp.frown;
+  svgEl('ellipse',{fill:goldD,cx:(hx-9).toFixed(1),cy:(hy-7).toFixed(1),rx:'3',ry:(2.5*fp.eyeOpenness).toFixed(1)});
+  svgEl('ellipse',{fill:goldD,cx:(hx+9).toFixed(1),cy:(hy-7).toFixed(1),rx:'3',ry:(2.5*fp.eyeOpenness).toFixed(1)});
+  svgEl('path',{d:`M${hx-14},${hy-15-fp.browRaise} Q${hx-9},${hy-18-fp.browRaise+fp.browFurrow} ${hx-4},${hy-15-fp.browRaise+fp.browFurrow}`,fill:'none',stroke:goldD,'stroke-width':'1.1','stroke-linecap':'round'});
+  svgEl('path',{d:`M${hx+14},${hy-15-fp.browRaise} Q${hx+9},${hy-18-fp.browRaise+fp.browFurrow} ${hx+4},${hy-15-fp.browRaise+fp.browFurrow}`,fill:'none',stroke:goldD,'stroke-width':'1.1','stroke-linecap':'round'});
+  svgEl('line',{x1:hx,y1:hy-3,x2:hx,y2:hy+4,stroke:goldD,'stroke-width':'1',opacity:'0.55'});
+  svgEl('path',{d:`M${hx-9},${hy+10+fp.jawOpen} Q${hx},${hy+10+fp.jawOpen+mc*2} ${hx+9},${hy+10+fp.jawOpen}`,fill:'none',stroke:goldD,'stroke-width':'1.5','stroke-linecap':'round'});
+  // Hair line hint
+  svgEl('path',{d:`M${hx-28},${hy-16} Q${hx},${hy-42} ${hx+28},${hy-16}`,fill:'none',stroke:goldD,'stroke-width':'0.8',opacity:'0.35'});
+  // Navel + body centreline hint
+  svgEl('line',{x1:p.thoracic.x.toFixed(1),y1:p.thoracic.y.toFixed(1),x2:p.pelvis.x.toFixed(1),y2:p.pelvis.y.toFixed(1),stroke:goldD,'stroke-width':'0.6',opacity:'0.3','stroke-dasharray':'3,4'});
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDERER — BULK (solid silhouette, chunky)
+// ═══════════════════════════════════════════════════════
+function renderBulk(p, fp) {
+  const fill = '#c8fff8', stroke = '#004455', sw = '1.8';
+  const B = {fill, stroke, 'stroke-width':sw};
+  const f = n => n.toFixed(1);
+
+  // Muscle mass tints (behind body)
+  renderMuscleOverlays(p, 'bulk');
+
+  // Legs (behind torso)
+  svgEl('path',{...B,d:limbPath(p.lHip,p.lKn,20,16)});
+  svgEl('path',{...B,d:limbPath(p.rHip,p.rKn,20,16)});
+  svgEl('path',{...B,d:limbPath(p.lKn,p.lAnk,15,11)});
+  svgEl('path',{...B,d:limbPath(p.rKn,p.rAnk,15,11)});
+  // Knee caps
+  svgEl('ellipse',{...B,cx:f(p.lKn.x),cy:f(p.lKn.y),rx:'8',ry:'7'});
+  svgEl('ellipse',{...B,cx:f(p.rKn.x),cy:f(p.rKn.y),rx:'8',ry:'7'});
+  // Feet (wider, more solid)
+  svgEl('ellipse',{...B,cx:f(p.lAnk.x-9),cy:f(p.lAnk.y+9),rx:'19',ry:'10'});
+  svgEl('ellipse',{...B,cx:f(p.rAnk.x+9),cy:f(p.rAnk.y+9),rx:'19',ry:'10'});
+
+  // Upper arms (drawn before torso — torso will overlay at shoulder)
+  svgEl('path',{...B,d:limbPath(p.lSh,p.lEl,18,14)});
+  svgEl('path',{...B,d:limbPath(p.rSh,p.rEl,18,14)});
+  // Elbow caps
+  svgEl('ellipse',{...B,cx:f(p.lEl.x),cy:f(p.lEl.y),rx:'9',ry:'8'});
+  svgEl('ellipse',{...B,cx:f(p.rEl.x),cy:f(p.rEl.y),rx:'9',ry:'8'});
+  // Forearms
+  svgEl('path',{...B,d:limbPath(p.lEl,p.lWr,14,9)});
+  svgEl('path',{...B,d:limbPath(p.rEl,p.rWr,14,9)});
+  // Fists
+  svgEl('ellipse',{...B,cx:f(p.lHand.x),cy:f(p.lHand.y),rx:'11',ry:'13'});
+  svgEl('ellipse',{...B,cx:f(p.rHand.x),cy:f(p.rHand.y),rx:'11',ry:'13'});
+
+  // Torso — wide trapezoid, wide shoulders narrow to waist, back out to hips
+  const shExt=26, waistNip=0.72, hipExt=18;
+  const tSL={x:p.lSh.x-shExt, y:p.lSh.y};
+  const tSR={x:p.rSh.x+shExt, y:p.rSh.y};
+  const midY=(p.lSh.y+p.pelvis.y)/2;
+  const wL={x:p.pelvis.x-(Math.abs(p.rSh.x-p.lSh.x)/2+shExt)*waistNip, y:midY};
+  const wR={x:p.pelvis.x+(Math.abs(p.rSh.x-p.lSh.x)/2+shExt)*waistNip, y:midY};
+  const hL={x:p.lHip.x-hipExt, y:p.lHip.y};
+  const hR={x:p.rHip.x+hipExt, y:p.rHip.y};
+  svgEl('path',{...B,d:`M${f(tSL.x)},${f(tSL.y)} L${f(tSR.x)},${f(tSR.y)} Q${f(wR.x)},${f(wR.y)} ${f(hR.x)},${f(hR.y)} L${f(hL.x)},${f(hL.y)} Q${f(wL.x)},${f(wL.y)} ${f(tSL.x)},${f(tSL.y)} Z`});
+
+  // Shoulder caps (deltoid mounds)
+  svgEl('ellipse',{...B,cx:f(p.lSh.x-10),cy:f(p.lSh.y-2),rx:'16',ry:'13'});
+  svgEl('ellipse',{...B,cx:f(p.rSh.x+10),cy:f(p.rSh.y-2),rx:'16',ry:'13'});
+
+  // Pec definition line (subtle)
+  const pcY = p.lSh.y+24;
+  svgEl('line',{x1:f(p.lSh.x+2),y1:f(pcY),x2:f(p.headCenter.x),y2:f(pcY),stroke:'#005566','stroke-width':'1',opacity:'0.5'});
+  svgEl('line',{x1:f(p.rSh.x-2),y1:f(pcY),x2:f(p.headCenter.x),y2:f(pcY),stroke:'#005566','stroke-width':'1',opacity:'0.5'});
+  // Ab line
+  const abTop=p.lSh.y+38, abBot=p.pelvis.y-6;
+  svgEl('line',{x1:f(p.headCenter.x),y1:f(abTop),x2:f(p.headCenter.x),y2:f(abBot),stroke:'#005566','stroke-width':'1',opacity:'0.4'});
+  for(let i=0;i<3;i++){
+    const ay=abTop+i*((abBot-abTop)/2.8);
+    svgEl('line',{x1:f(p.headCenter.x-11),y1:f(ay),x2:f(p.headCenter.x+11),y2:f(ay),stroke:'#005566','stroke-width':'0.8',opacity:'0.35'});
+  }
+
+  // Neck (thick)
+  svgEl('rect',{...B,x:f(p.thoracic.x-13),y:f(p.thoracic.y-4),width:'26',height:f(p.neck.y-p.thoracic.y+6),rx:'5'});
+
+  // Head
+  svgEl('circle',{...B,cx:f(p.headCenter.x),cy:f(p.headCenter.y),r:'33'});
+
+  // Face — bold
+  const hx=p.headCenter.x, hy=p.headCenter.y, mc=fp.smile-fp.frown;
+  const eyeStroke = stroke;
+  svgEl('ellipse',{fill:stroke,cx:f(hx-11),cy:f(hy-8),rx:'5',ry:f(4*fp.eyeOpenness)});
+  svgEl('ellipse',{fill:stroke,cx:f(hx+11),cy:f(hy-8),rx:'5',ry:f(4*fp.eyeOpenness)});
+  // Brows (thick)
+  svgEl('path',{d:`M${hx-17},${hy-17-fp.browRaise} Q${hx-10},${hy-21-fp.browRaise+fp.browFurrow} ${hx-3},${hy-17-fp.browRaise+fp.browFurrow}`,fill:'none',stroke:eyeStroke,'stroke-width':'2.5','stroke-linecap':'round'});
+  svgEl('path',{d:`M${hx+17},${hy-17-fp.browRaise} Q${hx+10},${hy-21-fp.browRaise+fp.browFurrow} ${hx+3},${hy-17-fp.browRaise+fp.browFurrow}`,fill:'none',stroke:eyeStroke,'stroke-width':'2.5','stroke-linecap':'round'});
+  // Mouth
+  svgEl('path',{d:`M${hx-11},${hy+10+fp.jawOpen} Q${hx},${hy+10+fp.jawOpen+mc*2} ${hx+11},${hy+10+fp.jawOpen}`,fill:'none',stroke:eyeStroke,'stroke-width':'2.2','stroke-linecap':'round'});
+
+  // Glow frame around bulk figure
+  svgEl('rect',{x:'5',y:'5',width:'450',height:'510',fill:'none',stroke:'#00e5ff','stroke-width':'0.5',opacity:'0.07',rx:'4'});
+}
+
+// ═══════════════════════════════════════════════════════
+// MUSCLE OVERLAYS — style-aware
+// ═══════════════════════════════════════════════════════
+const muscleMap = {
+  'Pec.S':   {name:'Pec (Sternal)',    color:'#ff4400', region:p=>({cx:(p.lSh.x+p.rSh.x)/2,cy:p.lSh.y+22,rx:50,ry:22})},
+  'Pec.C':   {name:'Pec (Clavicular)',color:'#ff6600', region:p=>({cx:(p.lSh.x+p.rSh.x)/2,cy:p.lSh.y+8,rx:44,ry:14})},
+  'Dlt.A':   {name:'Delt (Anterior)', color:'#ff8800', region:p=>({cx:p.lSh.x+8,cy:p.lSh.y+10,rx:13,ry:19,r2cx:p.rSh.x-8,r2cy:p.rSh.y+10})},
+  'Dlt.L':   {name:'Delt (Lateral)',  color:'#ffaa00', region:p=>({cx:p.lSh.x,cy:p.lSh.y+5,rx:12,ry:17,r2cx:p.rSh.x,r2cy:p.rSh.y+5})},
+  'Tri':     {name:'Triceps',         color:'#ff5500', region:p=>({cx:p.lSh.x+(p.lEl.x-p.lSh.x)*0.55+10,cy:p.lSh.y+(p.lEl.y-p.lSh.y)*0.55,rx:12,ry:22})},
+  'Bic':     {name:'Biceps',          color:'#ff7700', region:p=>({cx:p.lSh.x+(p.lEl.x-p.lSh.x)*0.45+10,cy:p.lSh.y+(p.lEl.y-p.lSh.y)*0.45,rx:12,ry:20})},
+  'Lat':     {name:'Latissimus',      color:'#ff4400', region:p=>({cx:(p.lSh.x+p.lHip.x)/2+5,cy:(p.lSh.y+p.lHip.y)/2,rx:20,ry:32})},
+  'Trp.U':   {name:'Trap (Upper)',    color:'#ff8800', region:p=>({cx:(p.lSh.x+p.rSh.x)/2,cy:p.thoracic.y+5,rx:52,ry:12})},
+  'Rect.Ab': {name:'Rectus Abdominis',color:'#ff5500', region:p=>({cx:p.pelvis.x,cy:(p.thoracic.y+p.pelvis.y)/2+5,rx:18,ry:30})},
+  'Obl.E':   {name:'External Oblique',color:'#ff7700', region:p=>({cx:p.pelvis.x-22,cy:(p.thoracic.y+p.pelvis.y)/2+5,rx:14,ry:28,r2cx:p.pelvis.x+22,r2cy:(p.thoracic.y+p.pelvis.y)/2+5})},
+  'Glu.Mx':  {name:'Glute Max',       color:'#ff4400', region:p=>({cx:p.lHip.x-5,cy:p.lHip.y+12,rx:18,ry:18,r2cx:p.rHip.x+5,r2cy:p.rHip.y+12})},
+  'Quad.RF': {name:'Quad (RF)',        color:'#ff5500', region:p=>({cx:p.lHip.x+(p.lKn.x-p.lHip.x)*0.45+16,cy:p.lHip.y+(p.lKn.y-p.lHip.y)*0.45,rx:13,ry:22})},
+  'Quad.VL': {name:'Quad (VL)',        color:'#ff6600', region:p=>({cx:p.lHip.x+(p.lKn.x-p.lHip.x)*0.5+18,cy:p.lHip.y+(p.lKn.y-p.lHip.y)*0.5,rx:12,ry:20})},
+  'Ham':     {name:'Hamstrings',       color:'#ff4400', region:p=>({cx:p.lHip.x+(p.lKn.x-p.lHip.x)*0.55-14,cy:p.lHip.y+(p.lKn.y-p.lHip.y)*0.55,rx:12,ry:20})},
+  'Gas':     {name:'Gastrocnemius',    color:'#ff6600', region:p=>({cx:p.lKn.x+(p.lAnk.x-p.lKn.x)*0.4+10,cy:p.lKn.y+(p.lAnk.y-p.lKn.y)*0.4,rx:10,ry:16})},
+  'Sol':     {name:'Soleus',           color:'#ff7700', region:p=>({cx:p.lKn.x+(p.lAnk.x-p.lKn.x)*0.6+9,cy:p.lKn.y+(p.lAnk.y-p.lKn.y)*0.6,rx:9,ry:14})},
+  // Face muscles
+  'Zyg.Mj':  {name:'Zygomaticus Mj',  color:'#ff8844', region:p=>({cx:p.headCenter.x-10,cy:p.headCenter.y+8,rx:8,ry:6,r2cx:p.headCenter.x+10,r2cy:p.headCenter.y+8})},
+  'Orb.Oc':  {name:'Orbicularis Oc',  color:'#ff6688', region:p=>({cx:p.headCenter.x-10,cy:p.headCenter.y-7,rx:9,ry:6,r2cx:p.headCenter.x+10,r2cy:p.headCenter.y-7})},
+  'Dep.Ang': {name:'Dep. Anguli',     color:'#ff5566', region:p=>({cx:p.headCenter.x-11,cy:p.headCenter.y+12,rx:6,ry:5,r2cx:p.headCenter.x+11,r2cy:p.headCenter.y+12})},
+  'Front':   {name:'Frontalis',        color:'#ff9900', region:p=>({cx:p.headCenter.x,cy:p.headCenter.y-20,rx:22,ry:10})},
+  'Corr':    {name:'Corrugator',       color:'#ff4488', region:p=>({cx:p.headCenter.x,cy:p.headCenter.y-15,rx:14,ry:6})},
+};
+
+function renderMuscleOverlays(p, style) {
+  const g = document.getElementById('avatar-render');
+  const activeMuscles = Object.entries(muscles).filter(([,v])=>v>0);
+  if (!activeMuscles.length) return;
+
+  const opLevels = [0, 0.3, 0.55, 0.82];
+  const blurMap = {wire:'url(#glow-muscle)', vitruv:'url(#glow-sm)', bulk:'url(#glow-bulk)'};
+
+  for (const [sym, level] of activeMuscles) {
+    const info = muscleMap[sym];
+    if (!info) continue;
+    const reg = info.region(p);
+    const op = opLevels[level];
+    // Style-specific color adjustments
+    let color = info.color;
+    if (style==='vitruv') color = '#cc3300';
+    if (style==='bulk')   color = '#ff6600';
+
+    const attrs = {fill:color, opacity:op.toString(), filter:blurMap[style]};
+    svgEl('ellipse',{...attrs,cx:reg.cx.toFixed(1),cy:reg.cy.toFixed(1),rx:reg.rx,ry:(reg.ry||reg.rx*0.7)});
+    if (reg.r2cx !== undefined)
+      svgEl('ellipse',{...attrs,cx:reg.r2cx.toFixed(1),cy:(reg.r2cy||reg.cy).toFixed(1),rx:reg.rx,ry:(reg.ry||reg.rx*0.7)});
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// MAIN RENDER DISPATCHER
+// ═══════════════════════════════════════════════════════
+function render() {
+  const p = calcPositions(joints);
+  const fp = getFaceParams();
+
+  document.getElementById('avatar-render').innerHTML = '';
+
+  if      (currentStyle === 'wire')   renderWire(p, fp);
+  else if (currentStyle === 'vitruv') renderVitruvian(p, fp);
+  else if (currentStyle === 'bulk')   renderBulk(p, fp);
+
   updateMNNOutput();
-
-  // Update info tab
   updateInfoTab();
 }
 
-// ══════════════════════════════════════════════════════════
-// MUSCLE OVERLAYS
-// ══════════════════════════════════════════════════════════
-const muscleGroups = {
-  // symbol → { name, region_fn(p) → {cx,cy,rx,ry,rot?} }
-  'Pec.S':    { name:'Pec (Sternal)',   color:'#ff4400', region: p => ({ cx:(p.lSh.x+p.rSh.x)/2, cy:p.lSh.y+22, rx:50, ry:22 }) },
-  'Pec.C':    { name:'Pec (Clavicular)',color:'#ff6600', region: p => ({ cx:(p.lSh.x+p.rSh.x)/2, cy:p.lSh.y+8,  rx:44, ry:14 }) },
-  'Dlt.A':    { name:'Delt (Anterior)', color:'#ff8800', region: p => ({ cx:p.lSh.x+8, cy:p.lSh.y+10, rx:12, ry:18, r2cx:p.rSh.x-8, r2cy:p.rSh.y+10 }) },
-  'Dlt.L':    { name:'Delt (Lateral)',  color:'#ffaa00', region: p => ({ cx:p.lSh.x, cy:p.lSh.y+5, rx:11, ry:16, r2cx:p.rSh.x, r2cy:p.rSh.y+5 }) },
-  'Dlt.P':    { name:'Delt (Posterior)',color:'#ff9900', region: p => ({ cx:p.lSh.x-6, cy:p.lSh.y+12, rx:11, ry:16, r2cx:p.rSh.x+6, r2cy:p.rSh.y+12 }) },
-  'Tri':      { name:'Triceps',         color:'#ff5500', region: p => midpoint(p.lSh, p.lEl, 0.55, 10, 30) },
-  'Bic':      { name:'Biceps',          color:'#ff7700', region: p => midpoint(p.lSh, p.lEl, 0.45, 10, 28) },
-  'Lat':      { name:'Latissimus',      color:'#ff4400', region: p => ({ cx:(p.lSh.x+p.lHip.x)/2+5, cy:(p.lSh.y+p.lHip.y)/2, rx:20, ry:35 }) },
-  'Trp.U':    { name:'Trap (Upper)',    color:'#ff8800', region: p => ({ cx:(p.lSh.x+p.rSh.x)/2, cy:p.thoracic.y+5, rx:52, ry:12 }) },
-  'Trp.M':    { name:'Trap (Middle)',   color:'#ff7700', region: p => ({ cx:(p.lSh.x+p.rSh.x)/2, cy:p.thoracic.y+20, rx:45, ry:12 }) },
-  'Rect.Ab':  { name:'Rectus Abdominis',color:'#ff5500', region: p => ({ cx:p.pelvis.x, cy:(p.thoracic.y+p.pelvis.y)/2+5, rx:18, ry:32 }) },
-  'Obl.E':    { name:'External Oblique',color:'#ff7700', region: p => ({ cx:p.pelvis.x-22, cy:(p.thoracic.y+p.pelvis.y)/2+5, rx:14, ry:30, r2cx:p.pelvis.x+22, r2cy:(p.thoracic.y+p.pelvis.y)/2+5 }) },
-  'Glu.Mx':   { name:'Glute Max',       color:'#ff4400', region: p => ({ cx:p.lHip.x-5, cy:p.lHip.y+12, rx:18, ry:18, r2cx:p.rHip.x+5, r2cy:p.rHip.y+12 }) },
-  'Quad.RF':  { name:'Quad (RF)',        color:'#ff5500', region: p => midpointLeg(p.lHip, p.lKn, 0.45, 18, 25) },
-  'Quad.VL':  { name:'Quad (VL)',        color:'#ff6600', region: p => midpointLeg(p.lHip, p.lKn, 0.5, 20, 22) },
-  'Ham':      { name:'Hamstrings',       color:'#ff4400', region: p => midpointLeg(p.lHip, p.lKn, 0.55, -16, 22) },
-  'Gas':      { name:'Gastrocnemius',    color:'#ff6600', region: p => midpointLeg(p.lKn, p.lAnk, 0.4, 12, 18) },
-  'Sol':      { name:'Soleus',           color:'#ff7700', region: p => midpointLeg(p.lKn, p.lAnk, 0.6, 10, 16) },
-  'Tib.A':    { name:'Tibialis Ant.',    color:'#ff8800', region: p => midpointLeg(p.lKn, p.lAnk, 0.5, -12, 14) },
-};
-
-function midpoint(p1, p2, t, offset, rx, ry) {
-  ry = ry || rx * 0.6;
-  return { cx: p1.x + (p2.x-p1.x)*t + offset, cy: p1.y + (p2.y-p1.y)*t, rx: rx * 0.6, ry: ry };
-}
-function midpointLeg(p1, p2, t, offset, rx, ry) {
-  ry = ry || rx * 1.2;
-  return { cx: p1.x + (p2.x-p1.x)*t + offset, cy: p1.y + (p2.y-p1.y)*t, rx: rx * 0.55, ry: ry * 0.85 };
-}
-
-function muscleOpacity(level) {
-  return [0, 0.32, 0.58, 0.85][level] || 0;
-}
-
-function renderMuscles(p) {
-  const container = document.getElementById('muscle-overlays');
-  container.innerHTML = '';
-
-  for (const [sym, info] of Object.entries(muscleGroups)) {
-    const level = muscles[sym] || 0;
-    if (level === 0) continue;
-
-    const op = muscleOpacity(level);
-    const reg = info.region(p);
-    const color = info.color;
-
-    // Draw primary muscle region
-    const el = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
-    el.setAttribute('cx', reg.cx.toFixed(1));
-    el.setAttribute('cy', reg.cy.toFixed(1));
-    el.setAttribute('rx', reg.rx);
-    el.setAttribute('ry', reg.ry || reg.rx * 0.7);
-    el.setAttribute('fill', color);
-    el.setAttribute('opacity', op);
-    el.setAttribute('filter', 'url(#glow-muscle)');
-    container.appendChild(el);
-
-    // If bilateral muscle has a right-side offset
-    if (reg.r2cx !== undefined) {
-      const el2 = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
-      el2.setAttribute('cx', reg.r2cx.toFixed(1));
-      el2.setAttribute('cy', (reg.r2cy || reg.cy).toFixed(1));
-      el2.setAttribute('rx', reg.rx);
-      el2.setAttribute('ry', reg.ry || reg.rx * 0.7);
-      el2.setAttribute('fill', color);
-      el2.setAttribute('opacity', op);
-      el2.setAttribute('filter', 'url(#glow-muscle)');
-      container.appendChild(el2);
-    }
-  }
-}
-
-function renderSpineMarks(p) {
-  const g = document.getElementById('spine-marks');
-  g.innerHTML = '';
-  const segments = 12;
-  for (let i = 1; i < segments; i++) {
-    const t = i / segments;
-    const x = p.pelvis.x + (p.thoracic.x - p.pelvis.x) * t;
-    const y = p.pelvis.y + (p.thoracic.y - p.pelvis.y) * t;
-    const len = 4;
-    const perp = p.spineBaseAngle + Math.PI/2;
-    const tick = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    tick.setAttribute('x1', (x + len * Math.cos(perp)).toFixed(1));
-    tick.setAttribute('y1', (y + len * Math.sin(perp)).toFixed(1));
-    tick.setAttribute('x2', (x - len * Math.cos(perp)).toFixed(1));
-    tick.setAttribute('y2', (y - len * Math.sin(perp)).toFixed(1));
-    tick.setAttribute('stroke', '#00e5ff');
-    tick.setAttribute('stroke-width', '1');
-    g.appendChild(tick);
-  }
-}
-
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 // MNN PARSER
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 function parseMNN(str) {
-  const result = { joints: {}, muscles: {}, movement: null };
-
-  // Movement tag
+  const result = {joints:{}, muscles:{}, movement:null};
   const mm = str.match(/\{([^}]+)\}/);
   if (mm) result.movement = mm[1];
-
-  // Position tags — [Pos:...]
-  const posBlocks = [...str.matchAll(/\[Pos:([^\]]+)\]/g)];
-  for (const block of posBlocks) {
-    // Match entries like "L.Sh(Flex:90,Abd:45)" or "Sp.L(Lat:20)"
-    const jMatches = [...block[1].matchAll(/([LRBi]*\.?[A-Za-z.]+)\(([^)]+)\)/g)];
-    for (const jm of jMatches) {
-      const name = jm[1].trim();
+  for (const block of [...str.matchAll(/\[Pos:([^\]]+)\]/g)]) {
+    for (const jm of [...block[1].matchAll(/([LRBi]*\.?[A-Za-z.]+)\(([^)]+)\)/g)]) {
       const axes = {};
-      const axisMatches = [...jm[2].matchAll(/([A-Za-z]+):\s*(-?\d+)/g)];
-      for (const am of axisMatches) axes[am[1]] = parseInt(am[2]);
-      result.joints[name] = axes;
+      for (const am of [...jm[2].matchAll(/([A-Za-z]+):\s*(-?\d+)/g)]) axes[am[1]] = parseInt(am[2]);
+      result.joints[jm[1].trim()] = axes;
     }
   }
-
-  // Contraction tags — [Con:...]
-  const conBlocks = [...str.matchAll(/\[Con:([^\]]+)\]/g)];
-  for (const block of conBlocks) {
-    const parts = block[1].split(',');
-    for (const part of parts) {
+  for (const block of [...str.matchAll(/\[Con:([^\]]+)\]/g)]) {
+    for (const part of block[1].split(',')) {
       const cm = part.trim().match(/^([A-Za-z.]+)(\++)/);
       if (cm) result.muscles[cm[1].trim()] = cm[2].length;
     }
   }
-
   return result;
 }
 
 function applyMNN() {
   const str = document.getElementById('mnn-input').value;
   const parsed = parseMNN(str);
-
-  // Merge joint updates into current state
   for (const [joint, axes] of Object.entries(parsed.joints)) {
     if (!joints[joint]) joints[joint] = {};
     Object.assign(joints[joint], axes);
   }
-
   muscles = parsed.muscles;
   currentMovement = parsed.movement || '';
-
   document.getElementById('movement-display').textContent = currentMovement ? `{${currentMovement}}` : '';
-
   render();
   updateMuscleDisplay();
   syncSliders();
 }
 
-// ══════════════════════════════════════════════════════════
-// GENERATED MNN OUTPUT
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// MNN OUTPUT
+// ═══════════════════════════════════════════════════════
 function updateMNNOutput() {
   const out = document.getElementById('mnn-output');
-
-  // Build [Pos:...] from non-default joints
   const posEntries = [];
   for (const [joint, axes] of Object.entries(joints)) {
-    const nonZero = Object.entries(axes).filter(([k,v]) => v !== 0);
-    if (nonZero.length === 0) continue;
-    const axStr = nonZero.map(([k,v]) => `${k}:${v}`).join(',');
-    posEntries.push(`${joint}(${axStr})`);
+    const nz = Object.entries(axes).filter(([,v])=>v!==0);
+    if (nz.length) posEntries.push(`${joint}(${nz.map(([k,v])=>`${k}:${v}`).join(',')})`);
   }
-
-  // Build [Con:...]
-  const conEntries = Object.entries(muscles).map(([k,v]) => `${k}${'+'.repeat(v)}`);
-
+  const conEntries = Object.entries(muscles).map(([k,v])=>`${k}${'+'.repeat(v)}`);
   let parts = [];
   if (currentMovement) parts.push(`<span class="tag-mov">{${currentMovement}}</span>`);
   if (conEntries.length) parts.push(`<span class="tag-con">[Con:${conEntries.join(', ')}]</span>`);
   if (posEntries.length) parts.push(`<span class="tag-pos">[Pos:${posEntries.join(' ')}]</span>`);
-
   out.innerHTML = parts.join('\n') || '<span style="color:var(--text-dim)">— default pose —</span>';
 }
 
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 // MUSCLE DISPLAY
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 function updateMuscleDisplay() {
   const list = document.getElementById('muscle-list');
-  const entries = Object.entries(muscles).filter(([,v]) => v > 0);
-
-  if (entries.length === 0) {
-    list.innerHTML = '<div class="muscle-empty">No muscles activated</div>';
-    return;
-  }
-
-  list.innerHTML = entries.map(([sym, level]) => {
-    const info = muscleGroups[sym];
-    const name = info ? info.name : sym;
-    const pct = level * 33;
+  const entries = Object.entries(muscles).filter(([,v])=>v>0);
+  if (!entries.length) { list.innerHTML = '<div class="muscle-empty">No muscles activated</div>'; return; }
+  list.innerHTML = entries.map(([sym,level]) => {
+    const info = muscleMap[sym];
+    const pct = level*33;
     const color = ['','rgba(255,165,0,0.7)','var(--orange)','var(--red-hot)'][level];
-    const levelClass = ['','l1','l2','l3'][level];
-    const plusStr = '+'.repeat(level);
-    return `<div class="muscle-row">
-      <div class="muscle-name">${sym}</div>
-      <div class="muscle-bar-bg"><div class="muscle-bar" style="width:${pct}%;background:${color}"></div></div>
-      <div class="muscle-level ${levelClass}">${plusStr}</div>
-    </div>`;
+    const lc = ['','l1','l2','l3'][level];
+    return `<div class="muscle-row"><div class="muscle-name">${sym}</div><div class="muscle-bar-bg"><div class="muscle-bar" style="width:${pct}%;background:${color}"></div></div><div class="muscle-level ${lc}">${'+'.repeat(level)}</div></div>`;
   }).join('');
 }
 
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 // PRESETS
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 const presets = {
-  tpose: {
-    label: 'T-Pose',
-    mnn: '[Pos:L.Sh(Abd:90) R.Sh(Abd:90) L.El(Flex:0) R.El(Flex:0) L.Hip(Abd:5) R.Hip(Abd:5)]',
-    muscles: {}
-  },
-  anatomical: {
-    label: 'Anatomical',
-    mnn: '[Pos:L.Sh(Abd:0) R.Sh(Abd:0) L.Hip(Abd:0) R.Hip(Abd:0)]',
-    muscles: {}
-  },
-  squat: {
-    label: 'Squat',
-    mnn: '[Pos:L.Hip(Flex:90,Abd:20) R.Hip(Flex:90,Abd:20) L.Kn(Flex:100) R.Kn(Flex:100) L.Sh(Abd:80,Flex:40) R.Sh(Abd:80,Flex:40) L.Ank(Dors:15) R.Ank(Dors:15) Sp.L(Flex:15)]',
-    muscles: { 'Quad.RF': 3, 'Quad.VL': 3, 'Glu.Mx': 2, 'Ham': 2, 'Gas': 1 }
-  },
-  pushup: {
-    label: 'Push-up',
-    mnn: '[Pos:L.Sh(Abd:60,Flex:90) R.Sh(Abd:60,Flex:90) L.El(Flex:90) R.El(Flex:90) Sp.L(Flex:5)]',
-    muscles: { 'Pec.S': 3, 'Pec.C': 2, 'Tri': 3, 'Dlt.A': 2 }
-  },
-  ohpress: {
-    label: 'Overhead Press',
-    mnn: '[Pos:L.Sh(Abd:180,Flex:10) R.Sh(Abd:180,Flex:10) L.El(Flex:10) R.El(Flex:10)]',
-    muscles: { 'Dlt.A': 3, 'Dlt.L': 2, 'Tri': 2, 'Trp.U': 2 }
-  },
-  curl: {
-    label: 'Bicep Curl (L)',
-    mnn: '[Pos:L.Sh(Abd:10) L.El(Flex:130) R.Sh(Abd:10) R.El(Flex:10)]',
-    muscles: { 'Bic': 3, 'Dlt.A': 1 }
-  },
-  run: {
-    label: 'Running',
-    mnn: '[Pos:L.Hip(Flex:60,Abd:5) R.Hip(Flex:20,Abd:5) L.Kn(Flex:30) R.Kn(Flex:80) L.Sh(Abd:35,Flex:30) R.Sh(Abd:35,Flex:-20) L.El(Flex:90) R.El(Flex:85) Sp.L(Rot:10)]',
-    muscles: { 'Quad.RF': 2, 'Ham': 2, 'Gas': 3, 'Glu.Mx': 2 }
-  },
-  wave: {
-    label: 'Wave',
-    mnn: '[Pos:R.Sh(Abd:160,Flex:20) R.El(Flex:30) R.Wr(Flex:-20) L.Sh(Abd:15) L.El(Flex:20)]',
-    muscles: { 'Dlt.L': 2, 'Dlt.A': 1 }
-  },
+  tpose:      {label:'T-Pose',     mnn:'[Pos:L.Sh(Abd:90) R.Sh(Abd:90) L.Hip(Abd:5) R.Hip(Abd:5)]', muscles:{}},
+  anatomical: {label:'Stand',      mnn:'[Pos:L.Sh(Abd:0) R.Sh(Abd:0) L.Hip(Abd:0) R.Hip(Abd:0)]', muscles:{}},
+  squat:      {label:'Squat',      mnn:'[Pos:L.Hip(Flex:90,Abd:20) R.Hip(Flex:90,Abd:20) L.Kn(Flex:100) R.Kn(Flex:100) L.Sh(Abd:80,Flex:40) R.Sh(Abd:80,Flex:40) L.Ank(Dors:15) R.Ank(Dors:15) Sp.L(Flex:15)]', muscles:{'Quad.RF':3,'Quad.VL':3,'Glu.Mx':2,'Ham':2,'Gas':1}},
+  pushup:     {label:'Push-up',    mnn:'[Pos:L.Sh(Abd:60,Flex:90) R.Sh(Abd:60,Flex:90) L.El(Flex:90) R.El(Flex:90)]', muscles:{'Pec.S':3,'Pec.C':2,'Tri':3,'Dlt.A':2}},
+  ohpress:    {label:'OH Press',   mnn:'[Pos:L.Sh(Abd:175,Flex:10) R.Sh(Abd:175,Flex:10) L.El(Flex:15) R.El(Flex:15)]', muscles:{'Dlt.A':3,'Dlt.L':2,'Tri':2,'Trp.U':2}},
+  curl:       {label:'Curl (L)',   mnn:'[Pos:L.Sh(Abd:10) L.El(Flex:130) R.Sh(Abd:10) R.El(Flex:10)]', muscles:{'Bic':3,'Dlt.A':1}},
+  run:        {label:'Run',        mnn:'[Pos:L.Hip(Flex:60,Abd:5) R.Hip(Flex:20,Abd:5) L.Kn(Flex:30) R.Kn(Flex:80) L.Sh(Abd:35,Flex:30) R.Sh(Abd:35,Flex:-20) L.El(Flex:90) R.El(Flex:85) Sp.L(Rot:10)]', muscles:{'Quad.RF':2,'Ham':2,'Gas':3,'Glu.Mx':2}},
+  wave:       {label:'Wave',       mnn:'[Pos:R.Sh(Abd:155,Flex:20) R.El(Flex:35) R.Wr(Flex:-20) L.Sh(Abd:15) L.El(Flex:20)]', muscles:{'Dlt.L':2,'Dlt.A':1}},
 };
 
-function applyPreset(key) {
+function applyPreset(key, ev) {
   const preset = presets[key];
   if (!preset) return;
-
-  // Reset to default, then apply preset
   joints = JSON.parse(JSON.stringify(defaultState));
-  muscles = { ...preset.muscles };
-  currentMovement = preset.movement || '';
+  muscles = {...preset.muscles};
+  currentMovement = '';
   document.getElementById('movement-display').textContent = '';
-
   const parsed = parseMNN(preset.mnn);
   for (const [joint, axes] of Object.entries(parsed.joints)) {
     if (!joints[joint]) joints[joint] = {};
     Object.assign(joints[joint], axes);
   }
-
-  // Update active preset button
-  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active-preset'));
-  event.target.classList.add('active-preset');
-
-  // Update input
+  document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('active-preset'));
+  if(ev) ev.target.classList.add('active-preset');
   document.getElementById('mnn-input').value = preset.mnn;
-  currentPreset = key;
-
   render();
   updateMuscleDisplay();
   syncSliders();
@@ -1121,140 +780,118 @@ function applyPreset(key) {
 
 function clearPose() {
   joints = JSON.parse(JSON.stringify(defaultState));
-  muscles = {};
-  currentMovement = '';
+  muscles = {}; currentMovement = '';
   document.getElementById('movement-display').textContent = '';
   document.getElementById('mnn-input').value = '';
-  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active-preset'));
-  render();
-  updateMuscleDisplay();
-  syncSliders();
+  document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('active-preset'));
+  render(); updateMuscleDisplay(); syncSliders();
 }
 
 function copyMNN() {
-  const out = document.getElementById('mnn-output').innerText;
-  navigator.clipboard.writeText(out).catch(() => {});
+  navigator.clipboard.writeText(document.getElementById('mnn-output').innerText).catch(()=>{});
 }
 
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 // SLIDERS
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 const sliderDefs = [
-  { label:'Spine Lat',   joint:'Sp.L',  axis:'Lat',  min:-35, max:35 },
-  { label:'Head Flex',   joint:'Sp.C',  axis:'Flex', min:-60, max:80 },
-  { label:'L Sh Abd',    joint:'L.Sh',  axis:'Abd',  min:0,   max:180 },
-  { label:'R Sh Abd',    joint:'R.Sh',  axis:'Abd',  min:0,   max:180 },
-  { label:'L Sh Flex',   joint:'L.Sh',  axis:'Flex', min:-45, max:180 },
-  { label:'R Sh Flex',   joint:'R.Sh',  axis:'Flex', min:-45, max:180 },
-  { label:'L Elbow Flex',joint:'L.El',  axis:'Flex', min:0,   max:145 },
-  { label:'R Elbow Flex',joint:'R.El',  axis:'Flex', min:0,   max:145 },
-  { label:'L Hip Abd',   joint:'L.Hip', axis:'Abd',  min:0,   max:45 },
-  { label:'R Hip Abd',   joint:'R.Hip', axis:'Abd',  min:0,   max:45 },
-  { label:'L Hip Flex',  joint:'L.Hip', axis:'Flex', min:-30, max:125 },
-  { label:'R Hip Flex',  joint:'R.Hip', axis:'Flex', min:-30, max:125 },
-  { label:'L Knee Flex', joint:'L.Kn',  axis:'Flex', min:0,   max:140 },
-  { label:'R Knee Flex', joint:'R.Kn',  axis:'Flex', min:0,   max:140 },
+  {label:'Spine Lat',    joint:'Sp.L', axis:'Lat',  min:-35, max:35},
+  {label:'Head Flex',    joint:'Sp.C', axis:'Flex', min:-60, max:80},
+  {label:'L Sh Abd',     joint:'L.Sh', axis:'Abd',  min:0,   max:180},
+  {label:'R Sh Abd',     joint:'R.Sh', axis:'Abd',  min:0,   max:180},
+  {label:'L Sh Flex',    joint:'L.Sh', axis:'Flex', min:-45, max:180},
+  {label:'R Sh Flex',    joint:'R.Sh', axis:'Flex', min:-45, max:180},
+  {label:'L Elbow Flex', joint:'L.El', axis:'Flex', min:0,   max:145},
+  {label:'R Elbow Flex', joint:'R.El', axis:'Flex', min:0,   max:145},
+  {label:'L Hip Abd',    joint:'L.Hip',axis:'Abd',  min:0,   max:45},
+  {label:'R Hip Abd',    joint:'R.Hip',axis:'Abd',  min:0,   max:45},
+  {label:'L Hip Flex',   joint:'L.Hip',axis:'Flex', min:-30, max:125},
+  {label:'R Hip Flex',   joint:'R.Hip',axis:'Flex', min:-30, max:125},
+  {label:'L Knee Flex',  joint:'L.Kn', axis:'Flex', min:0,   max:140},
+  {label:'R Knee Flex',  joint:'R.Kn', axis:'Flex', min:0,   max:140},
 ];
 
 function buildSliders() {
-  const grid = document.getElementById('slider-grid');
-  grid.innerHTML = sliderDefs.map((s, i) => {
-    const curVal = joints[s.joint]?.[s.axis] ?? 0;
-    return `<div class="slider-row">
-      <div class="slider-label"><span>${s.label}</span><span class="val" id="sv-${i}">${curVal}°</span></div>
-      <input type="range" id="sl-${i}" min="${s.min}" max="${s.max}" value="${curVal}"
-        oninput="onSlider(${i}, this.value)">
-    </div>`;
+  document.getElementById('slider-grid').innerHTML = sliderDefs.map((s,i) => {
+    const v = joints[s.joint]?.[s.axis] ?? 0;
+    return `<div class="slider-row"><div class="slider-label"><span>${s.label}</span><span class="val" id="sv-${i}">${v}°</span></div><input type="range" id="sl-${i}" min="${s.min}" max="${s.max}" value="${v}" oninput="onSlider(${i},this.value)"></div>`;
   }).join('');
 }
 
 function onSlider(i, val) {
-  const def = sliderDefs[i];
-  val = parseInt(val);
-  if (!joints[def.joint]) joints[def.joint] = {};
-  joints[def.joint][def.axis] = val;
-  document.getElementById(`sv-${i}`).textContent = val + '°';
-  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active-preset'));
+  const s = sliderDefs[i]; val = parseInt(val);
+  if (!joints[s.joint]) joints[s.joint] = {};
+  joints[s.joint][s.axis] = val;
+  document.getElementById(`sv-${i}`).textContent = val+'°';
+  document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('active-preset'));
   render();
 }
 
 function syncSliders() {
-  sliderDefs.forEach((s, i) => {
+  sliderDefs.forEach((s,i) => {
     const el = document.getElementById(`sl-${i}`);
     const sv = document.getElementById(`sv-${i}`);
-    if (!el || !sv) return;
-    const val = joints[s.joint]?.[s.axis] ?? 0;
-    el.value = val;
-    sv.textContent = val + '°';
+    if (!el||!sv) return;
+    const v = joints[s.joint]?.[s.axis] ?? 0;
+    el.value = v; sv.textContent = v+'°';
   });
 }
 
-// ══════════════════════════════════════════════════════════
-// INFO TAB
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// INFO + EXAMPLES
+// ═══════════════════════════════════════════════════════
 function updateInfoTab() {
   const el = document.getElementById('joint-state-display');
   if (!el) return;
   const lines = [];
   for (const [joint, axes] of Object.entries(joints)) {
-    const nonZero = Object.entries(axes).filter(([,v]) => v !== 0);
-    if (nonZero.length) lines.push(`${joint}: ${nonZero.map(([k,v])=>`${k}=${v}°`).join(', ')}`);
+    const nz = Object.entries(axes).filter(([,v])=>v!==0);
+    if (nz.length) lines.push(`${joint}: ${nz.map(([k,v])=>`${k}=${v}°`).join(', ')}`);
   }
   el.textContent = lines.join('\n') || '— all joints at default —';
 }
 
 function buildInfoRows() {
-  const el = document.getElementById('info-rows');
-  const infos = [
-    ['Spec',    'MNN v1.5.0'],
-    ['LOD',     'LOD 1 (Functional — ~55 muscles)'],
-    ['Joints',  '~139 DOF (Section 6 taxonomy)'],
-    ['View',    'Anterior (front) 2D projection'],
+  document.getElementById('info-rows').innerHTML = [
+    ['Spec','MNN v1.5.1'],['LOD','LOD 1 (~55 muscles)'],
+    ['Styles','WIRE · VITRUV · BULK'],['Joints','~139 DOF'],
     ['Platform','InThisWorld / AIUNITES'],
-  ];
-  el.innerHTML = infos.map(([k,v]) =>
-    `<div class="info-row"><span>${k}</span><span class="info-val">${v}</span></div>`
-  ).join('');
+  ].map(([k,v])=>`<div class="info-row"><span>${k}</span><span class="info-val">${v}</span></div>`).join('');
 }
 
-// ══════════════════════════════════════════════════════════
-// EXAMPLES
-// ══════════════════════════════════════════════════════════
 const examples = [
-  { label:'Shoulder press', str: '{Push.V} [Con:Dlt.A+++, Tri++] [Pos:L.Sh(Abd:170,Flex:10) R.Sh(Abd:170,Flex:10)]' },
-  { label:'Duchenne smile', str: '[Con:Zyg.Mj+++, Orb.Oc++] → CNVII' },
-  { label:'Concentration frown', str: '[Con:Corr+++, Front+] → CNVII' },
-  { label:'Cable fly', str: '{Pull.H} [Con:Pec.S+++, Dlt.A+] → MedPec/Axil [Pos:L.Sh(IR:25,Flex:90,Abd:45) R.Sh(IR:25,Flex:90,Abd:45)]' },
-  { label:'Lateral raise', str: '{Iso} [Con:Dlt.L+++, Trp.U+] → Axil [Pos:L.Sh(Abd:90) R.Sh(Abd:90)]' },
+  {label:'Shoulder press', str:'{Push.V} [Con:Dlt.A+++, Tri++] [Pos:L.Sh(Abd:170,Flex:10) R.Sh(Abd:170,Flex:10)]'},
+  {label:'Duchenne smile',  str:'[Con:Zyg.Mj+++, Orb.Oc++] → CNVII'},
+  {label:'Concentration frown', str:'[Con:Corr+++, Dep.Ang+++] → CNVII'},
+  {label:'Cable fly',       str:'{Pull.H} [Con:Pec.S+++, Dlt.A+] → MedPec/Axil [Pos:L.Sh(IR:25,Flex:90,Abd:45) R.Sh(IR:25,Flex:90,Abd:45)]'},
+  {label:'Lateral raise',   str:'{Iso} [Con:Dlt.L+++, Trp.U+] → Axil [Pos:L.Sh(Abd:90) R.Sh(Abd:90)]'},
+  {label:'Bicep flex pose', str:'[Con:Bic+++, Dlt.L++] [Pos:L.Sh(Abd:90) L.El(Flex:130) R.Sh(Abd:90) R.El(Flex:130)]'},
 ];
 
 function buildExamples() {
-  const el = document.getElementById('examples');
-  el.innerHTML = examples.map(e =>
-    `<button class="preset-btn" style="text-align:left;padding:7px 10px;font-size:9px;letter-spacing:0.5px" onclick="loadExample(this, ${JSON.stringify(e.str).replace(/'/g,'&apos;')})">${e.label}</button>`
+  document.getElementById('examples').innerHTML = examples.map(e =>
+    `<button class="preset-btn" style="text-align:left;padding:7px 10px;font-size:9px" onclick="loadExample(${JSON.stringify(e.str).replace(/'/g,'&apos;')})">${e.label}</button>`
   ).join('');
 }
 
-function loadExample(btn, str) {
+function loadExample(str) {
   document.getElementById('mnn-input').value = str;
   applyMNN();
 }
 
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 // TABS
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 function switchTab(name) {
-  document.querySelectorAll('.tab').forEach((t, i) => {
-    const names = ['pose','muscles','mnn','info'];
-    t.classList.toggle('active', names[i] === name);
-  });
-  document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
+  const names = ['pose','muscles','mnn','info'];
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', names[i]===name));
+  document.querySelectorAll('.tab-content').forEach(tc=>tc.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
 }
 
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 // INIT
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 buildSliders();
 buildInfoRows();
 buildExamples();
