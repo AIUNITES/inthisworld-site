@@ -79,7 +79,7 @@ const ITWStorage = {
       username,
       displayName: data.displayName,
       email: data.email || '',
-      password: data.password,
+      passwordHash: data.passwordHash, // set by ITWAuth.signup after hashing
       isAdmin: data.isAdmin || isFirst,
       createdAt: new Date().toISOString(),
       gamesPlayed: 0,
@@ -201,10 +201,17 @@ const ITWStorage = {
   // ── Export/Import ─────────────────────────────────────────────────────────
 
   exportData() {
+    // Strip password fields from export — backup files must never contain passwords.
+    const rawUsers = this.getUsers();
+    const safeUsers = {};
+    Object.entries(rawUsers).forEach(([k, u]) => {
+      const { password, passwordHash, ...safe } = u;
+      safeUsers[k] = safe;
+    });
     return {
       app: 'InThisWorld',
       version: ITW_CONFIG.version,
-      users:  this.getUsers(),
+      users:  safeUsers,
       scores: this.getScores(),
       exportedAt: new Date().toISOString()
     };

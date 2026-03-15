@@ -365,6 +365,7 @@
         <div class="panel">
           <div class="panel-header">
             <h3>💬 Chat Rooms</h3>
+            <span id="chat-status-dot" style="font-size:0.72rem;font-weight:700;"></span>
           </div>
           <div class="panel-body" id="room-list"></div>
         </div>
@@ -405,6 +406,11 @@
         <!-- Members tab (hidden) -->
         <div id="members-panel" style="display:none;flex:1;overflow-y:auto;padding:0.75rem;">
           <div class="members-grid" id="members-list"></div>
+        </div>
+
+        <!-- Offline banner -->
+        <div id="chat-offline-banner" style="display:none;padding:0.6rem 1.25rem;background:rgba(245,158,11,0.08);border-bottom:1px solid rgba(245,158,11,0.2);align-items:center;gap:0.5rem;font-size:0.78rem;color:#fbbf24;">
+          <span>⚠️</span><span>Chat is currently offline — messages are local only.</span>
         </div>
 
         <!-- Input or login prompt -->
@@ -461,10 +467,16 @@
       this.renderMyProfile();
 
       // Show GH connection status
+      const dot = document.getElementById('chat-status-dot');
+      const banner = document.getElementById('chat-offline-banner');
       if (GitHubChat.isConfigured()) {
         console.log('[ITW] Chat connected to GitHub Issues ✅');
+        if (dot) { dot.textContent = '● Online'; dot.style.color = '#4ade80'; }
+        if (banner) banner.style.display = 'none';
       } else {
-        console.info('[ITW] Chat running in local-only mode. See js/github-chat-token.template.js to enable GitHub sync.');
+        console.info('[ITW] Chat running in local-only mode.');
+        if (dot) { dot.textContent = '● Offline'; dot.style.color = '#f59e0b'; }
+        if (banner) banner.style.display = 'flex';
       }
 
       // Heartbeat if logged in
