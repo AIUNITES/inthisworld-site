@@ -32,7 +32,6 @@
   .view-tag{position:absolute;top:12px;left:16px;font-size:9px;color:var(--text-dim);letter-spacing:3px;border:1px solid var(--cyan-faint);padding:3px 8px;}
   .movement-display{position:absolute;top:12px;right:16px;font-size:11px;color:var(--cyan);opacity:0.7;text-shadow:0 0 8px var(--cyan);}
 
-  /* Style + 3D controls */
   .style-selector{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:5px;z-index:10;}
   .style-row{display:flex;gap:5px;}
   .rot-row{display:none;align-items:center;gap:6px;background:rgba(0,10,30,0.85);border:1px solid rgba(0,229,255,0.2);border-radius:4px;padding:4px 10px;}
@@ -107,10 +106,10 @@
 <body>
 
 <div class="header">
-  <a href="index.html" class="header-back">← InThisWorld</a>
-  <div class="header-logo">◆ MNN AVATAR</div>
-  <div class="header-sub">MUSCULAR NEURO NOTATION · INTHISWORLD / AIUNITES</div>
-  <div class="header-version">v1.5.1 · LOD 1</div>
+  <a href="index.html" class="header-back">&larr; InThisWorld</a>
+  <div class="header-logo">&#9670; MNN AVATAR</div>
+  <div class="header-sub">MUSCULAR NEURO NOTATION &middot; INTHISWORLD / AIUNITES</div>
+  <div class="header-version">v1.5.1 &middot; LOD 1</div>
 </div>
 
 <div class="main">
@@ -118,7 +117,7 @@
   <div class="avatar-panel">
     <div class="corner-tl"></div><div class="corner-tr"></div>
     <div class="corner-bl"></div><div class="corner-br"></div>
-    <div class="view-tag" id="view-tag">WIRE · ANTERIOR</div>
+    <div class="view-tag" id="view-tag">WIRE &middot; ANTERIOR</div>
     <div class="movement-display" id="movement-display"></div>
 
     <svg id="avatar-svg" viewBox="0 0 460 520" xmlns="http://www.w3.org/2000/svg">
@@ -141,27 +140,24 @@
         </filter>
       </defs>
       <line x1="230" y1="0" x2="230" y2="520" stroke="#00e5ff" stroke-width="0.3" opacity="0.1" stroke-dasharray="4,8"/>
-      <!-- Dynamic render layer — cleared and redrawn on each frame -->
       <g id="avatar-render"></g>
-      <!-- Scan line -->
       <rect x="0" y="-2" width="460" height="1.5" fill="#00e5ff" opacity="0.06">
         <animate attributeName="y" from="-10" to="530" dur="5s" repeatCount="indefinite"/>
       </rect>
     </svg>
 
-    <!-- Style + 3D selector -->
     <div class="style-selector">
       <div class="style-row">
         <button class="style-btn active" onclick="setStyle('wire')">WIRE</button>
         <button class="style-btn style-vitruv" onclick="setStyle('vitruv')">VITRUV</button>
         <button class="style-btn style-bulk" onclick="setStyle('bulk')">BULK</button>
-        <button class="style-btn" id="btn-3d" onclick="toggle3D(this)" title="Toggle 3D rotation">3D ▶</button>
+        <button class="style-btn" id="btn-3d" onclick="toggle3D(this)" title="Toggle 3D rotation">3D &#9654;</button>
       </div>
       <div class="rot-row" id="rot-row">
         <span class="rot-label">ROT</span>
         <input type="range" id="rot-slider" class="rot-slider" min="-180" max="180" value="0" oninput="setRotY(this.value)">
-        <span class="rot-label" id="rot-deg">0°</span>
-        <button class="style-btn" id="btn-auto" onclick="toggleAutoRotate(this)" style="padding:3px 10px;font-size:8px">▶ AUTO</button>
+        <span class="rot-label" id="rot-deg">0&deg;</span>
+        <button class="style-btn" id="btn-auto" onclick="toggleAutoRotate(this)" style="padding:3px 10px;font-size:8px">&#9654; AUTO</button>
       </div>
     </div>
   </div>
@@ -199,7 +195,7 @@
       <div class="section" style="flex:1;overflow-y:auto">
         <div class="section-title">ACTIVE MUSCLES</div>
         <div class="muscle-list" id="muscle-list">
-          <div class="muscle-empty">No muscles activated — paste MNN with [Con:] tag</div>
+          <div class="muscle-empty">No muscles activated &mdash; paste MNN with [Con:] tag</div>
         </div>
       </div>
     </div>
@@ -207,11 +203,11 @@
     <div class="tab-content" id="tab-mnn">
       <div class="section">
         <div class="section-title">MNN INPUT STRING</div>
-        <textarea id="mnn-input" placeholder="{Push.H} [Con:Pec.S+++, Dlt.A+] → MedPec/Axil&#10;[Pos:L.Sh(Abd:90,Flex:45) L.El(Flex:60)]&#10;[Vec:H:Mid,A:0°,Src:Cable]"></textarea>
+        <textarea id="mnn-input" placeholder="{Push.H} [Con:Pec.S+++, Dlt.A+] &#8594; MedPec/Axil&#10;[Pos:L.Sh(Abd:90,Flex:45) L.El(Flex:60)]&#10;[Vec:H:Mid,A:0&deg;,Src:Cable]"></textarea>
         <div class="btn-row">
-          <button class="btn" onclick="applyMNN()">▶ APPLY</button>
-          <button class="btn btn-dim" onclick="clearPose()">◻ RESET</button>
-          <button class="btn btn-dim" onclick="copyMNN()">⎘ COPY</button>
+          <button class="btn" onclick="applyMNN()">&#9654; APPLY</button>
+          <button class="btn btn-dim" onclick="clearPose()">&#9723; RESET</button>
+          <button class="btn btn-dim" onclick="copyMNN()">&#9064; COPY</button>
         </div>
       </div>
       <div class="section">
@@ -219,7 +215,7 @@
         <div class="mnn-out" id="mnn-output"></div>
       </div>
       <div class="section">
-        <div class="section-title">QUICK EXAMPLES — CLICK TO APPLY</div>
+        <div class="section-title">QUICK EXAMPLES &mdash; CLICK TO APPLY</div>
         <div style="display:flex;flex-direction:column;gap:6px" id="examples"></div>
       </div>
     </div>
@@ -236,11 +232,11 @@
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════
+// ===================================================
 // STATE
-// ═══════════════════════════════════════════════════════
+// ===================================================
 const DEG = Math.PI / 180;
-let currentStyle = 'wire'; // 'wire' | 'vitruv' | 'bulk'
+let currentStyle = 'wire';
 
 const defaultState = {
   'Sp.L': {Flex:0,Lat:0,Rot:0}, 'Sp.T': {Flex:0,Lat:0,Rot:0}, 'Sp.C': {Flex:0,Lat:0,Rot:0},
@@ -256,29 +252,28 @@ let joints = JSON.parse(JSON.stringify(defaultState));
 let muscles = {};
 let currentMovement = '';
 
-// 3D rotation state
 let is3D = false;
-let rotY = 0;        // Y-axis rotation in radians
+let rotY = 0;
 let autoRotate = false;
 let rafId = null;
-let rawCache = null; // pre-projection positions, used by face renderer
+let rawCache = null;
 
-// ═══════════════════════════════════════════════════════
+// ===================================================
 // STYLE SWITCHER
-// ═══════════════════════════════════════════════════════
+// ===================================================
 function setStyle(name, btn) {
   currentStyle = name;
   document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('active'));
-  const target = btn || (typeof event !== 'undefined' && event?.target) || document.querySelector(`.style-btn[onclick*="'${name}'"]`);
+  const target = btn || (typeof event !== 'undefined' && event?.target) || document.querySelector('.style-btn[onclick*="' + name + '"]');
   if (target) target.classList.add('active');
   const labels = {wire:'WIRE · ANTERIOR', vitruv:'VITRUV · ANTERIOR', bulk:'BULK · ANTERIOR'};
   document.getElementById('view-tag').textContent = labels[name];
   render();
 }
 
-// ═══════════════════════════════════════════════════════
+// ===================================================
 // 3D PROJECTION
-// ═══════════════════════════════════════════════════════
+// ===================================================
 function applyProjection(positions) {
   if (!is3D && rotY === 0) return positions;
   const CX = 230, P = 520;
@@ -347,8 +342,6 @@ function stopAutoRotate() {
   if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
 }
 
-// Project a face-local offset through the same Y-rotation + perspective as applyProjection.
-// lx/ly/lz = local offset from head center (lz+ = toward viewer, face surface Z ≈ +24..+30)
 function projectFacePoint(lx, ly, lz) {
   if (!rawCache) return { x: 230 + lx, y: 260 + ly };
   const hcx = rawCache.headCenter.x;
@@ -356,10 +349,8 @@ function projectFacePoint(lx, ly, lz) {
   const hcz = rawCache.headCenter.z || 0;
   const CX = 230, P = 520;
   if (!is3D && rotY === 0) return { x: hcx + lx, y: hcy + ly };
-  // World position of this face point
   const wx = hcx + lx;
   const wz = hcz + lz;
-  // Identical transform to applyProjection
   const cos = Math.cos(rotY), sin = Math.sin(rotY);
   const dx = wx - CX;
   const x3 = dx * cos - wz * sin;
@@ -368,7 +359,6 @@ function projectFacePoint(lx, ly, lz) {
   return { x: CX + x3 * s, y: hcy + ly };
 }
 
-// Opacity of face features: 1 = facing viewer, 0 = facing away (back of head)
 function getFaceOpacity() {
   if (!is3D) return 1;
   return Math.max(0, Math.cos(rotY));
@@ -378,15 +368,13 @@ function updateViewTag() {
   const deg = Math.round(rotY * 180 / Math.PI);
   const labels = {wire:'WIRE', vitruv:'VITRUV', bulk:'BULK'};
   const label = labels[currentStyle] || 'WIRE';
-  const viewLabel = is3D
-    ? `${label} · 3D ${deg}°`
-    : `${label} · ANTERIOR`;
+  const viewLabel = is3D ? label + ' · 3D ' + deg + '°' : label + ' · ANTERIOR';
   document.getElementById('view-tag').textContent = viewLabel;
 }
 
-// ═══════════════════════════════════════════════════════
+// ===================================================
 // KINEMATICS
-// ═══════════════════════════════════════════════════════
+// ===================================================
 function calcPositions(j) {
   const cx = 230, pelvisY = 365;
   const spLat = (j['Sp.L']?.Lat || 0) * DEG;
@@ -406,7 +394,6 @@ function calcPositions(j) {
   const lHip = {x:pelvis.x+hipW*Math.cos(perpAngle+Math.PI), y:pelvis.y+hipW*Math.sin(perpAngle+Math.PI)};
   const rHip = {x:pelvis.x+hipW*Math.cos(perpAngle), y:pelvis.y+hipW*Math.sin(perpAngle)};
 
-  // Left arm
   const lShAbd = j['L.Sh']?.Abd ?? 90;
   const lElFlex = j['L.El']?.Flex ?? 0;
   const lWrFlex = j['L.Wr']?.Flex ?? 0;
@@ -418,7 +405,6 @@ function calcPositions(j) {
   const lHA = lFA + lWrFlex*DEG;
   const lHand = {x:lWr.x+30*Math.cos(lHA), y:lWr.y+30*Math.sin(lHA)};
 
-  // Right arm
   const rShAbd = j['R.Sh']?.Abd ?? 90;
   const rElFlex = j['R.El']?.Flex ?? 0;
   const rWrFlex = j['R.Wr']?.Flex ?? 0;
@@ -430,30 +416,24 @@ function calcPositions(j) {
   const rHA = rFA - rWrFlex*DEG;
   const rHand = {x:rWr.x+30*Math.cos(rHA), y:rWr.y+30*Math.sin(rHA)};
 
-  // Left leg
   const lHipAbd = j['L.Hip']?.Abd ?? 5;
   const lHipFlex = j['L.Hip']?.Flex ?? 0;
   const lKnFlex = j['L.Kn']?.Flex ?? 0;
-  const lAnkPlan = j['L.Ank']?.Plan ?? 5;
-  const lAnkDors = j['L.Ank']?.Dors ?? 0;
   const lULA = (90 + lHipAbd + lHipFlex*0.15) * DEG;
   const lKn = {x:lHip.x+105*Math.cos(lULA), y:lHip.y+105*Math.sin(lULA)};
   const lLLA = lULA - lKnFlex*0.5*DEG;
   const lAnk = {x:lKn.x+95*Math.cos(lLLA), y:lKn.y+95*Math.sin(lLLA)};
   const lFootEnd = {x:lAnk.x-36*Math.cos(lLLA-Math.PI/2), y:lAnk.y-36*Math.sin(lLLA-Math.PI/2)};
 
-  // Right leg
   const rHipAbd = j['R.Hip']?.Abd ?? 5;
   const rHipFlex = j['R.Hip']?.Flex ?? 0;
   const rKnFlex = j['R.Kn']?.Flex ?? 0;
-  const rAnkPlan = j['R.Ank']?.Plan ?? 5;
   const rULA = (90 - rHipAbd - rHipFlex*0.15) * DEG;
   const rKn = {x:rHip.x+105*Math.cos(rULA), y:rHip.y+105*Math.sin(rULA)};
   const rLLA = rULA + rKnFlex*0.5*DEG;
   const rAnk = {x:rKn.x+95*Math.cos(rLLA), y:rKn.y+95*Math.sin(rLLA)};
   const rFootEnd = {x:rAnk.x+36*Math.cos(rLLA-Math.PI/2), y:rAnk.y+36*Math.sin(rLLA-Math.PI/2)};
 
-  // ── Z depths for 3D projection (positive = toward viewer) ──
   const lShF  = j['L.Sh']?.Flex ?? 0;
   const rShF  = j['R.Sh']?.Flex ?? 0;
   lEl.z  = Math.sin(lShF * DEG) * 82;
@@ -474,9 +454,9 @@ function calcPositions(j) {
     spineBaseAngle,neckAngle,lUAA,rUAA,lULA,rULA,lFA,rFA,lLLA,rLLA};
 }
 
-// ═══════════════════════════════════════════════════════
-// SVG HELPERS (shared)
-// ═══════════════════════════════════════════════════════
+// ===================================================
+// SVG HELPERS
+// ===================================================
 function svgEl(tag, attrs, parent) {
   const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
   for (const [k,v] of Object.entries(attrs)) e.setAttribute(k, v);
@@ -484,19 +464,13 @@ function svgEl(tag, attrs, parent) {
   return e;
 }
 
-// Tapered quadrilateral path between two points
 function limbPath(p1, p2, w1, w2) {
   const dx = p2.x-p1.x, dy = p2.y-p1.y;
   const len = Math.sqrt(dx*dx+dy*dy) || 1;
   const nx = -dy/len, ny = dx/len;
   const f = n => n.toFixed(1);
-  return `M${f(p1.x+nx*w1)},${f(p1.y+ny*w1)} L${f(p2.x+nx*w2)},${f(p2.y+ny*w2)} `+
-         `L${f(p2.x-nx*w2)},${f(p2.y-ny*w2)} L${f(p1.x-nx*w1)},${f(p1.y-ny*w1)} Z`;
-}
-
-// Rounded capped limb (smoother version using ellipses at ends)
-function limbPathRound(p1, p2, w1, w2) {
-  return limbPath(p1, p2, w1, w2); // base version, enhance per-style
+  return 'M'+f(p1.x+nx*w1)+','+f(p1.y+ny*w1)+' L'+f(p2.x+nx*w2)+','+f(p2.y+ny*w2)+
+         ' L'+f(p2.x-nx*w2)+','+f(p2.y-ny*w2)+' L'+f(p1.x-nx*w1)+','+f(p1.y-ny*w1)+' Z';
 }
 
 function getFaceParams() {
@@ -510,17 +484,12 @@ function getFaceParams() {
   };
 }
 
-// ═══════════════════════════════════════════════════════
-// RENDERER — WIRE (original cyan stick)
-// ═══════════════════════════════════════════════════════
+// ===================================================
+// RENDERER — WIRE
+// ===================================================
 function renderWire(p, fp) {
-  const g = document.getElementById('avatar-render');
   const C = '#00e5ff', Cd = '#40c8e0';
-
-  // Muscle glow overlays first (behind skeleton)
   renderMuscleOverlays(p, 'wire');
-
-  // Spine marks
   const sm = svgEl('g', {opacity:'0.3', filter:'url(#glow-sm)'});
   for (let i=1; i<12; i++) {
     const t = i/12;
@@ -531,19 +500,15 @@ function renderWire(p, fp) {
       x1:(x+4*Math.cos(pa)).toFixed(1), y1:(y+4*Math.sin(pa)).toFixed(1),
       x2:(x-4*Math.cos(pa)).toFixed(1), y2:(y-4*Math.sin(pa)).toFixed(1)}, sm);
   }
-
-  // Rib cage
   const ribCx = (p.lSh.x+p.rSh.x)/2;
   const ribCy = p.lSh.y + (p.pelvis.y-p.lSh.y)*0.38;
   const ribRx = Math.abs(p.rSh.x-p.lSh.x)*0.5;
   const ribRy = (p.pelvis.y-p.thoracic.y)*0.38;
   svgEl('ellipse', {cx:ribCx.toFixed(1), cy:ribCy.toFixed(1), rx:ribRx.toFixed(1), ry:ribRy.toFixed(1),
     fill:'none', stroke:C, 'stroke-width':'1', opacity:'0.13', filter:'url(#glow-sm)'});
-
-  // Bones
   const bg = svgEl('g', {filter:'url(#glow)'});
-  const bone = (id, x1, y1, x2, y2, sw, op='1') =>
-    svgEl('line', {stroke:C,'stroke-width':sw,'stroke-linecap':'round',opacity:op,
+  const bone = (id, x1, y1, x2, y2, sw, op) =>
+    svgEl('line', {stroke:C,'stroke-width':sw,'stroke-linecap':'round',opacity:op||'1',
       x1:x1.toFixed(1),y1:y1.toFixed(1),x2:x2.toFixed(1),y2:y2.toFixed(1)}, bg);
   bone('sp',   p.pelvis.x,p.pelvis.y,p.thoracic.x,p.thoracic.y,'2.5');
   bone('nk',   p.thoracic.x,p.thoracic.y,p.neck.x,p.neck.y,'2');
@@ -563,10 +528,8 @@ function renderWire(p, fp) {
   bone('rul',  p.rHip.x,p.rHip.y,p.rKn.x,p.rKn.y,'3.5');
   bone('rll',  p.rKn.x,p.rKn.y,p.rAnk.x,p.rAnk.y,'3');
   bone('rft',  p.rAnk.x,p.rAnk.y,p.rFootEnd.x,p.rFootEnd.y,'2');
-
-  // Joints
   const jg = svgEl('g', {filter:'url(#glow-sm)'});
-  const jc = (cx,cy,r,fill,op='0.85') => svgEl('circle',{cx:cx.toFixed(1),cy:cy.toFixed(1),r,fill,opacity:op},jg);
+  const jc = (cx,cy,r,fill,op) => svgEl('circle',{cx:cx.toFixed(1),cy:cy.toFixed(1),r,fill,opacity:op||'0.85'},jg);
   svgEl('circle',{cx:p.headCenter.x.toFixed(1),cy:p.headCenter.y.toFixed(1),r:'34',fill:'none',stroke:Cd,'stroke-width':'1.5'},jg);
   jc(p.lSh.x,p.lSh.y,7,C);
   jc(p.rSh.x,p.rSh.y,7,C);
@@ -581,8 +544,6 @@ function renderWire(p, fp) {
   jc(p.rKn.x,p.rKn.y,5,Cd,'0.7');
   jc(p.lAnk.x,p.lAnk.y,4,Cd,'0.6');
   jc(p.rAnk.x,p.rAnk.y,4,Cd,'0.6');
-
-  // Face — 3D-projected
   const faceOp = getFaceOpacity();
   if (faceOp > 0.02) {
     const fg = svgEl('g', {filter:'url(#glow-sm)', opacity:faceOp.toFixed(2)});
@@ -603,45 +564,33 @@ function renderWire(p, fp) {
     const mR  = projectFacePoint( 10,  10+fp.jawOpen, 24);
     svgEl('ellipse',{cx:f(eL.x),cy:f(eL.y),rx:'4',ry:(2.5*fp.eyeOpenness).toFixed(1),fill:C,opacity:'0.8'},fg);
     svgEl('ellipse',{cx:f(eR.x),cy:f(eR.y),rx:'4',ry:(2.5*fp.eyeOpenness).toFixed(1),fill:C,opacity:'0.8'},fg);
-    svgEl('path',{d:`M${f(bL1.x)},${f(bL1.y)} Q${f(bLm.x)},${f(bLm.y)} ${f(bL2.x)},${f(bL2.y)}`,fill:'none',stroke:C,'stroke-width':'1.5','stroke-linecap':'round'},fg);
-    svgEl('path',{d:`M${f(bR1.x)},${f(bR1.y)} Q${f(bRm.x)},${f(bRm.y)} ${f(bR2.x)},${f(bR2.y)}`,fill:'none',stroke:C,'stroke-width':'1.5','stroke-linecap':'round'},fg);
+    svgEl('path',{d:'M'+f(bL1.x)+','+f(bL1.y)+' Q'+f(bLm.x)+','+f(bLm.y)+' '+f(bL2.x)+','+f(bL2.y),fill:'none',stroke:C,'stroke-width':'1.5','stroke-linecap':'round'},fg);
+    svgEl('path',{d:'M'+f(bR1.x)+','+f(bR1.y)+' Q'+f(bRm.x)+','+f(bRm.y)+' '+f(bR2.x)+','+f(bR2.y),fill:'none',stroke:C,'stroke-width':'1.5','stroke-linecap':'round'},fg);
     svgEl('line',{x1:f(ns1.x),y1:f(ns1.y),x2:f(ns2.x),y2:f(ns2.y),stroke:C,'stroke-width':'1',opacity:'0.5'},fg);
-    svgEl('path',{d:`M${f(mL.x)},${f(mL.y)} Q${f(mM.x)},${f(mM.y)} ${f(mR.x)},${f(mR.y)}`,fill:'none',stroke:C,'stroke-width':'1.5','stroke-linecap':'round'},fg);
+    svgEl('path',{d:'M'+f(mL.x)+','+f(mL.y)+' Q'+f(mM.x)+','+f(mM.y)+' '+f(mR.x)+','+f(mR.y),fill:'none',stroke:C,'stroke-width':'1.5','stroke-linecap':'round'},fg);
   }
 }
 
-// ═══════════════════════════════════════════════════════
-// RENDERER — VITRUV (Vitruvian proportions, warm gold)
-// ═══════════════════════════════════════════════════════
+// ===================================================
+// RENDERER — VITRUV
+// ===================================================
 function renderVitruvian(p, fp) {
   const gold = '#c8a84b', goldL = '#e8d5a3', goldD = '#7a5010';
-
-  // Reference geometry (circle + square, da Vinci style)
   const circleCy = (p.lSh.y + p.pelvis.y) / 2 + 10;
   const circleR = Math.abs(p.rSh.x-p.lSh.x)*0.88 + 25;
-  svgEl('circle',{cx:p.headCenter.x.toFixed(1),cy:circleCy.toFixed(1),r:circleR.toFixed(1),
-    fill:'none',stroke:gold,'stroke-width':'0.7',opacity:'0.25'});
+  svgEl('circle',{cx:p.headCenter.x.toFixed(1),cy:circleCy.toFixed(1),r:circleR.toFixed(1),fill:'none',stroke:gold,'stroke-width':'0.7',opacity:'0.25'});
   const sqTop = p.headCenter.y - 36, sqBot = p.lAnk.y + 22;
   const sqH = sqBot - sqTop, sqW = circleR*2;
-  svgEl('rect',{x:(p.headCenter.x-sqW/2).toFixed(1),y:sqTop.toFixed(1),width:sqW.toFixed(1),height:sqH.toFixed(1),
-    fill:'none',stroke:gold,'stroke-width':'0.7',opacity:'0.18'});
-  // Horizontal proportion guides
+  svgEl('rect',{x:(p.headCenter.x-sqW/2).toFixed(1),y:sqTop.toFixed(1),width:sqW.toFixed(1),height:sqH.toFixed(1),fill:'none',stroke:gold,'stroke-width':'0.7',opacity:'0.18'});
   [p.headCenter.y-32, p.thoracic.y-5, (p.thoracic.y+p.pelvis.y)/2, p.pelvis.y, p.lAnk.y].forEach(y => {
-    svgEl('line',{x1:(p.headCenter.x-circleR-12).toFixed(1),y1:y.toFixed(1),
-      x2:(p.headCenter.x+circleR+12).toFixed(1),y2:y.toFixed(1),
-      stroke:gold,'stroke-width':'0.5',opacity:'0.2'});
+    svgEl('line',{x1:(p.headCenter.x-circleR-12).toFixed(1),y1:y.toFixed(1),x2:(p.headCenter.x+circleR+12).toFixed(1),y2:y.toFixed(1),stroke:gold,'stroke-width':'0.5',opacity:'0.2'});
   });
-  // Tick marks on sides
   for(let i=0;i<8;i++){
     const y = sqTop + i*(sqH/7);
     svgEl('line',{x1:(p.headCenter.x-sqW/2-6).toFixed(1),y1:y.toFixed(1),x2:(p.headCenter.x-sqW/2).toFixed(1),y2:y.toFixed(1),stroke:gold,'stroke-width':'0.6',opacity:'0.3'});
     svgEl('line',{x1:(p.headCenter.x+sqW/2).toFixed(1),y1:y.toFixed(1),x2:(p.headCenter.x+sqW/2+6).toFixed(1),y2:y.toFixed(1),stroke:gold,'stroke-width':'0.6',opacity:'0.3'});
   }
-
-  // Body — filled warm shapes
   const B = {fill:goldL, stroke:goldD, 'stroke-width':'1.2', opacity:'0.92'};
-
-  // Back layer
   svgEl('path',{...B,d:limbPath(p.lHip,p.lKn,14,11)});
   svgEl('path',{...B,d:limbPath(p.rHip,p.rKn,14,11)});
   svgEl('path',{...B,d:limbPath(p.lKn,p.lAnk,11,7)});
@@ -654,22 +603,12 @@ function renderVitruvian(p, fp) {
   svgEl('path',{...B,d:limbPath(p.rEl,p.rWr,9,6)});
   svgEl('ellipse',{...B,cx:p.lHand.x.toFixed(1),cy:p.lHand.y.toFixed(1),rx:'7',ry:'9'});
   svgEl('ellipse',{...B,cx:p.rHand.x.toFixed(1),cy:p.rHand.y.toFixed(1),rx:'7',ry:'9'});
-
-  // Torso
   const shW=13, hipW=10;
   const f=n=>n.toFixed(1);
-  svgEl('path',{...B,d:`M${f(p.lSh.x-shW)},${f(p.lSh.y)} L${f(p.rSh.x+shW)},${f(p.rSh.y)} L${f(p.rHip.x+hipW)},${f(p.rHip.y)} L${f(p.lHip.x-hipW)},${f(p.lHip.y)} Z`});
-
-  // Neck
+  svgEl('path',{...B,d:'M'+f(p.lSh.x-shW)+','+f(p.lSh.y)+' L'+f(p.rSh.x+shW)+','+f(p.rSh.y)+' L'+f(p.rHip.x+hipW)+','+f(p.rHip.y)+' L'+f(p.lHip.x-hipW)+','+f(p.lHip.y)+' Z'});
   svgEl('rect',{...B,x:(p.thoracic.x-7).toFixed(1),y:p.thoracic.y.toFixed(1),width:'14',height:(p.neck.y-p.thoracic.y).toFixed(1),rx:'3'});
-
-  // Head
   svgEl('circle',{...B,cx:p.headCenter.x.toFixed(1),cy:p.headCenter.y.toFixed(1),r:'30'});
-
-  // Muscle overlays
   renderMuscleOverlays(p, 'vitruv');
-
-  // Face — fine detail, 3D-projected
   const faceOp = getFaceOpacity();
   const ff = n => n.toFixed(1);
   if (faceOp > 0.02) {
@@ -693,53 +632,39 @@ function renderVitruvian(p, fp) {
     const hR  = projectFacePoint( 28, -16, 16);
     svgEl('ellipse',{fill:goldD,opacity:foStr,cx:ff(eL.x),cy:ff(eL.y),rx:'3',ry:(2.5*fp.eyeOpenness).toFixed(1)});
     svgEl('ellipse',{fill:goldD,opacity:foStr,cx:ff(eR.x),cy:ff(eR.y),rx:'3',ry:(2.5*fp.eyeOpenness).toFixed(1)});
-    svgEl('path',{d:`M${ff(bL1.x)},${ff(bL1.y)} Q${ff(bLm.x)},${ff(bLm.y)} ${ff(bL2.x)},${ff(bL2.y)}`,fill:'none',stroke:goldD,'stroke-width':'1.1','stroke-linecap':'round',opacity:foStr});
-    svgEl('path',{d:`M${ff(bR1.x)},${ff(bR1.y)} Q${ff(bRm.x)},${ff(bRm.y)} ${ff(bR2.x)},${ff(bR2.y)}`,fill:'none',stroke:goldD,'stroke-width':'1.1','stroke-linecap':'round',opacity:foStr});
+    svgEl('path',{d:'M'+ff(bL1.x)+','+ff(bL1.y)+' Q'+ff(bLm.x)+','+ff(bLm.y)+' '+ff(bL2.x)+','+ff(bL2.y),fill:'none',stroke:goldD,'stroke-width':'1.1','stroke-linecap':'round',opacity:foStr});
+    svgEl('path',{d:'M'+ff(bR1.x)+','+ff(bR1.y)+' Q'+ff(bRm.x)+','+ff(bRm.y)+' '+ff(bR2.x)+','+ff(bR2.y),fill:'none',stroke:goldD,'stroke-width':'1.1','stroke-linecap':'round',opacity:foStr});
     svgEl('line',{x1:ff(ns1.x),y1:ff(ns1.y),x2:ff(ns2.x),y2:ff(ns2.y),stroke:goldD,'stroke-width':'1',opacity:(faceOp*0.55).toFixed(2)});
-    svgEl('path',{d:`M${ff(mL.x)},${ff(mL.y)} Q${ff(mM.x)},${ff(mM.y)} ${ff(mR.x)},${ff(mR.y)}`,fill:'none',stroke:goldD,'stroke-width':'1.5','stroke-linecap':'round',opacity:foStr});
-    svgEl('path',{d:`M${ff(hL.x)},${ff(hL.y)} Q${ff(hM.x)},${ff(hM.y)} ${ff(hR.x)},${ff(hR.y)}`,fill:'none',stroke:goldD,'stroke-width':'0.8',opacity:(faceOp*0.35).toFixed(2)});
+    svgEl('path',{d:'M'+ff(mL.x)+','+ff(mL.y)+' Q'+ff(mM.x)+','+ff(mM.y)+' '+ff(mR.x)+','+ff(mR.y),fill:'none',stroke:goldD,'stroke-width':'1.5','stroke-linecap':'round',opacity:foStr});
+    svgEl('path',{d:'M'+ff(hL.x)+','+ff(hL.y)+' Q'+ff(hM.x)+','+ff(hM.y)+' '+ff(hR.x)+','+ff(hR.y),fill:'none',stroke:goldD,'stroke-width':'0.8',opacity:(faceOp*0.35).toFixed(2)});
   }
-  // Navel + body centreline hint
   svgEl('line',{x1:p.thoracic.x.toFixed(1),y1:p.thoracic.y.toFixed(1),x2:p.pelvis.x.toFixed(1),y2:p.pelvis.y.toFixed(1),stroke:goldD,'stroke-width':'0.6',opacity:'0.3','stroke-dasharray':'3,4'});
 }
 
-// ═══════════════════════════════════════════════════════
-// RENDERER — BULK (solid silhouette, chunky)
-// ═══════════════════════════════════════════════════════
+// ===================================================
+// RENDERER — BULK
+// ===================================================
 function renderBulk(p, fp) {
   const fill = '#c8fff8', stroke = '#004455', sw = '1.8';
   const B = {fill, stroke, 'stroke-width':sw};
   const f = n => n.toFixed(1);
-
-  // Muscle mass tints (behind body)
   renderMuscleOverlays(p, 'bulk');
-
-  // Legs (behind torso)
   svgEl('path',{...B,d:limbPath(p.lHip,p.lKn,20,16)});
   svgEl('path',{...B,d:limbPath(p.rHip,p.rKn,20,16)});
   svgEl('path',{...B,d:limbPath(p.lKn,p.lAnk,15,11)});
   svgEl('path',{...B,d:limbPath(p.rKn,p.rAnk,15,11)});
-  // Knee caps
   svgEl('ellipse',{...B,cx:f(p.lKn.x),cy:f(p.lKn.y),rx:'8',ry:'7'});
   svgEl('ellipse',{...B,cx:f(p.rKn.x),cy:f(p.rKn.y),rx:'8',ry:'7'});
-  // Feet (wider, more solid)
   svgEl('ellipse',{...B,cx:f(p.lAnk.x-9),cy:f(p.lAnk.y+9),rx:'19',ry:'10'});
   svgEl('ellipse',{...B,cx:f(p.rAnk.x+9),cy:f(p.rAnk.y+9),rx:'19',ry:'10'});
-
-  // Upper arms (drawn before torso — torso will overlay at shoulder)
   svgEl('path',{...B,d:limbPath(p.lSh,p.lEl,18,14)});
   svgEl('path',{...B,d:limbPath(p.rSh,p.rEl,18,14)});
-  // Elbow caps
   svgEl('ellipse',{...B,cx:f(p.lEl.x),cy:f(p.lEl.y),rx:'9',ry:'8'});
   svgEl('ellipse',{...B,cx:f(p.rEl.x),cy:f(p.rEl.y),rx:'9',ry:'8'});
-  // Forearms
   svgEl('path',{...B,d:limbPath(p.lEl,p.lWr,14,9)});
   svgEl('path',{...B,d:limbPath(p.rEl,p.rWr,14,9)});
-  // Fists
   svgEl('ellipse',{...B,cx:f(p.lHand.x),cy:f(p.lHand.y),rx:'11',ry:'13'});
   svgEl('ellipse',{...B,cx:f(p.rHand.x),cy:f(p.rHand.y),rx:'11',ry:'13'});
-
-  // Torso — wide trapezoid, wide shoulders narrow to waist, back out to hips
   const shExt=26, waistNip=0.72, hipExt=18;
   const tSL={x:p.lSh.x-shExt, y:p.lSh.y};
   const tSR={x:p.rSh.x+shExt, y:p.rSh.y};
@@ -748,31 +673,20 @@ function renderBulk(p, fp) {
   const wR={x:p.pelvis.x+(Math.abs(p.rSh.x-p.lSh.x)/2+shExt)*waistNip, y:midY};
   const hL={x:p.lHip.x-hipExt, y:p.lHip.y};
   const hR={x:p.rHip.x+hipExt, y:p.rHip.y};
-  svgEl('path',{...B,d:`M${f(tSL.x)},${f(tSL.y)} L${f(tSR.x)},${f(tSR.y)} Q${f(wR.x)},${f(wR.y)} ${f(hR.x)},${f(hR.y)} L${f(hL.x)},${f(hL.y)} Q${f(wL.x)},${f(wL.y)} ${f(tSL.x)},${f(tSL.y)} Z`});
-
-  // Shoulder caps (deltoid mounds)
+  svgEl('path',{...B,d:'M'+f(tSL.x)+','+f(tSL.y)+' L'+f(tSR.x)+','+f(tSR.y)+' Q'+f(wR.x)+','+f(wR.y)+' '+f(hR.x)+','+f(hR.y)+' L'+f(hL.x)+','+f(hL.y)+' Q'+f(wL.x)+','+f(wL.y)+' '+f(tSL.x)+','+f(tSL.y)+' Z'});
   svgEl('ellipse',{...B,cx:f(p.lSh.x-10),cy:f(p.lSh.y-2),rx:'16',ry:'13'});
   svgEl('ellipse',{...B,cx:f(p.rSh.x+10),cy:f(p.rSh.y-2),rx:'16',ry:'13'});
-
-  // Pec definition line (subtle)
   const pcY = p.lSh.y+24;
   svgEl('line',{x1:f(p.lSh.x+2),y1:f(pcY),x2:f(p.headCenter.x),y2:f(pcY),stroke:'#005566','stroke-width':'1',opacity:'0.5'});
   svgEl('line',{x1:f(p.rSh.x-2),y1:f(pcY),x2:f(p.headCenter.x),y2:f(pcY),stroke:'#005566','stroke-width':'1',opacity:'0.5'});
-  // Ab line
   const abTop=p.lSh.y+38, abBot=p.pelvis.y-6;
   svgEl('line',{x1:f(p.headCenter.x),y1:f(abTop),x2:f(p.headCenter.x),y2:f(abBot),stroke:'#005566','stroke-width':'1',opacity:'0.4'});
   for(let i=0;i<3;i++){
     const ay=abTop+i*((abBot-abTop)/2.8);
     svgEl('line',{x1:f(p.headCenter.x-11),y1:f(ay),x2:f(p.headCenter.x+11),y2:f(ay),stroke:'#005566','stroke-width':'0.8',opacity:'0.35'});
   }
-
-  // Neck (thick)
   svgEl('rect',{...B,x:f(p.thoracic.x-13),y:f(p.thoracic.y-4),width:'26',height:f(p.neck.y-p.thoracic.y+6),rx:'5'});
-
-  // Head
   svgEl('circle',{...B,cx:f(p.headCenter.x),cy:f(p.headCenter.y),r:'33'});
-
-  // Face — bold, 3D-projected
   const faceOp = getFaceOpacity();
   if (faceOp > 0.02) {
     const mc = fp.smile - fp.frown;
@@ -790,18 +704,16 @@ function renderBulk(p, fp) {
     const mR  = projectFacePoint( 11,  10+fp.jawOpen, 24);
     svgEl('ellipse',{fill:stroke,opacity:foStr,cx:f(eL.x),cy:f(eL.y),rx:'5',ry:f(4*fp.eyeOpenness)});
     svgEl('ellipse',{fill:stroke,opacity:foStr,cx:f(eR.x),cy:f(eR.y),rx:'5',ry:f(4*fp.eyeOpenness)});
-    svgEl('path',{d:`M${f(bL1.x)},${f(bL1.y)} Q${f(bLm.x)},${f(bLm.y)} ${f(bL2.x)},${f(bL2.y)}`,fill:'none',stroke,opacity:foStr,'stroke-width':'2.5','stroke-linecap':'round'});
-    svgEl('path',{d:`M${f(bR1.x)},${f(bR1.y)} Q${f(bRm.x)},${f(bRm.y)} ${f(bR2.x)},${f(bR2.y)}`,fill:'none',stroke,opacity:foStr,'stroke-width':'2.5','stroke-linecap':'round'});
-    svgEl('path',{d:`M${f(mL.x)},${f(mL.y)} Q${f(mM.x)},${f(mM.y)} ${f(mR.x)},${f(mR.y)}`,fill:'none',stroke,opacity:foStr,'stroke-width':'2.2','stroke-linecap':'round'});
+    svgEl('path',{d:'M'+f(bL1.x)+','+f(bL1.y)+' Q'+f(bLm.x)+','+f(bLm.y)+' '+f(bL2.x)+','+f(bL2.y),fill:'none',stroke,opacity:foStr,'stroke-width':'2.5','stroke-linecap':'round'});
+    svgEl('path',{d:'M'+f(bR1.x)+','+f(bR1.y)+' Q'+f(bRm.x)+','+f(bRm.y)+' '+f(bR2.x)+','+f(bR2.y),fill:'none',stroke,opacity:foStr,'stroke-width':'2.5','stroke-linecap':'round'});
+    svgEl('path',{d:'M'+f(mL.x)+','+f(mL.y)+' Q'+f(mM.x)+','+f(mM.y)+' '+f(mR.x)+','+f(mR.y),fill:'none',stroke,opacity:foStr,'stroke-width':'2.2','stroke-linecap':'round'});
   }
-
-  // Glow frame around bulk figure
   svgEl('rect',{x:'5',y:'5',width:'450',height:'510',fill:'none',stroke:'#00e5ff','stroke-width':'0.5',opacity:'0.07',rx:'4'});
 }
 
-// ═══════════════════════════════════════════════════════
-// MUSCLE OVERLAYS — style-aware
-// ═══════════════════════════════════════════════════════
+// ===================================================
+// MUSCLE OVERLAYS
+// ===================================================
 const muscleMap = {
   'Pec.S':   {name:'Pec (Sternal)',    color:'#ff4400', region:p=>({cx:(p.lSh.x+p.rSh.x)/2,cy:p.lSh.y+22,rx:50,ry:22})},
   'Pec.C':   {name:'Pec (Clavicular)',color:'#ff6600', region:p=>({cx:(p.lSh.x+p.rSh.x)/2,cy:p.lSh.y+8,rx:44,ry:14})},
@@ -819,7 +731,6 @@ const muscleMap = {
   'Ham':     {name:'Hamstrings',       color:'#ff4400', region:p=>({cx:p.lHip.x+(p.lKn.x-p.lHip.x)*0.55-14,cy:p.lHip.y+(p.lKn.y-p.lHip.y)*0.55,rx:12,ry:20})},
   'Gas':     {name:'Gastrocnemius',    color:'#ff6600', region:p=>({cx:p.lKn.x+(p.lAnk.x-p.lKn.x)*0.4+10,cy:p.lKn.y+(p.lAnk.y-p.lKn.y)*0.4,rx:10,ry:16})},
   'Sol':     {name:'Soleus',           color:'#ff7700', region:p=>({cx:p.lKn.x+(p.lAnk.x-p.lKn.x)*0.6+9,cy:p.lKn.y+(p.lAnk.y-p.lKn.y)*0.6,rx:9,ry:14})},
-  // Face muscles
   'Zyg.Mj':  {name:'Zygomaticus Mj',  color:'#ff8844', region:p=>({cx:p.headCenter.x-10,cy:p.headCenter.y+8,rx:8,ry:6,r2cx:p.headCenter.x+10,r2cy:p.headCenter.y+8})},
   'Orb.Oc':  {name:'Orbicularis Oc',  color:'#ff6688', region:p=>({cx:p.headCenter.x-10,cy:p.headCenter.y-7,rx:9,ry:6,r2cx:p.headCenter.x+10,r2cy:p.headCenter.y-7})},
   'Dep.Ang': {name:'Dep. Anguli',     color:'#ff5566', region:p=>({cx:p.headCenter.x-11,cy:p.headCenter.y+12,rx:6,ry:5,r2cx:p.headCenter.x+11,r2cy:p.headCenter.y+12})},
@@ -828,23 +739,18 @@ const muscleMap = {
 };
 
 function renderMuscleOverlays(p, style) {
-  const g = document.getElementById('avatar-render');
   const activeMuscles = Object.entries(muscles).filter(([,v])=>v>0);
   if (!activeMuscles.length) return;
-
   const opLevels = [0, 0.3, 0.55, 0.82];
   const blurMap = {wire:'url(#glow-muscle)', vitruv:'url(#glow-sm)', bulk:'url(#glow-bulk)'};
-
   for (const [sym, level] of activeMuscles) {
     const info = muscleMap[sym];
     if (!info) continue;
     const reg = info.region(p);
     const op = opLevels[level];
-    // Style-specific color adjustments
     let color = info.color;
     if (style==='vitruv') color = '#cc3300';
     if (style==='bulk')   color = '#ff6600';
-
     const attrs = {fill:color, opacity:op.toString(), filter:blurMap[style]};
     svgEl('ellipse',{...attrs,cx:reg.cx.toFixed(1),cy:reg.cy.toFixed(1),rx:reg.rx,ry:(reg.ry||reg.rx*0.7)});
     if (reg.r2cx !== undefined)
@@ -852,28 +758,25 @@ function renderMuscleOverlays(p, style) {
   }
 }
 
-// ═══════════════════════════════════════════════════════
+// ===================================================
 // MAIN RENDER DISPATCHER
-// ═══════════════════════════════════════════════════════
+// ===================================================
 function render() {
   const raw = calcPositions(joints);
-  rawCache = raw;       // store for face point projection
+  rawCache = raw;
   const p   = applyProjection(raw);
   const fp  = getFaceParams();
-
   document.getElementById('avatar-render').innerHTML = '';
-
   if      (currentStyle === 'wire')   renderWire(p, fp);
   else if (currentStyle === 'vitruv') renderVitruvian(p, fp);
   else if (currentStyle === 'bulk')   renderBulk(p, fp);
-
   updateMNNOutput();
   updateInfoTab();
 }
 
-// ═══════════════════════════════════════════════════════
+// ===================================================
 // MNN PARSER
-// ═══════════════════════════════════════════════════════
+// ===================================================
 function parseMNN(str) {
   const result = {joints:{}, muscles:{}, movement:null};
   const mm = str.match(/\{([^}]+)\}/);
@@ -903,49 +806,48 @@ function applyMNN() {
   }
   muscles = parsed.muscles;
   currentMovement = parsed.movement || '';
-  document.getElementById('movement-display').textContent = currentMovement ? `{${currentMovement}}` : '';
+  document.getElementById('movement-display').textContent = currentMovement ? '{' + currentMovement + '}' : '';
   render();
   updateMuscleDisplay();
   syncSliders();
 }
 
-// ═══════════════════════════════════════════════════════
+// ===================================================
 // MNN OUTPUT
-// ═══════════════════════════════════════════════════════
+// ===================================================
 function updateMNNOutput() {
   const out = document.getElementById('mnn-output');
   const posEntries = [];
   for (const [joint, axes] of Object.entries(joints)) {
     const nz = Object.entries(axes).filter(([,v])=>v!==0);
-    if (nz.length) posEntries.push(`${joint}(${nz.map(([k,v])=>`${k}:${v}`).join(',')})`);
+    if (nz.length) posEntries.push(joint + '(' + nz.map(([k,v])=>k+':'+v).join(',') + ')');
   }
-  const conEntries = Object.entries(muscles).map(([k,v])=>`${k}${'+'.repeat(v)}`);
+  const conEntries = Object.entries(muscles).map(([k,v])=>k+'+'.repeat(v));
   let parts = [];
-  if (currentMovement) parts.push(`<span class="tag-mov">{${currentMovement}}</span>`);
-  if (conEntries.length) parts.push(`<span class="tag-con">[Con:${conEntries.join(', ')}]</span>`);
-  if (posEntries.length) parts.push(`<span class="tag-pos">[Pos:${posEntries.join(' ')}]</span>`);
+  if (currentMovement) parts.push('<span class="tag-mov">{' + currentMovement + '}</span>');
+  if (conEntries.length) parts.push('<span class="tag-con">[Con:' + conEntries.join(', ') + ']</span>');
+  if (posEntries.length) parts.push('<span class="tag-pos">[Pos:' + posEntries.join(' ') + ']</span>');
   out.innerHTML = parts.join('\n') || '<span style="color:var(--text-dim)">— default pose —</span>';
 }
 
-// ═══════════════════════════════════════════════════════
+// ===================================================
 // MUSCLE DISPLAY
-// ═══════════════════════════════════════════════════════
+// ===================================================
 function updateMuscleDisplay() {
   const list = document.getElementById('muscle-list');
   const entries = Object.entries(muscles).filter(([,v])=>v>0);
   if (!entries.length) { list.innerHTML = '<div class="muscle-empty">No muscles activated</div>'; return; }
   list.innerHTML = entries.map(([sym,level]) => {
-    const info = muscleMap[sym];
     const pct = level*33;
     const color = ['','rgba(255,165,0,0.7)','var(--orange)','var(--red-hot)'][level];
     const lc = ['','l1','l2','l3'][level];
-    return `<div class="muscle-row"><div class="muscle-name">${sym}</div><div class="muscle-bar-bg"><div class="muscle-bar" style="width:${pct}%;background:${color}"></div></div><div class="muscle-level ${lc}">${'+'.repeat(level)}</div></div>`;
+    return '<div class="muscle-row"><div class="muscle-name">' + sym + '</div><div class="muscle-bar-bg"><div class="muscle-bar" style="width:' + pct + '%;background:' + color + '"></div></div><div class="muscle-level ' + lc + '">' + '+'.repeat(level) + '</div></div>';
   }).join('');
 }
 
-// ═══════════════════════════════════════════════════════
+// ===================================================
 // PRESETS
-// ═══════════════════════════════════════════════════════
+// ===================================================
 const presets = {
   tpose:      {label:'T-Pose',     mnn:'[Pos:L.Sh(Abd:90) R.Sh(Abd:90) L.Hip(Abd:5) R.Hip(Abd:5)]', muscles:{}},
   anatomical: {label:'Stand',      mnn:'[Pos:L.Sh(Abd:0) R.Sh(Abd:0) L.Hip(Abd:0) R.Hip(Abd:0)]', muscles:{}},
@@ -990,9 +892,9 @@ function copyMNN() {
   navigator.clipboard.writeText(document.getElementById('mnn-output').innerText).catch(()=>{});
 }
 
-// ═══════════════════════════════════════════════════════
+// ===================================================
 // SLIDERS
-// ═══════════════════════════════════════════════════════
+// ===================================================
 const sliderDefs = [
   {label:'Spine Lat',    joint:'Sp.L', axis:'Lat',  min:-35, max:35},
   {label:'Head Flex',    joint:'Sp.C', axis:'Flex', min:-60, max:80},
@@ -1013,7 +915,7 @@ const sliderDefs = [
 function buildSliders() {
   document.getElementById('slider-grid').innerHTML = sliderDefs.map((s,i) => {
     const v = joints[s.joint]?.[s.axis] ?? 0;
-    return `<div class="slider-row"><div class="slider-label"><span>${s.label}</span><span class="val" id="sv-${i}">${v}°</span></div><input type="range" id="sl-${i}" min="${s.min}" max="${s.max}" value="${v}" oninput="onSlider(${i},this.value)"></div>`;
+    return '<div class="slider-row"><div class="slider-label"><span>' + s.label + '</span><span class="val" id="sv-' + i + '">' + v + '&deg;</span></div><input type="range" id="sl-' + i + '" min="' + s.min + '" max="' + s.max + '" value="' + v + '" oninput="onSlider(' + i + ',this.value)"></div>';
   }).join('');
 }
 
@@ -1021,76 +923,76 @@ function onSlider(i, val) {
   const s = sliderDefs[i]; val = parseInt(val);
   if (!joints[s.joint]) joints[s.joint] = {};
   joints[s.joint][s.axis] = val;
-  document.getElementById(`sv-${i}`).textContent = val+'°';
+  document.getElementById('sv-' + i).textContent = val + '°';
   document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('active-preset'));
   render();
 }
 
 function syncSliders() {
   sliderDefs.forEach((s,i) => {
-    const el = document.getElementById(`sl-${i}`);
-    const sv = document.getElementById(`sv-${i}`);
+    const el = document.getElementById('sl-' + i);
+    const sv = document.getElementById('sv-' + i);
     if (!el||!sv) return;
     const v = joints[s.joint]?.[s.axis] ?? 0;
-    el.value = v; sv.textContent = v+'°';
+    el.value = v; sv.textContent = v + '°';
   });
 }
 
-// ═══════════════════════════════════════════════════════
+// ===================================================
 // INFO + EXAMPLES
-// ═══════════════════════════════════════════════════════
+// ===================================================
 function updateInfoTab() {
   const el = document.getElementById('joint-state-display');
   if (!el) return;
   const lines = [];
   for (const [joint, axes] of Object.entries(joints)) {
     const nz = Object.entries(axes).filter(([,v])=>v!==0);
-    if (nz.length) lines.push(`${joint}: ${nz.map(([k,v])=>`${k}=${v}°`).join(', ')}`);
+    if (nz.length) lines.push(joint + ': ' + nz.map(([k,v])=>k+'='+v+'°').join(', '));
   }
   el.textContent = lines.join('\n') || '— all joints at default —';
 }
 
 function buildInfoRows() {
   document.getElementById('info-rows').innerHTML = [
-    ['Spec','MNN v1.5.1'],['LOD','LOD 1 (~55 muscles)'],
+    ['Spec','MNN v1.6'],['LOD','LOD 1 (~55 muscles)'],
     ['Styles','WIRE · VITRUV · BULK'],['Joints','~139 DOF'],
     ['Platform','InThisWorld / AIUNITES'],
-  ].map(([k,v])=>`<div class="info-row"><span>${k}</span><span class="info-val">${v}</span></div>`).join('');
+  ].map(([k,v])=>'<div class="info-row"><span>' + k + '</span><span class="info-val">' + v + '</span></div>').join('');
 }
 
 const examples = [
   {label:'Shoulder press', str:'{Push.V} [Con:Dlt.A+++, Tri++] [Pos:L.Sh(Abd:170,Flex:10) R.Sh(Abd:170,Flex:10)]'},
-  {label:'Duchenne smile',  str:'[Con:Zyg.Mj+++, Orb.Oc++] → CNVII'},
-  {label:'Concentration frown', str:'[Con:Corr+++, Dep.Ang+++] → CNVII'},
-  {label:'Cable fly',       str:'{Pull.H} [Con:Pec.S+++, Dlt.A+] → MedPec/Axil [Pos:L.Sh(IR:25,Flex:90,Abd:45) R.Sh(IR:25,Flex:90,Abd:45)]'},
-  {label:'Lateral raise',   str:'{Iso} [Con:Dlt.L+++, Trp.U+] → Axil [Pos:L.Sh(Abd:90) R.Sh(Abd:90)]'},
+  {label:'Duchenne smile',  str:'[Con:Zyg.Mj+++, Orb.Oc++]'},
+  {label:'Concentration frown', str:'[Con:Corr+++, Dep.Ang+++]'},
+  {label:'Cable fly',       str:'{Pull.H} [Con:Pec.S+++, Dlt.A+] [Pos:L.Sh(IR:25,Flex:90,Abd:45) R.Sh(IR:25,Flex:90,Abd:45)]'},
+  {label:'Lateral raise',   str:'{Iso} [Con:Dlt.L+++, Trp.U+] [Pos:L.Sh(Abd:90) R.Sh(Abd:90)]'},
   {label:'Bicep flex pose', str:'[Con:Bic+++, Dlt.L++] [Pos:L.Sh(Abd:90) L.El(Flex:130) R.Sh(Abd:90) R.El(Flex:130)]'},
 ];
 
 function buildExamples() {
-  document.getElementById('examples').innerHTML = examples.map(e =>
-    `<button class="preset-btn" style="text-align:left;padding:7px 10px;font-size:9px" onclick="loadExample(${JSON.stringify(e.str).replace(/'/g,'&apos;')})">${e.label}</button>`
+  document.getElementById('examples').innerHTML = examples.map((e, i) =>
+    '<button class="preset-btn" style="text-align:left;padding:7px 10px;font-size:9px" onclick="loadExample(' + i + ')">' + e.label + '</button>'
   ).join('');
 }
 
-function loadExample(str) {
-  document.getElementById('mnn-input').value = str;
+function loadExample(idx) {
+  document.getElementById('mnn-input').value = examples[idx].str;
   applyMNN();
 }
 
-// ═══════════════════════════════════════════════════════
+// ===================================================
 // TABS
-// ═══════════════════════════════════════════════════════
+// ===================================================
 function switchTab(name) {
   const names = ['pose','muscles','mnn','info'];
   document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', names[i]===name));
   document.querySelectorAll('.tab-content').forEach(tc=>tc.classList.remove('active'));
-  document.getElementById('tab-'+name).classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
 }
 
-// ═══════════════════════════════════════════════════════
+// ===================================================
 // INIT
-// ═══════════════════════════════════════════════════════
+// ===================================================
 buildSliders();
 buildInfoRows();
 buildExamples();
