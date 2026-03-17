@@ -518,6 +518,44 @@ const ANIM_SEQUENCES = {
       { mnn: '[Pos:L.Hip(Flex:20,Abd:5) R.Hip(Flex:60,Abd:5) L.Kn(Flex:80) R.Kn(Flex:30) L.Sh(Abd:35,Flex:-20) R.Sh(Abd:35,Flex:30) L.El(Flex:85) R.El(Flex:90)]', muscles: { 'Quad.RF': 2, 'Ham': 2, 'Gas': 3 }, duration: 350 },
     ],
   },
+  bench_correct: {
+    label: 'Bench ✓',
+    loop: true,
+    easing: 'ease-bio',
+    keyframes: [
+      // Start: bar at chest, pecs loaded
+      { mnn: '[Pos:L.Sh(Abd:55,Flex:0) R.Sh(Abd:55,Flex:0) L.El(Flex:90) R.El(Flex:90)]',
+        muscles: { 'Pec.S': 3, 'Pec.C': 2, 'Tri': 1 }, duration: 400 },
+      // Press: pecs drive, minimal delt
+      { mnn: '[Pos:L.Sh(Abd:55,Flex:5) R.Sh(Abd:55,Flex:5) L.El(Flex:15) R.El(Flex:15)]',
+        muscles: { 'Pec.S': 3, 'Pec.C': 3, 'Tri': 2, 'Dlt.A': 1 }, duration: 1000 },
+      // Top lockout
+      { mnn: '[Pos:L.Sh(Abd:55,Flex:5) R.Sh(Abd:55,Flex:5) L.El(Flex:5) R.El(Flex:5)]',
+        muscles: { 'Pec.S': 2, 'Tri': 3 }, duration: 400 },
+      // Lower back down
+      { mnn: '[Pos:L.Sh(Abd:55,Flex:0) R.Sh(Abd:55,Flex:0) L.El(Flex:90) R.El(Flex:90)]',
+        muscles: { 'Pec.S': 2, 'Pec.C': 1, 'Tri': 1 }, duration: 900 },
+    ],
+  },
+  bench_wrong: {
+    label: 'Bench ✗ Shoulder',
+    loop: true,
+    easing: 'ease-bio',
+    keyframes: [
+      // Start: bar at chest, poor setup — shoulders elevated
+      { mnn: '[Pos:L.Sh(Abd:75,Flex:15) R.Sh(Abd:75,Flex:15) L.El(Flex:90) R.El(Flex:90)]',
+        muscles: { 'Pec.S': 1, 'Dlt.A': 2, 'Trp.U': 1 }, duration: 400 },
+      // Press: ANTERIOR DELT takes over — shoulder drives forward
+      { mnn: '[Pos:L.Sh(Abd:75,Flex:45) R.Sh(Abd:75,Flex:45) L.El(Flex:30) R.El(Flex:30)]',
+        muscles: { 'Dlt.A': 3, 'Pec.S': 1, 'Pec.C': 1, 'Tri': 1, 'Trp.U': 2 }, duration: 1000 },
+      // Top — shoulder dominated, pecs barely loaded
+      { mnn: '[Pos:L.Sh(Abd:75,Flex:50) R.Sh(Abd:75,Flex:50) L.El(Flex:10) R.El(Flex:10)]',
+        muscles: { 'Dlt.A': 3, 'Tri': 2, 'Pec.S': 1 }, duration: 400 },
+      // Lower
+      { mnn: '[Pos:L.Sh(Abd:75,Flex:15) R.Sh(Abd:75,Flex:15) L.El(Flex:90) R.El(Flex:90)]',
+        muscles: { 'Dlt.A': 1, 'Pec.S': 1 }, duration: 900 },
+    ],
+  },
   ohpress: {
     label: 'OH Press',
     loop: true,
