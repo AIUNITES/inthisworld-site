@@ -378,6 +378,8 @@ function animStep(ts) {
   }
 
   render();
+  // Only update muscle display when crossing a keyframe boundary (muscles changed)
+  if (animT === 0 || animT >= 1) updateMuscleDisplay();
   animRafId = requestAnimationFrame(animStep);
 }
 
@@ -390,6 +392,7 @@ function animPlay() {
   joints = JSON.parse(JSON.stringify(animKeyframes[0].joints));
   muscles = { ...(animKeyframes[0].muscles || {}) };
   updateAnimUI();
+  updateMuscleDisplay();
   animRafId = requestAnimationFrame(animStep);
 }
 
@@ -1190,6 +1193,7 @@ const presets = {
 function applyPreset(key, ev) {
   const preset = presets[key];
   if (!preset) return;
+  animStop(); // stop any running animation before applying preset
   joints = JSON.parse(JSON.stringify(defaultState));
   muscles = {...preset.muscles};
   currentMovement = '';
@@ -1208,6 +1212,7 @@ function applyPreset(key, ev) {
 }
 
 function clearPose() {
+  animStop(); // stop any running animation before clearing
   joints = JSON.parse(JSON.stringify(defaultState));
   muscles = {}; currentMovement = '';
   document.getElementById('movement-display').textContent = '';
