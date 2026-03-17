@@ -151,7 +151,7 @@
         <button class="style-btn active" onclick="setStyle('wire')">WIRE</button>
         <button class="style-btn style-vitruv" onclick="setStyle('vitruv')">VITRUV</button>
         <button class="style-btn style-bulk" onclick="setStyle('bulk')">BULK</button>
-        <button class="style-btn" id="btn-3d" onclick="toggle3D(this)" title="Toggle 3D rotation">3D &#9654;</button>
+        <button class="style-btn" id="btn-3d" onclick="toggle3D(this)" title="Toggle 3D rotation">3D</button>
       </div>
       <div class="rot-row" id="rot-row">
         <span class="rot-label">ROT</span>
@@ -168,6 +168,7 @@
       <div class="tab active" onclick="switchTab('pose')">POSE</div>
       <div class="tab" onclick="switchTab('muscles')">MUSCLES</div>
       <div class="tab" onclick="switchTab('mnn')">MNN</div>
+      <div class="tab" onclick="switchTab('anim')">ANIMATE</div>
       <div class="tab" onclick="switchTab('info')">INFO</div>
     </div>
 
@@ -220,6 +221,8 @@
       </div>
     </div>
 
+    <div class="tab-content" id="tab-anim"></div>
+
     <div class="tab-content" id="tab-info">
       <div class="section" style="flex:1;overflow-y:auto">
         <div class="section-title">SYSTEM INFO</div>
@@ -259,6 +262,297 @@ let rafId = null;
 let rawCache = null;
 
 // ===================================================
+// ANIMATION ENGINE (MNN v1.1 — Section 4.5)
+// ===================================================
+let animKeyframes   = [];   // [{joints, muscles, duration, easing}, ...]
+let animFrame       = 0;    // current keyframe index
+let animT           = 0;    // progress 0→1 within current transition
+let animPlaying     = false;
+let animLoop        = false;
+let animRafId       = null;
+let animLastTime    = null;
+
+// Easing functions mapped from spec tags
+const EASINGS = {
+  'ease-bio':    t => t < 0.5 ? 2*t*t*(1.5-t) : 1 - Math.pow(-2*t+2,2)/2,   // bell-shaped velocity (motor cortex)
+  'ease-linear': t => t,
+  'ease-snap':   t => t < 0.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2,          // ballistic (basal ganglia)
+  'ease-in':     t => t*t*t,
+  'ease-out':    t => 1-Math.pow(1-t,3),
+  'ease-spring': t => { const c=2*Math.PI/3; return t===0?0:t===1?1:Math.pow(2,-10*t)*Math.sin((t*10-0.75)*c)+1; }, // SSC overshoot
+};
+
+function lerpJoints(fromJ, toJ, t) {
+  const out = {};
+  const allKeys = new Set([...Object.keys(fromJ), ...Object.keys(toJ)]);
+  for (const joint of allKeys) {
+    out[joint] = {};
+    const fAxes = fromJ[joint] || {};
+    const tAxes = toJ[joint] || {};
+    const axisKeys = new Set([...Object.keys(fAxes), ...Object.keys(tAxes)]);
+    for (const ax of axisKeys) {
+      const fv = fAxes[ax] ?? 0;
+      const tv = tAxes[ax] ?? 0;
+      out[joint][ax] = fv + (tv - fv) * t;
+    }
+  }
+  return out;
+}
+
+function animStep(ts) {
+  if (!animPlaying || animKeyframes.length < 2) return;
+  if (animLastTime === null) animLastTime = ts;
+  const dt = ts - animLastTime;
+  animLastTime = ts;
+
+  const kf = animKeyframes[animFrame];
+  animT += dt / kf.duration;
+
+  if (animT >= 1) {
+    // Snap to end of this transition
+    animT = 1;
+    joints = JSON.parse(JSON.stringify(animKeyframes[animFrame + 1].joints));
+    muscles = { ...(animKeyframes[animFrame + 1].muscles || {}) };
+    animFrame++;
+
+    if (animFrame >= animKeyframes.length - 1) {
+      if (animLoop) {
+        animFrame = 0;
+        animT = 0;
+      } else {
+        animPlaying = false;
+        animLastTime = null;
+        updateAnimUI();
+        render();
+        updateMuscleDisplay();
+        syncSliders();
+        return;
+      }
+    } else {
+      animT = 0;
+    }
+  } else {
+    const easeFn = EASINGS[kf.easing] || EASINGS['ease-bio'];
+    const et = easeFn(animT);
+    joints = lerpJoints(animKeyframes[animFrame].joints, animKeyframes[animFrame + 1].joints, et);
+    const curMuscles = animKeyframes[animFrame].muscles || {};
+    const nxtMuscles = animKeyframes[animFrame + 1].muscles || {};
+    muscles = Object.keys({...curMuscles,...nxtMuscles}).reduce((acc, k) => {
+      acc[k] = Math.round(((curMuscles[k]||0) + ((nxtMuscles[k]||0)-(curMuscles[k]||0))*et));
+      return acc;
+    }, {});
+  }
+
+  render();
+  animRafId = requestAnimationFrame(animStep);
+}
+
+function animPlay() {
+  if (animKeyframes.length < 2) return;
+  animPlaying = true;
+  animFrame = 0;
+  animT = 0;
+  animLastTime = null;
+  joints = JSON.parse(JSON.stringify(animKeyframes[0].joints));
+  muscles = { ...(animKeyframes[0].muscles || {}) };
+  updateAnimUI();
+  animRafId = requestAnimationFrame(animStep);
+}
+
+function animStop() {
+  animPlaying = false;
+  if (animRafId) cancelAnimationFrame(animRafId);
+  animRafId = null;
+  animLastTime = null;
+  animFrame = 0;
+  animT = 0;
+  updateAnimUI();
+}
+
+function animToggleLoop(btn) {
+  animLoop = !animLoop;
+  btn.textContent = animLoop ? '∞ LOOP ON' : '∞ LOOP';
+  btn.style.color = animLoop ? 'var(--cyan)' : '';
+  btn.style.borderColor = animLoop ? 'var(--cyan)' : '';
+}
+
+function updateAnimUI() {
+  const playBtn = document.getElementById('anim-play');
+  const stopBtn = document.getElementById('anim-stop');
+  if (playBtn) playBtn.textContent = animPlaying ? '⏸ PAUSE' : '▶ PLAY';
+  if (stopBtn) stopBtn.disabled = !animPlaying;
+}
+
+// Parse MNN animation string with ~ transitions into keyframes
+function parseMNNAnim(str) {
+  // Split on → arrows and ~ transitions
+  // Format: [Pos:...][Con:...] ~NNNms:ease-xxx → [Pos:...]
+  const frames = [];
+  // Split on transition markers ~NNNms or → 
+  const parts = str.split(/\s*(→|\u2192)\s*/);
+  let pendingDuration = 800;
+  let pendingEasing = 'ease-bio';
+
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i].trim();
+    if (!part) continue;
+    // Extract transition spec from END of this part: ~NNNms:ease-xxx
+    const transMatch = part.match(/~(\d+)ms(?::([a-z-]+))?/);
+    const cleanPart = part.replace(/~\d+ms(?::[a-z-]+)?/, '').trim();
+    const parsed = parseMNN(cleanPart);
+    const loopMatch = str.match(/\[Loop:(\d+|inf)\]/);
+
+    frames.push({
+      joints: Object.keys(parsed.joints).length ? mergeJoints(defaultState, parsed.joints) : JSON.parse(JSON.stringify(defaultState)),
+      muscles: parsed.muscles || {},
+      duration: pendingDuration,
+      easing: pendingEasing,
+      loop: loopMatch ? (loopMatch[1] === 'inf' ? -1 : parseInt(loopMatch[1])) : 0,
+    });
+
+    if (transMatch) {
+      pendingDuration = parseInt(transMatch[1]);
+      pendingEasing = transMatch[2] || 'ease-bio';
+    } else {
+      pendingDuration = 800;
+      pendingEasing = 'ease-bio';
+    }
+  }
+  return frames;
+}
+
+function mergeJoints(base, overrides) {
+  const out = JSON.parse(JSON.stringify(base));
+  for (const [joint, axes] of Object.entries(overrides)) {
+    if (!out[joint]) out[joint] = {};
+    Object.assign(out[joint], axes);
+  }
+  return out;
+}
+
+// Built-in named animation sequences (spec §4.5.7)
+const ANIM_SEQUENCES = {
+  wave: {
+    label: 'Wave',
+    loop: true,
+    easing: 'ease-bio',
+    keyframes: [
+      { mnn: '[Pos:R.Sh(Abd:120,Flex:20) R.El(Flex:20)]', muscles: { 'Dlt.L': 2 }, duration: 600 },
+      { mnn: '[Pos:R.Sh(Abd:155,Flex:20) R.El(Flex:60) R.Wr(Flex:-20)]', muscles: { 'Dlt.L': 3, 'Dlt.A': 1 }, duration: 400 },
+      { mnn: '[Pos:R.Sh(Abd:120,Flex:20) R.El(Flex:20) R.Wr(Flex:15)]', muscles: { 'Dlt.L': 2 }, duration: 400 },
+    ],
+  },
+  curl: {
+    label: 'Bicep Curl',
+    loop: true,
+    easing: 'ease-bio',
+    keyframes: [
+      { mnn: '[Pos:L.Sh(Abd:10) L.El(Flex:0) R.Sh(Abd:10) R.El(Flex:0)]', muscles: {}, duration: 600 },
+      { mnn: '[Pos:L.El(Flex:135) R.El(Flex:135)]', muscles: { 'Bic': 3, 'Dlt.A': 1 }, duration: 500 },
+      { mnn: '[Pos:L.El(Flex:0) R.El(Flex:0)]', muscles: { 'Tri': 2 }, duration: 700 },
+    ],
+  },
+  squat: {
+    label: 'Squat',
+    loop: true,
+    easing: 'ease-bio',
+    keyframes: [
+      { mnn: '[Pos:L.Hip(Flex:0,Abd:5) R.Hip(Flex:0,Abd:5) L.Kn(Flex:0) R.Kn(Flex:0) L.Sh(Abd:0) R.Sh(Abd:0)]', muscles: {}, duration: 400 },
+      { mnn: '[Pos:L.Hip(Flex:90,Abd:20) R.Hip(Flex:90,Abd:20) L.Kn(Flex:100) R.Kn(Flex:100) L.Sh(Abd:80,Flex:40) R.Sh(Abd:80,Flex:40) Sp.L(Flex:15)]', muscles: { 'Quad.RF': 3, 'Quad.VL': 3, 'Glu.Mx': 2, 'Ham': 2 }, duration: 1800 },
+      { mnn: '[Pos:L.Hip(Flex:0,Abd:5) R.Hip(Flex:0,Abd:5) L.Kn(Flex:0) R.Kn(Flex:0) L.Sh(Abd:0) R.Sh(Abd:0) Sp.L(Flex:0)]', muscles: { 'Quad.RF': 2, 'Glu.Mx': 3 }, duration: 1500 },
+    ],
+  },
+  breathe: {
+    label: 'Breathe',
+    loop: true,
+    easing: 'ease-bio',
+    keyframes: [
+      { mnn: '[Pos:L.Sh(Abd:90,Flex:0) R.Sh(Abd:90,Flex:0) Sp.L(Lat:0)]', muscles: {}, duration: 400 },
+      { mnn: '[Pos:L.Sh(Abd:95,Flex:5) R.Sh(Abd:95,Flex:5) Sp.L(Lat:0) Sp.T(Flex:-5)]', muscles: { 'Rect.Ab': 1 }, duration: 2500 },
+      { mnn: '[Pos:L.Sh(Abd:90,Flex:0) R.Sh(Abd:90,Flex:0) Sp.L(Lat:0) Sp.T(Flex:0)]', muscles: {}, duration: 3000 },
+    ],
+  },
+  run: {
+    label: 'Run Cycle',
+    loop: true,
+    easing: 'ease-snap',
+    keyframes: [
+      { mnn: '[Pos:L.Hip(Flex:60,Abd:5) R.Hip(Flex:20,Abd:5) L.Kn(Flex:30) R.Kn(Flex:80) L.Sh(Abd:35,Flex:30) R.Sh(Abd:35,Flex:-20) L.El(Flex:90) R.El(Flex:85)]', muscles: { 'Quad.RF': 2, 'Ham': 2, 'Gas': 3 }, duration: 350 },
+      { mnn: '[Pos:L.Hip(Flex:20,Abd:5) R.Hip(Flex:60,Abd:5) L.Kn(Flex:80) R.Kn(Flex:30) L.Sh(Abd:35,Flex:-20) R.Sh(Abd:35,Flex:30) L.El(Flex:85) R.El(Flex:90)]', muscles: { 'Quad.RF': 2, 'Ham': 2, 'Gas': 3 }, duration: 350 },
+    ],
+  },
+  ohpress: {
+    label: 'OH Press',
+    loop: true,
+    easing: 'ease-bio',
+    keyframes: [
+      { mnn: '[Pos:L.Sh(Abd:70,Flex:10) R.Sh(Abd:70,Flex:10) L.El(Flex:90) R.El(Flex:90)]', muscles: { 'Dlt.A': 1 }, duration: 400 },
+      { mnn: '[Pos:L.Sh(Abd:175,Flex:10) R.Sh(Abd:175,Flex:10) L.El(Flex:15) R.El(Flex:15)]', muscles: { 'Dlt.A': 3, 'Dlt.L': 2, 'Tri': 2, 'Trp.U': 2 }, duration: 900 },
+      { mnn: '[Pos:L.Sh(Abd:70,Flex:10) R.Sh(Abd:70,Flex:10) L.El(Flex:90) R.El(Flex:90)]', muscles: { 'Tri': 1 }, duration: 1000 },
+    ],
+  },
+};
+
+function loadAnimSequence(key) {
+  const seq = ANIM_SEQUENCES[key];
+  if (!seq) return;
+  animStop();
+  animLoop = seq.loop;
+  const loopBtn = document.getElementById('anim-loop');
+  if (loopBtn) { loopBtn.textContent = animLoop ? '∞ LOOP ON' : '∞ LOOP'; loopBtn.style.color = animLoop ? 'var(--cyan)' : ''; loopBtn.style.borderColor = animLoop ? 'var(--cyan)' : ''; }
+
+  animKeyframes = seq.keyframes.map(kf => {
+    const parsed = parseMNN(kf.mnn);
+    return {
+      joints: mergeJoints(defaultState, parsed.joints),
+      muscles: kf.muscles || {},
+      duration: kf.duration,
+      easing: kf.easing || seq.easing || 'ease-bio',
+    };
+  });
+  // Highlight active
+  document.querySelectorAll('.anim-seq-btn').forEach(b => b.classList.remove('active-preset'));
+  const btn = document.getElementById('anim-btn-' + key);
+  if (btn) btn.classList.add('active-preset');
+  updateAnimUI();
+}
+
+function buildAnimTab() {
+  const tab = document.getElementById('tab-anim');
+  if (!tab) return;
+  tab.innerHTML = `
+    <div class="section">
+      <div class="section-title">PLAYBACK</div>
+      <div class="btn-row" style="margin-bottom:8px">
+        <button class="btn" id="anim-play" onclick="animPlaying ? animStop() : animPlay()">&#9654; PLAY</button>
+        <button class="btn btn-dim" id="anim-stop" onclick="animStop()" disabled>&#9632; STOP</button>
+        <button class="btn btn-dim" id="anim-loop" onclick="animToggleLoop(this)">&#8734; LOOP</button>
+      </div>
+      <div style="font-size:9px;color:var(--text-dim);margin-top:4px" id="anim-status">Select a sequence below or paste MNN with transitions in the MNN tab.</div>
+    </div>
+    <div class="section">
+      <div class="section-title">BUILT-IN SEQUENCES — MNN v1.1 &#167;4.5</div>
+      <div class="preset-grid">
+        ${Object.entries(ANIM_SEQUENCES).map(([key,seq]) =>
+          `<button class="preset-btn anim-seq-btn" id="anim-btn-${key}" onclick="loadAnimSequence('${key}')">${seq.label}</button>`
+        ).join('')}
+      </div>
+    </div>
+    <div class="section" style="flex:1;overflow-y:auto">
+      <div class="section-title">EASING CURVES — SPEC &#167;4.5.3</div>
+      ${Object.entries(EASINGS).map(([k]) => {
+        const desc = {
+          'ease-bio':'Motor cortex + cerebellar correction','ease-linear':'Mechanical/robotic baseline',
+          'ease-snap':'Basal ganglia ballistic program','ease-in':'Recruitment buildup',
+          'ease-out':'Antagonist braking deceleration','ease-spring':'Stretch-shortening cycle'
+        }[k]||'';
+        return `<div class="info-row"><span style="color:var(--cyan);font-size:9px">${k}</span><span class="info-val" style="font-size:8px;max-width:160px;text-align:right">${desc}</span></div>`;
+      }).join('')}
+    </div>
+  `;
+}
+
+// ===================================================
 // STYLE SWITCHER
 // ===================================================
 function setStyle(name, btn) {
@@ -296,7 +590,7 @@ function applyProjection(positions) {
 
 function toggle3D(btn) {
   is3D = !is3D;
-  btn.textContent = is3D ? '3D ■' : '3D ▶';
+  btn.textContent = is3D ? '3D ■' : '2D';
   btn.style.color  = is3D ? 'var(--cyan)' : '';
   btn.style.borderColor = is3D ? 'var(--cyan)' : '';
   btn.style.background  = is3D ? 'rgba(0,229,255,0.12)' : '';
@@ -984,7 +1278,7 @@ function loadExample(idx) {
 // TABS
 // ===================================================
 function switchTab(name) {
-  const names = ['pose','muscles','mnn','info'];
+  const names = ['pose','muscles','mnn','anim','info'];
   document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', names[i]===name));
   document.querySelectorAll('.tab-content').forEach(tc=>tc.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
@@ -996,6 +1290,7 @@ function switchTab(name) {
 buildSliders();
 buildInfoRows();
 buildExamples();
+buildAnimTab();
 render();
 </script>
 </body>
