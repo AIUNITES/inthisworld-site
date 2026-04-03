@@ -143,7 +143,7 @@
   <a href="index.html" class="header-back">&larr; InThisWorld</a>
   <div class="header-logo">&#9670; MNN AVATAR</div>
   <div class="header-sub">MUSCULAR NEURO NOTATION &middot; INTHISWORLD / AIUNITES</div>
-  <div class="header-version">v1.5.1 &middot; LOD 1</div>
+  <div class="header-version">v2.0 &middot; LOD 1</div>
 </div>
 
 <div class="main">
@@ -230,7 +230,7 @@
       <div class="section" style="flex:1;overflow-y:auto">
         <div class="section-title">ACTIVE MUSCLES</div>
         <div class="muscle-list" id="muscle-list">
-          <div class="muscle-empty">No muscles activated &mdash; paste MNN with [Con:] tag</div>
+          <div class="muscle-empty">No muscles activated &mdash; paste MNN with @ACT() tag</div>
         </div>
       </div>
     </div>
@@ -238,7 +238,7 @@
     <div class="tab-content" id="tab-mnn">
       <div class="section">
         <div class="section-title">MNN INPUT STRING</div>
-        <textarea id="mnn-input" placeholder="{Push.H} [Con:Pec.S+++, Dlt.A+] &#8594; MedPec/Axil&#10;[Pos:L.Sh(Abd:90,Flex:45) L.El(Flex:60)]&#10;[Vec:H:Mid,A:0&deg;,Src:Cable]"></textarea>
+        <textarea id="mnn-input" placeholder="@MOV(Push.H) @ACT(Pec.S:3, Dlt.A:1) >> MedPec/Axil&#10;@JNT(L.Sh:Abd=90,Flex=45) @JNT(L.El:Flex=60)&#10;@VEC(Ht=Mid,Ang=0&deg;,Src=Cable)"></textarea>
         <div class="btn-row">
           <button class="btn" onclick="applyMNN()">&#9654; APPLY</button>
           <button class="btn btn-dim" onclick="clearPose()">&#9723; RESET</button>
@@ -1144,23 +1144,47 @@ function render() {
 }
 
 // ===================================================
-// MNN PARSER
+// MNN PARSER (v2.0 @TAG + v1.x fallback)
 // ===================================================
 function parseMNN(str) {
   const result = {joints:{}, muscles:{}, movement:null};
-  const mm = str.match(/\{([^}]+)\}/);
-  if (mm) result.movement = mm[1];
-  for (const block of [...str.matchAll(/\[Pos:([^\]]+)\]/g)]) {
-    for (const jm of [...block[1].matchAll(/([LRBi]*\.?[A-Za-z.]+)\(([^)]+)\)/g)]) {
-      const axes = {};
-      for (const am of [...jm[2].matchAll(/([A-Za-z]+):\s*(-?\d+)/g)]) axes[am[1]] = parseInt(am[2]);
-      result.joints[jm[1].trim()] = axes;
+  // v2.0: @MOV()
+  const mov2 = str.match(/@MOV\(([^)]+)\)/);
+  if (mov2) result.movement = mov2[1];
+  // v1.x fallback: {Movement}
+  if (!result.movement) { const mm = str.match(/\{([^}]+)\}/); if (mm) result.movement = mm[1]; }
+  // v2.0: @ACT(Sym:N, ...)
+  for (const block of [...str.matchAll(/@ACT\(([^)]+)\)/g)]) {
+    for (const part of block[1].split(',')) {
+      const cm = part.trim().match(/^([A-Za-z.]+):([0-9]+)/);
+      if (cm) result.muscles[cm[1].trim()] = parseInt(cm[2]);
     }
   }
-  for (const block of [...str.matchAll(/\[Con:([^\]]+)\]/g)]) {
-    for (const part of block[1].split(',')) {
-      const cm = part.trim().match(/^([A-Za-z.]+)(\++)/);
-      if (cm) result.muscles[cm[1].trim()] = cm[2].length;
+  // v1.x fallback: [Con:Sym+++, ...]
+  if (!Object.keys(result.muscles).length) {
+    for (const block of [...str.matchAll(/\[Con:([^\]]+)\]/g)]) {
+      for (const part of block[1].split(',')) {
+        const cm = part.trim().match(/^([A-Za-z.]+)(\++)/);
+        if (cm) result.muscles[cm[1].trim()] = cm[2].length;
+      }
+    }
+  }
+  // v2.0: @JNT(Side.Joint:Axis=value,...)
+  for (const block of [...str.matchAll(/@JNT\(([^)]+)\)/g)]) {
+    const jm = block[1].match(/^([A-Za-z.]+):(.+)/);
+    if (!jm) continue;
+    const axes = {};
+    for (const am of [...jm[2].matchAll(/([A-Za-z]+)=(-?[0-9]+)/g)]) axes[am[1]] = parseInt(am[2]);
+    result.joints[jm[1].trim()] = axes;
+  }
+  // v1.x fallback: [Pos:Joint(Axis:value) ...]
+  if (!Object.keys(result.joints).length) {
+    for (const block of [...str.matchAll(/\[Pos:([^\]]+)\]/g)]) {
+      for (const jm of [...block[1].matchAll(/([LRBi]*\.?[A-Za-z.]+)\(([^)]+)\)/g)]) {
+        const axes = {};
+        for (const am of [...jm[2].matchAll(/([A-Za-z]+):\s*(-?\d+)/g)]) axes[am[1]] = parseInt(am[2]);
+        result.joints[jm[1].trim()] = axes;
+      }
     }
   }
   return result;
@@ -1186,16 +1210,16 @@ function applyMNN() {
 // ===================================================
 function updateMNNOutput() {
   const out = document.getElementById('mnn-output');
-  const posEntries = [];
+  const jntParts = [];
   for (const [joint, axes] of Object.entries(joints)) {
     const nz = Object.entries(axes).filter(([,v])=>v!==0);
-    if (nz.length) posEntries.push(joint + '(' + nz.map(([k,v])=>k+':'+v).join(',') + ')');
+    if (nz.length) jntParts.push('@JNT(' + joint + ':' + nz.map(([k,v])=>k+'='+v).join(',') + ')');
   }
-  const conEntries = Object.entries(muscles).map(([k,v])=>k+'+'.repeat(v));
+  const actParts = Object.entries(muscles).map(([k,v])=>k+':'+v);
   let parts = [];
-  if (currentMovement) parts.push('<span class="tag-mov">{' + currentMovement + '}</span>');
-  if (conEntries.length) parts.push('<span class="tag-con">[Con:' + conEntries.join(', ') + ']</span>');
-  if (posEntries.length) parts.push('<span class="tag-pos">[Pos:' + posEntries.join(' ') + ']</span>');
+  if (currentMovement) parts.push('<span class="tag-mov">@MOV(' + currentMovement + ')</span>');
+  if (actParts.length)  parts.push('<span class="tag-con">@ACT(' + actParts.join(', ') + ')</span>');
+  if (jntParts.length)  parts.push('<span class="tag-pos">' + jntParts.join(' ') + '</span>');
   out.innerHTML = parts.join('\n') || '<span style="color:var(--text-dim)">— default pose —</span>';
 }
 
@@ -1210,7 +1234,7 @@ function updateMuscleDisplay() {
     const pct = level*33;
     const color = ['','rgba(255,165,0,0.7)','var(--orange)','var(--red-hot)'][level];
     const lc = ['','l1','l2','l3'][level];
-    return '<div class="muscle-row"><div class="muscle-name">' + sym + '</div><div class="muscle-bar-bg"><div class="muscle-bar" style="width:' + pct + '%;background:' + color + '"></div></div><div class="muscle-level ' + lc + '">' + '+'.repeat(level) + '</div></div>';
+    return '<div class="muscle-row"><div class="muscle-name">' + sym + '</div><div class="muscle-bar-bg"><div class="muscle-bar" style="width:' + pct + '%;background:' + color + '"></div></div><div class="muscle-level ' + lc + '">:' + level + '</div></div>';
   }).join('');
 }
 
@@ -1325,19 +1349,19 @@ function updateInfoTab() {
 
 function buildInfoRows() {
   document.getElementById('info-rows').innerHTML = [
-    ['Spec','MNN v1.6'],['LOD','LOD 1 (~55 muscles)'],
+    ['Spec','MNN v2.0'],['LOD','LOD 1 (~55 muscles)'],
     ['Styles','WIRE · VITRUV · BULK'],['Joints','~139 DOF'],
     ['Platform','InThisWorld / AIUNITES'],
   ].map(([k,v])=>'<div class="info-row"><span>' + k + '</span><span class="info-val">' + v + '</span></div>').join('');
 }
 
 const examples = [
-  {label:'Shoulder press', str:'{Push.V} [Con:Dlt.A+++, Tri++] [Pos:L.Sh(Abd:170,Flex:10) R.Sh(Abd:170,Flex:10)]'},
-  {label:'Duchenne smile',  str:'[Con:Zyg.Mj+++, Orb.Oc++]'},
-  {label:'Concentration frown', str:'[Con:Corr+++, Dep.Ang+++]'},
-  {label:'Cable fly',       str:'{Pull.H} [Con:Pec.S+++, Dlt.A+] [Pos:L.Sh(IR:25,Flex:90,Abd:45) R.Sh(IR:25,Flex:90,Abd:45)]'},
-  {label:'Lateral raise',   str:'{Iso} [Con:Dlt.L+++, Trp.U+] [Pos:L.Sh(Abd:90) R.Sh(Abd:90)]'},
-  {label:'Bicep flex pose', str:'[Con:Bic+++, Dlt.L++] [Pos:L.Sh(Abd:90) L.El(Flex:130) R.Sh(Abd:90) R.El(Flex:130)]'},
+  {label:'Shoulder press', str:'@MOV(Push.V) @ACT(Dlt.A:3, Tri:2) @JNT(L.Sh:Abd=170,Flex=10) @JNT(R.Sh:Abd=170,Flex=10)'},
+  {label:'Duchenne smile',  str:'@ACT(Zyg.Mj:3, Orb.Oc:2)'},
+  {label:'Concentration frown', str:'@ACT(Corr:3, Dep.Ang:3)'},
+  {label:'Cable fly',       str:'@MOV(Pull.H) @ACT(Pec.S:3, Dlt.A:1) @JNT(L.Sh:IR=25,Flex=90,Abd=45) @JNT(R.Sh:IR=25,Flex=90,Abd=45)'},
+  {label:'Lateral raise',   str:'@MOV(Stab) @ACT(Dlt.L:3, Trp.U:1) @JNT(L.Sh:Abd=90) @JNT(R.Sh:Abd=90)'},
+  {label:'Bicep flex pose', str:'@ACT(Bic:3, Dlt.L:2) @JNT(L.Sh:Abd=90) @JNT(L.El:Flex=130) @JNT(R.Sh:Abd=90) @JNT(R.El:Flex=130)'},
 ];
 
 function buildExamples() {
