@@ -1,9 +1,10 @@
 # VMN — Vehicle Motion Notation
-## Specification v1.0.0
+## Specification v1.1.0
 
-**Protocol family:** VWN (Virtual World Notation)
+**Protocol family:** VWN (Virtual World Notation) → UMN (Universal Movement Notation)
 **Maintained by:** AIUNITES LLC
 **Published:** 2026-04-03
+**Updated:** 2026-04-03 — v1.1 adds @MULTI() morphing vehicle notation
 **Status:** ACTIVE
 **Relation to HMN:** Peer protocol. VMN and HMN strings compose freely in one scene string.
 **Primary platform:** InThisWorld (inthisworld.com) / Second Life / OpenSim
@@ -417,7 +418,118 @@ LSL translation:
 
 ---
 
-## 6. Complete VMN-to-LSL Bridge Table
+## 5b. Multi-Mode Morphing Vehicles
+
+A morphing vehicle can transition between two or more vehicle classes during
+operation. This is physically real in SL/OpenSim — llSetVehicleType() can be
+called mid-flight and physics parameters interpolated between modes.
+
+### 5b.1 @MULTI() — Multi-mode vehicle declaration
+
+Declares all vehicle modes the craft can operate in. Always listed in order
+from least-dense to most-dense medium (Space > Air > Sea > Car/Sub).
+
+    @VMN(Multi:Air+Sea)       // seaplane — air and water modes
+    @VMN(Multi:Car+Sea)       // amphibious — ground and water modes
+    @VMN(Multi:Space+Air)     // spacecraft with atmospheric re-entry glide
+    @VMN(Multi:Air+Sea+Car)   // full amphibious aircraft + ground taxi
+    @VMN(Multi:Sub+Sea)       // submarine that surfaces as a boat
+
+### 5b.2 @MODE(Transition:FromTo) — Active transition
+
+Declares that the vehicle is actively morphing between two modes.
+
+    @MODE(Transition:AirToSea)    // transitioning from Air to Sea mode
+    @MODE(Transition:CarToSea)    // entering water from ground
+    @MODE(Transition:SpaceToAir)  // re-entry — space to atmosphere
+    @MODE(Transition:SeaToAir)    // seaplane taking off from water
+
+### 5b.3 @PROGRESS() — Morphing progress 0.0–1.0
+
+Describes how far through the mode transition the vehicle currently is.
+0.0 = fully in source mode. 1.0 = fully in destination mode.
+
+    @PROGRESS(0.0)    // still fully in source mode, about to begin
+    @PROGRESS(0.35)   // 35% through transition
+    @PROGRESS(0.65)   // 65% through — dominant in destination mode
+    @PROGRESS(1.0)    // transition complete, fully in destination mode
+
+### 5b.4 Morphing examples
+
+**Seaplane water landing:**
+
+    @VMN(Multi:Air+Sea) @MODE(Transition:AirToSea) @PROGRESS(0.65)
+    @ATT(Pit=-8,Rol=0,Yaw=090) @VEL(Fwd=45,Vert=-3)
+    ~5000ms.ease-out >> @VMN(Sea) @MODE(Taxi)
+
+**Amphibious vehicle entering water:**
+
+    @VMN(Multi:Car+Sea) @MODE(Transition:CarToSea) @PROGRESS(0.3)
+    @VEL(Fwd=8,Vert=-0.5) @ATT(Pit=5)
+    ~8000ms.ease-in >> @VMN(Sea) @MODE(Cruise)
+
+**Spacecraft atmospheric re-entry:**
+
+    @VMN(Multi:Space+Air) @MODE(Reentry) @PROGRESS(0.2)
+    @ATT(Pit=40,Rol=0,Yaw=270) @VEL(Fwd=7800,Vert=-120)
+    ~180000ms.ease-in >> @VMN(Air) @MODE(Glide)
+
+**Seaplane takeoff from water:**
+
+    @VMN(Multi:Air+Sea) @MODE(Transition:SeaToAir) @PROGRESS(0.4)
+    @ATT(Pit=8,Rol=0,Yaw=180) @VEL(Fwd=55,Vert=3)
+    ~4000ms.ease-out >> @VMN(Air) @MODE(Climb)
+
+**Submarine surfacing:**
+
+    @VMN(Multi:Sub+Sea) @MODE(Transition:SubToSea) @PROGRESS(0.7)
+    @NAV(Depth=3,Hdg=270) @VEL(Fwd=4,Vert=0.8)
+    ~30000ms.ease-out >> @VMN(Sea) @MODE(Cruise)
+
+### 5b.5 LSL morphing bridge
+
+Morphing is achieved by interpolating physics parameters between source and
+destination vehicle type values. The @PROGRESS() value is the interpolation
+factor `p` (0.0–1.0).
+
+    // @VMN(Multi:Air+Sea) @PROGRESS(p) →
+    // Interpolate between AIRPLANE and BOAT physics parameters:
+
+    float p = 0.65;  // @PROGRESS value
+
+    // Reduce air physics, increase sea physics:
+    llSetVehicleFloatParam(VEHICLE_LINEAR_DEFLECTION_EFFICIENCY, 0.5*(1.0-p));
+    llSetVehicleFloatParam(VEHICLE_ANGULAR_DEFLECTION_EFFICIENCY, 0.5*(1.0-p));
+    llSetVehicleFloatParam(VEHICLE_VERTICAL_ATTRACTION_EFFICIENCY, 0.9*(1.0-p));
+    llSetVehicleFloatParam(VEHICLE_BUOYANCY, p * 1.0);
+    llSetVehicleFloatParam(VEHICLE_LINEAR_FRICTION_TIMESCALE, 4.0 + (6.0*p));
+
+    // At p >= 0.95: commit to destination mode:
+    if (p >= 0.95) llSetVehicleType(VEHICLE_TYPE_BOAT);
+
+    // Mesh morph (SL shape keys / link prim animations):
+    // llSetLinkPrimitiveParamsFast(LINK_THIS, [PRIM_TYPE, ...]) at each step
+
+### 5b.6 Valid morphing mode pairs
+
+| Pair | Direction | Use case |
+|------|-----------|----------|
+| Air + Sea | Both | Seaplane, flying boat |
+| Car + Sea | Both | Amphibious vehicle |
+| Space + Air | Space→Air | Re-entry vehicle, spaceplane |
+| Air + Space | Air→Space | Rocket plane launching |
+| Sub + Sea | Both | Submarine surfacing/diving |
+| Car + Air | Both | Flying car (SL-possible) |
+| Sea + Sub | Both | Diving tender |
+| Air + Sea + Car | Any | Full amphibious aircraft |
+
+### 5b.7 Combined HMN + morphing VMN scene string
+
+    // Pilot as seaplane touches down — body braced, expression alert
+    @VMN(Multi:Air+Sea) @MODE(Transition:AirToSea) @PROGRESS(0.5)
+    @ATT(Pit=-6,Rol=0,Yaw=090) @VEL(Fwd=50,Vert=-2) @ALT(m=1)
+    @MOV(Sit) @ACT(Trap:2,Bic:1) @JNT(Sp.L:Flex=5)
+    @FNN(Corr:2,Orb.Oc.O:2)
 
 This table is the formal mapping between VMN tags and their LSL equivalents.
 It covers all tags defined in this specification.
