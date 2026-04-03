@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="canonical" href="https://inthisworld.com/umm.html">
+<title>UMN for Virtual Worlds — Universal Movement Notation | InThisWorld</title>
+<meta name="description" content="Universal Movement Notation (UMN) applied to virtual world scenarios. Reference strings for avatar states, social interactions, vehicle motion, and LSL scripting.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico">
+<style>
+:root {
+  --bg:#06060f; --bg2:#0e0e1c; --bg3:#161628;
+  --border:rgba(139,92,246,.2);
+  --purple:#8b5cf6; --purple2:#a78bfa;
+  --cyan:#22d3ee; --green:#34d399; --pink:#f472b6;
+  --orange:#fb923c; --yellow:#fbbf24;
+  --gray:#6b7280; --text:#e2e8f0; --text2:#94a3b8;
+  --mnn:#34d399; --fnn:#f472b6; --vmn:#22d3ee; --vrn:#fb923c;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;}
+
+/* Webring */
+.wb{background:linear-gradient(90deg,#0a0a0f,#1a1a2e);border-bottom:1px solid rgba(99,102,241,.3);padding:8px 0;font-size:12px;position:sticky;top:0;z-index:100;}
+.wb-c{max-width:1200px;margin:0 auto;padding:0 20px;display:flex;align-items:center;gap:12px;overflow-x:auto;scrollbar-width:none;}
+.wb-c::-webkit-scrollbar{display:none;}
+.wb-c a{color:rgba(255,255,255,.7);text-decoration:none;white-space:nowrap;}
+.wb-c a:hover{color:#fff;}
+.wb-brand{color:#6366f1!important;font-weight:600;}
+
+/* Nav */
+.nav{background:var(--bg2);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;gap:16px;}
+.nav-logo{font-size:1.1rem;font-weight:800;}
+.nav-logo span{color:var(--purple);}
+.nav-links{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap;}
+.nav-links a{color:var(--text2);text-decoration:none;padding:5px 12px;border-radius:6px;font-size:.82rem;transition:all .15s;}
+.nav-links a:hover{background:var(--bg3);color:var(--text);}
+.nav-links a.active{background:rgba(139,92,246,.15);color:var(--purple2);}
+
+/* Hero */
+.hero{background:radial-gradient(ellipse at 50% 0%,rgba(139,92,246,.15),transparent 60%);padding:60px 24px 48px;text-align:center;border-bottom:1px solid var(--border);}
+.hero-eyebrow{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--purple2);margin-bottom:16px;}
+.hero h1{font-size:2.2rem;font-weight:800;line-height:1.2;margin-bottom:16px;}
+.hero h1 span{background:linear-gradient(135deg,var(--purple),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero-sub{font-size:1rem;color:var(--text2);max-width:560px;margin:0 auto 28px;line-height:1.7;}
+.hero-tags{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+.htag{padding:5px 14px;border-radius:20px;font-size:.78rem;font-weight:600;border:1px solid;}
+
+/* Protocol legend */
+.proto-bar{background:var(--bg2);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;gap:20px;justify-content:center;flex-wrap:wrap;}
+.proto-item{display:flex;align-items:center;gap:7px;font-size:.8rem;}
+.pdot{width:10px;height:10px;border-radius:50%;}
+.pcode{font-family:'JetBrains Mono',monospace;font-size:.75rem;}
+
+/* Main content */
+.content{max-width:1100px;margin:0 auto;padding:40px 24px;}
+
+/* Section headers */
+.section-hdr{margin:40px 0 20px;}
+.section-hdr h2{font-size:1.25rem;font-weight:700;margin-bottom:6px;}
+.section-hdr p{font-size:.85rem;color:var(--text2);line-height:1.6;}
+.section-hdr .tag{display:inline-flex;align-items:center;gap:5px;font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:10px;border:1px solid;margin-bottom:10px;font-family:'JetBrains Mono',monospace;}
+
+/* Scenario cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .2s;}
+.card:hover{border-color:rgba(139,92,246,.4);}
+.card-head{padding:16px 18px 12px;border-bottom:1px solid var(--border);}
+.card-title{font-size:.92rem;font-weight:700;margin-bottom:4px;}
+.card-desc{font-size:.78rem;color:var(--text2);line-height:1.5;}
+.card-body{padding:14px 18px;}
+
+/* Code blocks */
+.codeblock{background:#040410;border:1px solid rgba(139,92,246,.15);border-radius:8px;padding:12px 14px;margin-bottom:10px;position:relative;}
+.codeblock pre{font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.9;white-space:pre-wrap;word-break:break-all;}
+.codeblock .cbadge{position:absolute;top:8px;right:8px;font-size:.6rem;font-weight:700;padding:2px 7px;border-radius:8px;font-family:'JetBrains Mono',monospace;}
+.lsl-block{background:#020210;border:1px solid rgba(34,211,238,.15);border-radius:8px;padding:12px 14px;}
+.lsl-block pre{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:#22d3ee;line-height:1.8;white-space:pre-wrap;}
+.lsl-label{font-size:.62rem;font-weight:700;color:#22d3ee;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+
+/* Token colors */
+.t-mov{color:#818cf8;}
+.t-act{color:#34d399;}
+.t-nerve{color:#f472b6;}
+.t-jnt{color:#fbbf24;}
+.t-vec{color:#fb923c;}
+.t-vmn{color:#22d3ee;}
+.t-expr{color:#818cf8;}
+.t-fnn{color:#f472b6;}
+.t-res{color:#fb923c;}
+.t-plc{color:#fbbf24;}
+.t-voc{color:#818cf8;}
+.t-mode{color:#a78bfa;}
+.t-prog{color:#22d3ee;}
+
+/* Copy button */
+.copy-btn{width:100%;padding:7px;background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.3);border-radius:6px;color:var(--purple2);font-size:.75rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;margin-top:8px;}
+.copy-btn:hover{background:rgba(139,92,246,.2);}
+
+/* Compound badge */
+.compound-note{font-size:.7rem;color:var(--text2);font-style:italic;margin-top:6px;padding:5px 10px;background:rgba(139,92,246,.06);border-radius:5px;border-left:2px solid var(--purple);}
+
+/* LSL toggle */
+.lsl-toggle{font-size:.72rem;color:var(--cyan);cursor:pointer;padding:5px 0;display:flex;align-items:center;gap:5px;background:none;border:none;font-family:inherit;margin-top:6px;}
+.lsl-toggle:hover{color:#fff;}
+.lsl-section{display:none;margin-top:8px;}
+.lsl-section.open{display:block;}
+
+/* CTA */
+.cta-bar{background:linear-gradient(135deg,rgba(139,92,246,.12),rgba(34,211,238,.08));border:1px solid var(--border);border-radius:16px;padding:36px 28px;text-align:center;margin:48px 0 20px;}
+.cta-bar h3{font-size:1.2rem;font-weight:700;margin-bottom:8px;}
+.cta-bar p{color:var(--text2);font-size:.88rem;margin-bottom:20px;}
+.cta-btn{display:inline-flex;align-items:center;gap:8px;background:var(--purple);color:#fff;padding:10px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:.88rem;transition:background .15s;}
+.cta-btn:hover{background:#7c3aed;}
+
+/* Footer */
+footer{border-top:1px solid var(--border);padding:24px;text-align:center;color:var(--gray);font-size:.78rem;}
+footer a{color:var(--purple2);text-decoration:none;}
+
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<!-- Webring -->
+<div class="wb"><div class="wb-c">
+  <a class="wb-brand" href="https://aiunites.com">◆ AIUNITES</a>
+  <span style="color:rgba(255,255,255,.2)">|</span>
+  <a href="https://aiunites.github.io/aizines-app/">AIZines</a>
+  <a href="https://aiunites.github.io/bodspas-site/">💪 BodSpas</a>
+  <a href="https://aiunites.github.io/voicestry-site/">VoiceStry</a>
+  <a href="https://aiunites.github.io/aibyjob-demo/">AIByJob</a>
+  <a href="https://aiunites.github.io/videobate-site/">VideoBate</a>
+  <a href="https://aiunites.github.io/cosmostheopera-site/">🌌 COSMOS</a>
+</div></div>
+
+<!-- Nav -->
+<nav class="nav">
+  <div class="nav-logo">In<span>This</span>World</div>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="mnn-avatar.html">Avatar Builder</a>
+    <a href="vmn-vehicles.html">Vehicle Studio</a>
+    <a href="umm.html" class="active">UMN Reference</a>
+    <a href="https://aiunites.com/notation-studio.html" target="_blank" style="background:rgba(139,92,246,.15);color:var(--purple2);border:1px solid rgba(139,92,246,.3);">◆ UMN Studio →</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-eyebrow">Universal Movement Notation</div>
+  <h1>Every movement in a<br><span>virtual world</span>, notated</h1>
+  <p class="hero-sub">UMN is a plain-text notation system for avatar states, social interactions, vehicle physics, and voice — all composable into a single scene string.</p>
+  <div class="hero-tags">
+    <span class="htag" style="color:var(--mnn);border-color:var(--mnn);background:rgba(52,211,153,.08)">MNN · Body</span>
+    <span class="htag" style="color:var(--fnn);border-color:var(--fnn);background:rgba(244,114,182,.08)">FNN · Face</span>
+    <span class="htag" style="color:var(--vmn);border-color:var(--vmn);background:rgba(34,211,238,.08)">VMN · Vehicle</span>
+    <span class="htag" style="color:var(--vrn);border-color:var(--vrn);background:rgba(251,146,60,.08)">VRN · Voice</span>
+  </div>
+</div>
+
+<!-- Protocol bar -->
+<div class="proto-bar">
+  <div class="proto-item"><span class="pdot" style="background:var(--mnn)"></span><span class="pcode" style="color:var(--mnn)">@MOV()</span><span style="color:var(--text2)">Movement pattern</span></div>
+  <div class="proto-item"><span class="pdot" style="background:var(--mnn)"></span><span class="pcode" style="color:var(--mnn)">@ACT()</span><span style="color:var(--text2)">Muscle activation</span></div>
+  <div class="proto-item"><span class="pdot" style="background:var(--fnn)"></span><span class="pcode" style="color:var(--fnn)">@FNN()</span><span style="color:var(--text2)">Facial state</span></div>
+  <div class="proto-item"><span class="pdot" style="background:var(--vmn)"></span><span class="pcode" style="color:var(--vmn)">@VMN()</span><span style="color:var(--text2)">Vehicle class</span></div>
+  <div class="proto-item"><span class="pdot" style="background:var(--vrn)"></span><span class="pcode" style="color:var(--vrn)">@RES()</span><span style="color:var(--text2)">Voice resonance</span></div>
+</div>
+
+<div class="content">
+
+<!-- ══════════════════════════════════════════
+  SECTION 1: AVATAR BODY STATES
+══════════════════════════════════════════ -->
+<div class="section-hdr">
+  <div class="tag" style="color:var(--mnn);border-color:var(--mnn);background:rgba(52,211,153,.07)">● MNN · Body</div>
+  <h2>Avatar Body States</h2>
+  <p>The most common avatar postures and motions, notated as MNN strings. Each string encodes the movement pattern, primary muscle groups, and innervating nerves.</p>
+</div>
+
+<div class="grid">
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Idle Stance</div>
+      <div class="card-desc">Avatar standing at rest. Core lightly engaged for postural stability.</div>
+    </div>
+    <div class="card-body">
+      <div class="codeblock"><span class="cbadge" style="background:rgba(52,211,153,.15);color:var(--mnn)">MNN</span>
+        <pre><span class="t-mov">@MOV(Idle)</span> <span class="t-act">@ACT(TrA:1, Ers:1)</span> <span class="t-nerve">>> Intercost/DorsRami</span></pre>
+      </div>
+      <button class="copy-btn" onclick="copy('@MOV(Idle) @ACT(TrA:1, Ers:1) >> Intercost/DorsRami', this)">⎘ Copy String</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Walking</div>
+      <div class="card-desc">Natural forward gait. Glutes and quads alternate, gastrocnemius push-off.</div>
+    </div>
+    <div class="card-body">
+      <div class="codeblock"><span class="cbadge" style="background:rgba(52,211,153,.15);color:var(--mnn)">MNN</span>
+        <pre><span class="t-mov">@MOV(Walk)</span> <span class="t-act">@ACT(Glu.Mx:2, Quad.RF:2, Gas:1)</span> <span class="t-nerve">>> InfGlu/Fem/Tib</span></pre>
+      </div>
+      <button class="copy-btn" onclick="copy('@MOV(Walk) @ACT(Glu.Mx:2, Quad.RF:2, Gas:1) >> InfGlu/Fem/Tib', this)">⎘ Copy String</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Running</div>
+      <div class="card-desc">High-effort locomotion. Glutes max + quads at peak, hip flexors engaged.</div>
+    </div>
+    <div class="card-body">
+      <div class="codeblock"><span class="cbadge" style="background:rgba(52,211,153,.15);color:var(--mnn)">MNN</span>
+        <pre><span class="t-mov">@MOV(Run)</span> <span class="t-act">@ACT(Glu.Mx:3, Quad.RF:3, HpFl:2, Gas:2)</span> <span class="t-nerve">>> InfGlu/Fem/Tib</span></pre>
+      </div>
+      <button class="copy-btn" onclick="copy('@MOV(Run) @ACT(Glu.Mx:3, Quad.RF:3, HpFl:2, Gas:2) >> InfGlu/Fem/Tib', this)">⎘ Copy String</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Flying</div>
+      <div class="card-desc">Avatar fly mode. Shoulder girdle stabilized, core braced for horizontal posture.</div>
+    </div>
+    <div class="card-body">
+      <div class="codeblock"><span class="cbadge" style="background:rgba(52,211,153,.15);color:var(--mnn)">MNN</span>
+        <pre><span class="t-mov">@MOV(Fly)</span> <span class="t-act">@ACT(Trp.L:2, Ser:2, TrA:2)</span> <span class="t-nerve">>> CNXI/LTh/Intercost</span>
+<span class="t-jnt">@JNT(Bi.Sh:Flex=30,Abd=20)</span></pre>
+      </div>
+      <button class="copy-btn" onclick="copy('@MOV(Fly) @ACT(Trp.L:2, Ser:2, TrA:2) >> CNXI/LTh/Intercost @JNT(Bi.Sh:Flex=30,Abd=20)', this)">⎘ Copy String</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Seated — Chair</div>
+      <div class="card-desc">Standard seated posture. Hip flexors + lumbar extensors holding position.</div>
+    </div>
+    <div class="card-body">
+      <div class="codeblock"><span class="cbadge" style="background:rgba(52,211,153,.15);color:var(--mnn)">MNN</span>
+        <pre><span class="t-mov">@MOV(Sit)</span> <span class="t-act">@ACT(HpFl:2, Ers:1, TrA:1)</span> <span class="t-nerve">>> Fem/DorsRami</span>
+<span class="t-jnt">@JNT(Bi.Hip:Flex=90 Bi.Kn:Flex=90)</span></pre>
+      </div>
+      <button class="copy-btn" onclick="copy('@MOV(Sit) @ACT(HpFl:2, Ers:1, TrA:1) >> Fem/DorsRami @JNT(Bi.Hip:Flex=90 Bi.Kn:Flex=90)', this)">⎘ Copy String</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Seated — Floor (Cross-legged)</div>
+      <div class="card-desc">Ground-level sit. Hip external rotation, adductors relaxed, core upright.</div>
+    </div>
+    <div class="card-body">
+      <div class="codeblock"><span class="cbadge" style="background:rgba(52,211,153,.15);color:var(--mnn)">MNN</span>
+        <pre><span class="t-mov">@MOV(Sit.Floor)</span> <span class="t-act">@ACT(Pir:2, Ers:1, TrA:1)</span> <span class="t-nerve">>> Sci.T/DorsRami</span>
+<span class="t-jnt">@JNT(Bi.Hip:Flex=90,ER=45)</span></pre>
+      </div>
+      <button class="copy-btn" onclick="copy('@MOV(Sit.Floor) @ACT(Pir:2, Ers:1, TrA:1) >> Sci.T/DorsRami @JNT(Bi.Hip:Flex=90,ER=45)', this)">⎘ Copy String</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Swimming</div>
+      <div class="card-desc">Avatar swim mode. Lat dominant, shoulder rotation, core anti-extension.</div>
+    </div>
+    <div class="card-body">
+      <div class="codeblock"><span class="cbadge" style="background:rgba(52,211,153,.15);color:var(--mnn)">MNN</span>
+        <pre><span class="t-mov">@MOV(Swim)</span> <span class="t-act">@ACT(Lat:2, Pec.S:2, TrA:2, Obl.E:1)</span> <span class="t-nerve">>> ThDors/MedPec</span></pre>
+      </div>
+      <button class="copy-btn" onclick="copy('@MOV(Swim) @ACT(Lat:2, Pec.S:2, TrA:2, Obl.E:1) >> ThDors/MedPec', this)">⎘ Copy String</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Dancing</div>
+      <div class="card-desc">Rhythmic full-body movement. Core rotation dominant, arms free.</div>
+    </div>
+    <div class="card-body">
+      <div class="codeblock"><span class="cbadge" style="background:rgba(52,211,153,.15);color:var(--mnn)">MNN</span>
+        <pre><span class="t-mov">@MOV(Dance)</span> <span class="t-act">@ACT(Obl.E:2, TrA:1, Glu.Md:1)</span> <span class="t-nerve">>> Intercost/SupGlu</span></pre>
+      </div>
+      <button class="copy-btn" onclick="copy('@MOV(Dance) @ACT(Obl.E:2, TrA:1, Glu.Md:1) >> Intercost/SupGlu', this)">⎘ Copy String</button>
+    </div>
+  </div>
+
+</div><!-- /grid -->
+
+
+<!-- ══════════════════════════════════════════
+  SECTION 2: SOCIAL INTERACTIONS (MNN + FNN + VRN)
+══════════════════════════════════════════ -->
+<div class="section-hdr" style="margin-top:52px">
+  <div class="tag" style="color:var(--fnn);border-color:var(--fnn);background:rgba(244,114,182,.07)">● MNN + FNN + VRN · Social</div>
+  <h2>Social Interactions</h2>
+  <p>Compound strings encoding body, face, and voice together. These are scene strings — multiple protocols in one line, all at moment T.</p>
+</div>
+
+<div class="grid">
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Greeting — Wave + Smile</div>
+      <div class="card-desc">Right arm raised, Duchenne smile, forward posture. Full greeting scene.</div>
+    </div>
+    <div class="card-body">
+      <div class="codeblock"><span class="cbadge" style="background:rgba(244,114,182,.1);color:var(--fnn)">Compound</span>
+        <pre><span class="t-mov">@MOV(Wave)</span> <span class="t-act">@ACT(Dlt.A:2, Dlt.L:1, Tri:1)</span> <span class="t-nerve">>> Axil/Rad</span>
+<span class="t-jnt">@JNT(R.Sh:Flex=100,Abd=60)</span>
+<span class="t-fnn">@FNN(Zyg.Mj:3, Orb.Oc.O:2)</span> <span class="t-nerve">>> CNVII/Zyg</span></pre>
+      </div>
+      <div class="compound-note">MNN body state + FNN facial state = one complete greeting snapshot</div>
+      <button class="copy-btn" onclick="copy('@MOV(Wave) @ACT(Dlt.A:2, Dlt.L:1, Tri:1) >> Axil/Rad @JNT(R.Sh:Flex=100,Abd=60)\n@FNN(Zyg.Mj:3, Orb.Oc.O:2) >> CNVII/Zyg', this)">⎘ Copy String</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Active Conversation</div>
+      <div class="card-desc">Standing, speaking clearly, attentive expression. Vocal state included.</div>
+    </div>
+    <div class="card-body">
+      <div class="codeblock"><span class="cbadge" style="background:rgba(244,114,182,.1);color:var(--fnn)">Compound</span>
+        <pre><span class="t-mov">@MOV(Idle)</span> <span class="t-act">@ACT(TrA:1)</span>
+<span class="t-fnn">@FNN(Orb.Or:1, Zyg.Mj:1)</span> <span class="t-nerve">>> CNVII</span>
+<span class="t-res">@RES(Ch:2, Or:1)</span> <span class="t-plc">@PLC(A)</span> <span class="t-voc">@VOC(Fl)</span> <span class="t-res">@BR(Sp2)</span></pre>
+      </div>
+      <div class="compound-note">MNN body + FNN face + VRN voice = full conversational avatar state</div>
+      <button class="copy-btn" onclick="copy('@MOV(Idle) @ACT(TrA:1)\n@FNN(Orb.Or:1, Zyg.Mj:1) >> CNVII\n@RES(Ch:2, Or:1) @PLC(A) @VOC(Fl) @BR(Sp2)', this)">⎘ Copy String</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Laughing Together</div>
+      <div class="card-desc">Full laugh expression with body lean, vocal burst. Social energy peak.</div>
+    </div>
+    <div class="card-body">
+      <div class="codeblock"><span class="cbadge" style="background:rgba(244,114,182,.1);color:var(--fnn)">Compound</span>
+        <pre><span class="t-mov">@MOV(Idle)</span> <span class="t-act">@ACT(RA.U:2, Obl.E:2)</span>
+<span class="t-jnt">@JNT(Sp.L:Flex=15)</span>
+<span class="t-expr">@EXPR(Laugh)</span> <span class="t-fnn">@FNN(Zyg.Mj:4, Orb.Oc.O:3, Dep.Lab:2)</span>
+<span class="t-res">@RES(Ch:3, H:2)</span> <span class="t-voc">@VOC(Fl)</span> <span class="t-res">@BR(Sp3)</span></pre>
+      </div>
+      <button class="copy-btn" onclick="copy('@MOV(Idle) @ACT(RA.U:2, Obl.E:2)\n@JNT(Sp.L:Flex=15)\n@EXPR(Laugh) @FNN(Zyg.Mj:4, Orb.Oc.O:3, Dep.Lab:2)\n@RES(Ch:3, H:2) @VOC(Fl) @BR(Sp3)', this)">⎘ Copy String</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Bowing / Respectful Greeting</div>
+      <div class="card-desc">Forward spinal flexion, neutral face, no vocalization. Cultural bow gesture.</div>
+    </div>
+    <div class="card-body">
+      <div class="codeblock"><span class="cbadge" style="background:rgba(244,114,182,.1);color:var(--fnn)">Compound</span>
+        <pre><span class="t-mov">@MOV(Bow)</span> <span class="t-act">@ACT(Ers:2, RA.U:1)</span>
+<span class="t-jnt">@JNT(Sp.L:Flex=35, Sp.C:Flex=20)</span>
+<span class="t-fnn">@FNN(Zyg.Mj:1, Orb.Or:1)</span> <span class="t-nerve">>> CNVII</span></pre>
+      </div>
+      <button class="copy-btn" onclick="copy('@MOV(Bow) @ACT(Ers:2, RA.U:1)\n@JNT(Sp.L:Flex=35, Sp.C:Flex=20)\n@FNN(Zyg.Mj:1, Orb.Or:1) >> CNVII', this)">⎘ Copy String</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Singing — Opera Projection</div>
+      <div class="card-desc">Standing tall, full resonance stack, all chambers open. Maximum vocal presence.</div>
+    </div>
+    <div class="card-body">
+      <div class="codeblock"><span class="cbadge" style="background:rgba(251,146,60,.1);color:var(--vrn)">VRN</span>
+        <pre><span class="t-mov">@MOV(Idle)</span> <span class="t-act">@ACT(Dia:3, TrA:2, Ers:1)</span>
+<span class="t-fnn">@FNN(Zyg.Mj:2, Orb.Or:2)</span>
+<span class="t-res">@RES(H:3, Ch:3, Zy:3, Ma:3)</span> <span class="t-plc">@PLC(F)</span> <span class="t-voc">@VOC(Fl)</span> <span class="t-res">@BR(Sp5)</span></pre>
+      </div>
+      <button class="copy-btn" onclick="copy('@MOV(Idle) @ACT(Dia:3, TrA:2, Ers:1)\n@FNN(Zyg.Mj:2, Orb.Or:2)\n@RES(H:3, Ch:3, Zy:3, Ma:3) @PLC(F) @VOC(Fl) @BR(Sp5)', this)">⎘ Copy String</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Dancing — Euphoric</div>
+      <div class="card-desc">Free movement, genuine smile, head voice hum. Pure joy state.</div>
+    </div>
+    <div class="card-body">
+      <div class="codeblock"><span class="cbadge" style="background:rgba(244,114,182,.1);color:var(--fnn)">Compound</span>
+        <pre><span class="t-mov">@MOV(Dance)</span> <span class="t-act">@ACT(Obl.E:2, Glu.Md:2)</span>
+<span class="t-expr">@EXPR(Laugh)</span> <span class="t-fnn">@FNN(Zyg.Mj:3, Orb.Oc.O:3)</span>
+<span class="t-res">@RES(H:2, Zy:2)</span> <span class="t-voc">@VOC(Hd)</span> <span class="t-res">@BR(Sp2)</span></pre>
+      </div>
+      <button class="copy-btn" onclick="copy('@MOV(Dance) @ACT(Obl.E:2, Glu.Md:2)\n@EXPR(Laugh) @FNN(Zyg.Mj:3, Orb.Oc.O:3)\n@RES(H:2, Zy:2) @VOC(Hd) @BR(Sp2)', this)">⎘ Copy String</button>
+    </div>
+  </div>
+
+</div><!-- /grid -->
+
+
+<!-- ══════════════════════════════════════════
+  SECTION 3: VEHICLE STATES (VMN + LSL)
+══════════════════════════════════════════ -->
+<div class="section-hdr" style="margin-top:52px">
+  <div class="tag" style="color:var(--vmn);border-color:var(--vmn);background:rgba(34,211,238,.07)">● VMN · Vehicle + LSL Bridge</div>
+  <h2>Vehicle States</h2>
+  <p>VMN strings for common vehicle situations in InThisWorld and Second Life. Each string maps directly to the LSL vehicle physics API — click to expand the LSL translation.</p>
+</div>
+
+<div class="grid">
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Car — Street Cruise</div>
+      <div class="card-desc">Ground vehicle at moderate urban speed, gentle left curve.</div>
+    </div>
+    <div class="card-body">
+      <div class="codeblock"><span class="cbadge" style="background:rgba(34,211,238,.1);color:var(--vmn)">VMN</span>
+        <pre><span class="t-vmn">@VMN(Car)</span> <span class="t-jnt">@ATT(Rol=4,Yaw=270)</span>
+<span class="t-act">@VEL(Fwd=14)</span> <span class="t-nerve">@CTRL(Throt=0.7,Steer=-20)</span>
+<span class="t-mode">@MODE(Cruise)</span></pre>
+      </div>
+      <button class="lsl-toggle" onclick="toggleLSL(this)">▶ Show LSL</button>
+      <div class="lsl-section">
+        <div class="lsl-label">⌁ LSL Translation</div>
+        <div class="lsl-block"><pre>llSetVehicleType(VEHICLE_TYPE_CAR);
+llSetVehicleVectorParam(VEHICLE_LINEAR_MOTOR_DIRECTION, &lt;14,0,0&gt;);
+llSetVehicleFloatParam(VEHICLE_LINEAR_MOTOR_TIMESCALE, 1.0);
+llSetVehicleFloatParam(VEHICLE_ANGULAR_MOTOR_DIRECTION, 0.35);
+llSetVehicleFlags(VEHICLE_FLAG_NO_DEFLECTION_UP);
+llSetVehicleFlags(VEHICLE_FLAG_LIMIT_ROLL_ONLY);</pre></div>
+      </div>
+      <button class="copy-btn" onclick="copy('@VMN(Car) @ATT(Rol=4,Yaw=270) @VEL(Fwd=14) @CTRL(Throt=0.7,Steer=-20) @MODE(Cruise)', this)">⎘ Copy VMN String</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Boat — Coastal Sail</div>
+      <div class="card-desc">Sailing vessel heeled to port, beam reach, 7 knots.</div>
+    </div>
+    <div class="card-body">
+      <div class="codeblock"><span class="cbadge" style="background:rgba(34,211,238,.1);color:var(--vmn)">VMN</span>
+        <pre><span class="t-vmn">@VMN(Sea)</span> <span class="t-jnt">@ATT(Rol=-12,Yaw=135)</span>
+<span class="t-act">@VEL(Fwd=7)</span> <span class="t-nerve">@CTRL(Throt=0.4,Rudd=-8)</span>
+<span class="t-mode">@MODE(Cruise)</span></pre>
+      </div>
+      <button class="lsl-toggle" onclick="toggleLSL(this)">▶ Show LSL</button>
+      <div class="lsl-section">
+        <div class="lsl-label">⌁ LSL Translation</div>
+        <div class="lsl-block"><pre>llSetVehicleType(VEHICLE_TYPE_BOAT);
+llSetVehicleRotationParam(VEHICLE_REFERENCE_FRAME,
+    llEuler2Rot(&lt;0.0, -12.0, 135.0&gt; * DEG_TO_RAD));
+llSetVehicleVectorParam(VEHICLE_LINEAR_MOTOR_DIRECTION, &lt;7,0,0&gt;);
+llSetVehicleFloatParam(VEHICLE_BUOYANCY, 1.0);
+llSetVehicleFlags(VEHICLE_FLAG_REACT_TO_WIND);</pre></div>
+      </div>
+      <button class="copy-btn" onclick="copy('@VMN(Sea) @ATT(Rol=-12,Yaw=135) @VEL(Fwd=7) @CTRL(Throt=0.4,Rudd=-8) @MODE(Cruise)', this)">⎘ Copy VMN String</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Plane — Final Approach</div>
+      <div class="card-desc">Fixed-wing aircraft descending to land. Gear down, flaps, low throttle.</div>
+    </div>
+    <div class="card-body">
+      <div class="codeblock"><span class="cbadge" style="background:rgba(34,211,238,.1);color:var(--vmn)">VMN</span>
+        <pre><span class="t-vmn">@VMN(Air)</span> <span class="t-jnt">@ATT(Pit=-3,Rol=0,Yaw=090)</span>
+<span class="t-act">@VEL(Fwd=62,Vert=-2)</span> <span class="t-nerve">@ALT(m=200)</span>
+<span class="t-prog">@CTRL(Throt=0.3)</span> <span class="t-mode">@MODE(Approach)</span></pre>
+      </div>
+      <button class="lsl-toggle" onclick="toggleLSL(this)">▶ Show LSL</button>
+      <div class="lsl-section">
+        <div class="lsl-label">⌁ LSL Translation</div>
+        <div class="lsl-block"><pre>llSetVehicleType(VEHICLE_TYPE_AIRPLANE);
+llSetVehicleRotationParam(VEHICLE_REFERENCE_FRAME,
+    llEuler2Rot(&lt;-3.0, 0.0, 90.0&gt; * DEG_TO_RAD));
+llSetVehicleVectorParam(VEHICLE_LINEAR_MOTOR_DIRECTION, &lt;62, 0, -2&gt;);
+llSetVehicleFloatParam(VEHICLE_LINEAR_MOTOR_TIMESCALE, 2.4);</pre></div>
+      </div>
+      <button class="copy-btn" onclick="copy('@VMN(Air) @ATT(Pit=-3,Rol=0,Yaw=090) @VEL(Fwd=62,Vert=-2) @ALT(m=200) @CTRL(Throt=0.3) @MODE(Approach)', this)">⎘ Copy VMN String</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Helicopter — City Hover</div>
+      <div class="card-desc">Heli stationary above a city region at 80m. Collective holding altitude.</div>
+    </div>
+    <div class="card-body">
+      <div class="codeblock"><span class="cbadge" style="background:rgba(34,211,238,.1);color:var(--vmn)">VMN</span>
+        <pre><span class="t-vmn">@VMN(Heli)</span> <span class="t-jnt">@ATT(Pit=0,Rol=0,Yaw=000)</span>
+<span class="t-act">@VEL(Fwd=0,Vert=0)</span> <span class="t-nerve">@ALT(m=80)</span>
+<span class="t-prog">@CTRL(Throt=0.68,Coll=0.68)</span> <span class="t-mode">@MODE(Hover)</span></pre>
+      </div>
+      <button class="lsl-toggle" onclick="toggleLSL(this)">▶ Show LSL</button>
+      <div class="lsl-section">
+        <div class="lsl-label">⌁ LSL Translation</div>
+        <div class="lsl-block"><pre>llSetVehicleType(VEHICLE_TYPE_AIRPLANE);
+llSetVehicleVectorParam(VEHICLE_LINEAR_MOTOR_DIRECTION, &lt;0,0,0&gt;);
+llSetVehicleFloatParam(VEHICLE_VERTICAL_ATTRACTION_EFFICIENCY, 0.9);
+llSetVehicleFloatParam(VEHICLE_VERTICAL_ATTRACTION_TIMESCALE, 0.5);
+// Custom rotor: llApplyImpulse via rotor script</pre></div>
+      </div>
+      <button class="copy-btn" onclick="copy('@VMN(Heli) @ATT(Pit=0,Rol=0,Yaw=000) @VEL(Fwd=0,Vert=0) @ALT(m=80) @CTRL(Throt=0.68) @MODE(Hover)', this)">⎘ Copy VMN String</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Submarine — Deep Patrol</div>
+      <div class="card-desc">Underwater vessel at 40m depth, westward heading, slow descent.</div>
+    </div>
+    <div class="card-body">
+      <div class="codeblock"><span class="cbadge" style="background:rgba(34,211,238,.1);color:var(--vmn)">VMN</span>
+        <pre><span class="t-vmn">@VMN(Sub)</span> <span class="t-jnt">@ATT(Pit=-6,Yaw=270)</span>
+<span class="t-act">@VEL(Fwd=4,Vert=-0.5)</span>
+<span class="t-nerve">@ALT(m=-40)</span> <span class="t-prog">@CTRL(Throt=0.4,Buoy=0.35)</span>
+<span class="t-mode">@MODE(Cruise)</span></pre>
+      </div>
+      <button class="lsl-toggle" onclick="toggleLSL(this)">▶ Show LSL</button>
+      <div class="lsl-section">
+        <div class="lsl-label">⌁ LSL Translation</div>
+        <div class="lsl-block"><pre>llSetVehicleType(VEHICLE_TYPE_BOAT);
+llSetVehicleFloatParam(VEHICLE_BUOYANCY, 0.35);
+llSetVehicleVectorParam(VEHICLE_LINEAR_MOTOR_DIRECTION, &lt;4, 0, -0.5&gt;);
+llSetVehicleRotationParam(VEHICLE_REFERENCE_FRAME,
+    llEuler2Rot(&lt;-6.0, 0.0, 270.0&gt; * DEG_TO_RAD));</pre></div>
+      </div>
+      <button class="copy-btn" onclick="copy('@VMN(Sub) @ATT(Pit=-6,Yaw=270) @VEL(Fwd=4,Vert=-0.5) @ALT(m=-40) @CTRL(Throt=0.4,Buoy=0.35) @MODE(Cruise)', this)">⎘ Copy VMN String</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Seaplane — Water Landing (Morph)</div>
+      <div class="card-desc">Air→Sea morphing vehicle at 70% transition. Touching down on water.</div>
+    </div>
+    <div class="card-body">
+      <div class="codeblock"><span class="cbadge" style="background:rgba(139,92,246,.15);color:var(--purple2)">Morph</span>
+        <pre><span class="t-vmn">@VMN(Multi:Air+Sea)</span> <span class="t-prog">@PROGRESS(0.70)</span>
+<span class="t-mode">@MODE(Transition:AirToSea)</span>
+<span class="t-jnt">@ATT(Pit=-5,Rol=0,Yaw=090)</span>
+<span class="t-act">@VEL(Fwd=38,Vert=-1.5)</span></pre>
+      </div>
+      <button class="lsl-toggle" onclick="toggleLSL(this)">▶ Show LSL</button>
+      <div class="lsl-section">
+        <div class="lsl-label">⌁ LSL Translation (morphing)</div>
+        <div class="lsl-block"><pre>float p = 0.70;
+llSetVehicleFloatParam(VEHICLE_LINEAR_DEFLECTION_EFFICIENCY,
+    0.5 * (1.0 - p));
+llSetVehicleFloatParam(VEHICLE_BUOYANCY, p * 1.0);
+llSetVehicleFloatParam(VEHICLE_LINEAR_FRICTION_TIMESCALE,
+    4.0 + (6.0 * p));
+if (p >= 0.95) llSetVehicleType(VEHICLE_TYPE_BOAT);</pre></div>
+      </div>
+      <button class="copy-btn" onclick="copy('@VMN(Multi:Air+Sea) @PROGRESS(0.70) @MODE(Transition:AirToSea)\n@ATT(Pit=-5,Rol=0,Yaw=090) @VEL(Fwd=38,Vert=-1.5)', this)">⎘ Copy VMN String</button>
+    </div>
+  </div>
+
+</div><!-- /grid -->
+
+
+<!-- ══════════════════════════════════════════
+  SECTION 4: INHABITED VEHICLES (MNN + VMN)
+══════════════════════════════════════════ -->
+<div class="section-hdr" style="margin-top:52px">
+  <div class="tag" style="color:var(--purple2);border-color:var(--purple2);background:rgba(139,92,246,.07)">● MNN + FNN + VMN · Scene</div>
+  <h2>Inhabited Vehicles</h2>
+  <p>Complete scene strings — avatar body state, facial expression, and vehicle physics all captured at one moment. No other notation system encodes all three simultaneously.</p>
+</div>
+
+<div class="grid">
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Pilot — Banking Left</div>
+      <div class="card-desc">Small aircraft in a 25° left bank. Pilot torso compensating, concentrated face.</div>
+    </div>
+    <div class="card-body">
+      <div class="codeblock"><span class="cbadge" style="background:rgba(139,92,246,.15);color:var(--purple2)">Full Scene</span>
+        <pre><span class="t-vmn">@VMN(Air)</span> <span class="t-jnt">@ATT(Pit=3,Rol=-25,Yaw=270)</span> <span class="t-act">@VEL(Fwd=88)</span>
+<span class="t-mode">@MODE(Cruise)</span>
+<span class="t-mov">@MOV(Sit)</span> <span class="t-act">@ACT(Trap:1)</span>
+<span class="t-jnt">@JNT(Sp.T:Lat=8, Sp.C:Rot=-10)</span>
+<span class="t-fnn">@FNN(Corr:1, Orb.Oc.O:2)</span></pre>
+      </div>
+      <div class="compound-note">Aircraft state + pilot postural compensation + facial concentration — one string</div>
+      <button class="copy-btn" onclick="copy('@VMN(Air) @ATT(Pit=3,Rol=-25,Yaw=270) @VEL(Fwd=88) @MODE(Cruise)\n@MOV(Sit) @ACT(Trap:1) @JNT(Sp.T:Lat=8, Sp.C:Rot=-10)\n@FNN(Corr:1, Orb.Oc.O:2)', this)">⎘ Copy Scene String</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Driver — Hard Cornering</div>
+      <div class="card-desc">Car at speed through a tight corner. Driver leaning into the turn, gripping.</div>
+    </div>
+    <div class="card-body">
+      <div class="codeblock"><span class="cbadge" style="background:rgba(139,92,246,.15);color:var(--purple2)">Full Scene</span>
+        <pre><span class="t-vmn">@VMN(Car)</span> <span class="t-act">@VEL(Fwd=22)</span>
+<span class="t-nerve">@CTRL(Throt=0.85,Steer=-35)</span>
+<span class="t-mode">@MODE(Cruise)</span>
+<span class="t-mov">@MOV(Sit)</span> <span class="t-act">@ACT(Obl.E:2, Trap:2, Bic:1)</span>
+<span class="t-jnt">@JNT(Sp.T:Lat=-12)</span>
+<span class="t-fnn">@FNN(Corr:2, Orb.Oc.O:2)</span></pre>
+      </div>
+      <button class="copy-btn" onclick="copy('@VMN(Car) @VEL(Fwd=22) @CTRL(Throt=0.85,Steer=-35) @MODE(Cruise)\n@MOV(Sit) @ACT(Obl.E:2, Trap:2, Bic:1) @JNT(Sp.T:Lat=-12)\n@FNN(Corr:2, Orb.Oc.O:2)', this)">⎘ Copy Scene String</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Sailor — Beating Upwind</div>
+      <div class="card-desc">Sailing yacht heeled hard. Crew hiking out against the boat's lean.</div>
+    </div>
+    <div class="card-body">
+      <div class="codeblock"><span class="cbadge" style="background:rgba(139,92,246,.15);color:var(--purple2)">Full Scene</span>
+        <pre><span class="t-vmn">@VMN(Sea)</span> <span class="t-jnt">@ATT(Rol=-28,Yaw=045)</span>
+<span class="t-act">@VEL(Fwd=6)</span> <span class="t-mode">@MODE(Cruise)</span>
+<span class="t-mov">@MOV(Stab)</span> <span class="t-act">@ACT(Obl.E:3, Lat:2, Ers:2)</span>
+<span class="t-jnt">@JNT(Sp.L:Lat=28)</span>
+<span class="t-fnn">@FNN(Corr:2, Plat:1)</span></pre>
+      </div>
+      <button class="copy-btn" onclick="copy('@VMN(Sea) @ATT(Rol=-28,Yaw=045) @VEL(Fwd=6) @MODE(Cruise)\n@MOV(Stab) @ACT(Obl.E:3, Lat:2, Ers:2) @JNT(Sp.L:Lat=28)\n@FNN(Corr:2, Plat:1)', this)">⎘ Copy Scene String</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Spacecraft Crew — Zero-G</div>
+      <div class="card-desc">Avatar floating in spacecraft at orbital velocity. No gravity, relaxed posture.</div>
+    </div>
+    <div class="card-body">
+      <div class="codeblock"><span class="cbadge" style="background:rgba(139,92,246,.15);color:var(--purple2)">Full Scene</span>
+        <pre><span class="t-vmn">@VMN(Space)</span> <span class="t-jnt">@ATT(Pit=0,Yaw=090)</span>
+<span class="t-act">@VEL(Fwd=180)</span> <span class="t-mode">@MODE(Orbit)</span>
+<span class="t-mov">@MOV(Float)</span> <span class="t-act">@ACT(TrA:1)</span>
+<span class="t-jnt">@JNT(Bi.Hip:Flex=30 Bi.Kn:Flex=20)</span>
+<span class="t-fnn">@FNN(Zyg.Mj:1, Front:1)</span></pre>
+      </div>
+      <button class="copy-btn" onclick="copy('@VMN(Space) @ATT(Pit=0,Yaw=090) @VEL(Fwd=180) @MODE(Orbit)\n@MOV(Float) @ACT(TrA:1) @JNT(Bi.Hip:Flex=30 Bi.Kn:Flex=20)\n@FNN(Zyg.Mj:1, Front:1)', this)">⎘ Copy Scene String</button>
+    </div>
+  </div>
+
+</div><!-- /grid -->
+
+
+<!-- CTA -->
+<div class="cta-bar">
+  <h3>Build your own UMN strings</h3>
+  <p>The UMN Studio lets you construct MNN, FNN, VMN, and VRN strings interactively — pick symbols, set values, and copy the result anywhere.</p>
+  <a class="cta-btn" href="https://aiunites.com/notation-studio.html" target="_blank">◆ Open UMN Studio</a>
+</div>
+
+</div><!-- /content -->
+
+<footer>
+  <p>UMN — Universal Movement Notation · © 2026 AIUNITES LLC · MNN v2.0 · FNN v1.0 · VMN v1.0 · VRN v1.0</p>
+  <p style="margin-top:6px"><a href="https://aiunites.com">AIUNITES.com</a> · <a href="https://aiunites.com/notation-studio.html">UMN Studio</a> · <a href="vmn-vehicles.html">VMN Spec</a></p>
+</footer>
+
+<script>
+function copy(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    btn.style.background = 'rgba(52,211,153,.2)';
+    btn.style.borderColor = 'rgba(52,211,153,.5)';
+    btn.style.color = '#34d399';
+    setTimeout(() => {
+      btn.textContent = orig;
+      btn.style.background = '';
+      btn.style.borderColor = '';
+      btn.style.color = '';
+    }, 2000);
+  });
+}
+
+function toggleLSL(btn) {
+  const section = btn.nextElementSibling;
+  const open = section.classList.toggle('open');
+  btn.textContent = open ? '▼ Hide LSL' : '▶ Show LSL';
+}
+</script>
+</body>
+</html>
