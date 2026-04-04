@@ -509,6 +509,71 @@ const ANIM_SEQUENCES = {
       { mnn: '[Pos:L.Sh(Abd:90,Flex:0) R.Sh(Abd:90,Flex:0) Sp.L(Lat:0) Sp.T(Flex:0)]', muscles: {}, duration: 3000 },
     ],
   },
+  walk: {
+    label: 'Walk',
+    loop: true,
+    easing: 'ease-bio',
+    keyframes: [
+      { mnn: '[Pos:L.Hip(Flex:30,Abd:5) R.Hip(Flex:-5,Abd:5) L.Kn(Flex:10) R.Kn(Flex:35) L.Sh(Abd:20,Flex:20) R.Sh(Abd:20,Flex:-10) L.El(Flex:40) R.El(Flex:35)]', muscles: { 'Quad.RF': 1, 'Ham': 1, 'Gas': 1, 'Glu.Mx': 1 }, duration: 450 },
+      { mnn: '[Pos:L.Hip(Flex:-5,Abd:5) R.Hip(Flex:30,Abd:5) L.Kn(Flex:35) R.Kn(Flex:10) L.Sh(Abd:20,Flex:-10) R.Sh(Abd:20,Flex:20) L.El(Flex:35) R.El(Flex:40)]', muscles: { 'Quad.RF': 1, 'Ham': 1, 'Gas': 1, 'Glu.Mx': 1 }, duration: 450 },
+    ],
+  },
+  fly: {
+    label: 'Fly',
+    loop: true,
+    easing: 'ease-bio',
+    keyframes: [
+      { mnn: '[Pos:L.Sh(Abd:30,Flex:35) R.Sh(Abd:30,Flex:35) L.El(Flex:20) R.El(Flex:20) L.Hip(Flex:15,Abd:5) R.Hip(Flex:15,Abd:5) Sp.L(Flex:-10)]', muscles: { 'Dlt.A': 1, 'Trp.L': 2, 'TrA': 2 }, duration: 1800 },
+      { mnn: '[Pos:L.Sh(Abd:35,Flex:40) R.Sh(Abd:35,Flex:40) L.El(Flex:25) R.El(Flex:25) L.Hip(Flex:15,Abd:5) R.Hip(Flex:15,Abd:5) Sp.L(Flex:-12)]', muscles: { 'Dlt.A': 1, 'Trp.L': 2, 'TrA': 2 }, duration: 2000 },
+    ],
+  },
+  sit: {
+    label: 'Sit',
+    loop: false,
+    easing: 'ease-bio',
+    keyframes: [
+      { mnn: '[Pos:L.Hip(Flex:0,Abd:5) R.Hip(Flex:0,Abd:5) L.Kn(Flex:0) R.Kn(Flex:0) L.Sh(Abd:10) R.Sh(Abd:10)]', muscles: {}, duration: 400 },
+      { mnn: '[Pos:L.Hip(Flex:90,Abd:15) R.Hip(Flex:90,Abd:15) L.Kn(Flex:90) R.Kn(Flex:90) L.Sh(Abd:12) R.Sh(Abd:12) Sp.L(Flex:5)]', muscles: { 'HpFl': 1, 'Ers': 1 }, duration: 900 },
+    ],
+  },
+  swim: {
+    label: 'Swim',
+    loop: true,
+    easing: 'ease-bio',
+    keyframes: [
+      { mnn: '[Pos:L.Sh(Abd:0,Flex:160) R.Sh(Abd:0,Flex:20) L.El(Flex:10) R.El(Flex:30) L.Hip(Flex:20,Abd:5) R.Hip(Flex:10,Abd:5) Sp.L(Rot:8)]', muscles: { 'Lat': 2, 'Pec.S': 2, 'TrA': 2 }, duration: 600 },
+      { mnn: '[Pos:L.Sh(Abd:0,Flex:20) R.Sh(Abd:0,Flex:160) L.El(Flex:30) R.El(Flex:10) L.Hip(Flex:10,Abd:5) R.Hip(Flex:20,Abd:5) Sp.L(Rot:-8)]', muscles: { 'Lat': 2, 'Pec.S': 2, 'TrA': 2 }, duration: 600 },
+    ],
+  },
+  dance: {
+    label: 'Dance',
+    loop: true,
+    easing: 'ease-bio',
+    keyframes: [
+      { mnn: '[Pos:L.Sh(Abd:80,Flex:30) R.Sh(Abd:60,Flex:-10) L.El(Flex:60) R.El(Flex:40) L.Hip(Flex:20,Abd:15) R.Hip(Flex:5,Abd:5) L.Kn(Flex:20) Sp.L(Rot:15,Lat:5)]', muscles: { 'Obl.E': 2, 'Glu.Md': 1 }, duration: 500 },
+      { mnn: '[Pos:L.Sh(Abd:60,Flex:-10) R.Sh(Abd:80,Flex:30) L.El(Flex:40) R.El(Flex:60) L.Hip(Flex:5,Abd:5) R.Hip(Flex:20,Abd:15) R.Kn(Flex:20) Sp.L(Rot:-15,Lat:-5)]', muscles: { 'Obl.E': 2, 'Glu.Md': 1 }, duration: 500 },
+    ],
+  },
+  wave_vw: {
+    label: 'Wave (Avatar)',
+    loop: true,
+    easing: 'ease-bio',
+    keyframes: [
+      { mnn: '[Pos:R.Sh(Abd:120,Flex:20) R.El(Flex:20) R.Wr(Flex:15) L.Sh(Abd:10)]', muscles: { 'Dlt.L': 2, 'Dlt.A': 1 }, duration: 400 },
+      { mnn: '[Pos:R.Sh(Abd:150,Flex:25) R.El(Flex:60) R.Wr(Flex:-20) L.Sh(Abd:10)]', muscles: { 'Dlt.L': 3, 'Dlt.A': 2 }, duration: 350 },
+      { mnn: '[Pos:R.Sh(Abd:120,Flex:20) R.El(Flex:20) R.Wr(Flex:15) L.Sh(Abd:10)]', muscles: { 'Dlt.L': 2 }, duration: 350 },
+    ],
+  },
+  bow: {
+    label: 'Bow',
+    loop: false,
+    easing: 'ease-bio',
+    keyframes: [
+      { mnn: '[Pos:L.Sh(Abd:8) R.Sh(Abd:8) Sp.L(Flex:0) Sp.C(Flex:0)]', muscles: {}, duration: 400 },
+      { mnn: '[Pos:L.Sh(Abd:8) R.Sh(Abd:8) Sp.L(Flex:35) Sp.C(Flex:20) L.Hip(Flex:30) R.Hip(Flex:30)]', muscles: { 'Ers': 2 }, duration: 900 },
+      { mnn: '[Pos:L.Sh(Abd:8) R.Sh(Abd:8) Sp.L(Flex:0) Sp.C(Flex:0) L.Hip(Flex:0) R.Hip(Flex:0)]', muscles: {}, duration: 800 },
+    ],
+  },
   run: {
     label: 'Run Cycle',
     loop: true,
@@ -1393,6 +1458,27 @@ buildInfoRows();
 buildExamples();
 buildAnimTab();
 render();
+
+// URL param: ?mnn=ENCODED_STRING — pre-load from UMN Studio
+(function(){
+  const params = new URLSearchParams(location.search);
+  const mnnParam = params.get('mnn');
+  const animParam = params.get('anim');
+  if (mnnParam) {
+    try {
+      const str = decodeURIComponent(mnnParam);
+      document.getElementById('mnn-input').value = str;
+      applyMNN();
+      // Switch to MNN tab to show the loaded string
+      switchTab('mnn');
+    } catch(e) {}
+  }
+  if (animParam && ANIM_SEQUENCES[animParam]) {
+    loadAnimSequence(animParam);
+    switchTab('anim');
+    setTimeout(animPlay, 300);
+  }
+})();
 </script>
 </body>
 </html>
