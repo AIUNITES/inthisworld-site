@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="canonical" href="https://inthisworld.com/umm.html">
-<title>UMN for Virtual Worlds — Universal Movement Notation | InThisWorld</title>
-<meta name="description" content="Universal Movement Notation (UMN) applied to virtual world scenarios. Reference strings for avatar states, social interactions, vehicle motion, and LSL scripting.">
+<title>UMN in Action — Universal Movement Notation | InThisWorld</title>
+<meta name="description" content="Universal Movement Notation (UMN) demonstrated through InThisWorld's virtual environment. Any physical movement — rehab, training, avatar control, NPC behavior — notated as plain text.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="icon" href="favicon.ico">
@@ -152,8 +152,12 @@ footer a{color:var(--purple2);text-decoration:none;}
 <!-- Hero -->
 <div class="hero">
   <div class="hero-eyebrow">Universal Movement Notation</div>
-  <h1>Every movement in a<br><span>virtual world</span>, notated</h1>
-  <p class="hero-sub">UMN is a plain-text notation system for avatar states, social interactions, vehicle physics, voice, and NPC agents — all composable into a single scene string.</p>
+  <h1>Any movement, anywhere —<br><span>made visible</span></h1>
+  <p class="hero-sub">UMN is a plain-text notation system for human and non-human movement. InThisWorld uses it as a live demonstration environment — the avatar you see walking, sitting, or waving is the notation string being executed in real time.</p>
+  <div style="margin:0 auto 24px;max-width:600px;padding:12px 18px;background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.25);border-radius:10px;font-size:.82rem;color:var(--text2);line-height:1.8;text-align:left">
+    <strong style="color:var(--text)">Who reads this data:</strong> physical therapists logging a patient's gait, trainers tracking muscle activation, vocalists monitoring resonance, world builders scripting NPC behavior, or anyone who needs to record and reproduce movement precisely.
+    <strong style="color:var(--text)"> The patient or end user</strong> may never see the notation — or they may. Depends on the context.
+  </div>
   <div class="hero-tags">
     <span class="htag" style="color:var(--mnn);border-color:var(--mnn);background:rgba(52,211,153,.08)">MNN · Body</span>
     <span class="htag" style="color:var(--fnn);border-color:var(--fnn);background:rgba(244,114,182,.08)">FNN · Face</span>
@@ -181,8 +185,8 @@ footer a{color:var(--purple2);text-decoration:none;}
 ══════════════════════════════════════════ -->
 <div class="section-hdr">
   <div class="tag" style="color:var(--mnn);border-color:var(--mnn);background:rgba(52,211,153,.07)">● MNN · Body</div>
-  <h2>Avatar Body States</h2>
-  <p>The most common avatar postures and motions, notated as MNN strings. Each string encodes the movement pattern, primary muscle groups, and innervating nerves.</p>
+  <h2>Body Movement States</h2>
+  <p>MNN strings for common movement patterns. A physical therapist documenting a patient's gait uses the same notation as an avatar controller. The virtual world makes it visible — the string is identical in a clinic log, a game engine, or a cable rig.</p>
 </div>
 
 <div class="grid">
@@ -302,8 +306,8 @@ footer a{color:var(--purple2);text-decoration:none;}
 ══════════════════════════════════════════ -->
 <div class="section-hdr" style="margin-top:52px">
   <div class="tag" style="color:var(--fnn);border-color:var(--fnn);background:rgba(244,114,182,.07)">● MNN + FNN + VRN · Social</div>
-  <h2>Social Interactions</h2>
-  <p>Compound strings encoding body, face, and voice together. These are scene strings — multiple protocols in one line, all at moment T.</p>
+  <h2>Social Interactions &amp; Expressions</h2>
+  <p>Compound strings encoding body, face, and voice together — a complete behavioral state at one moment. Useful anywhere an expression must be precisely reproduced: actor coaching, NPC scripting, clinical expression assessment, or vocal training feedback.</p>
 </div>
 
 <div class="grid">
@@ -410,7 +414,7 @@ footer a{color:var(--purple2);text-decoration:none;}
 <div class="section-hdr" style="margin-top:52px">
   <div class="tag" style="color:var(--vmn);border-color:var(--vmn);background:rgba(34,211,238,.07)">● VMN · Vehicle + LSL Bridge</div>
   <h2>Vehicle States</h2>
-  <p>VMN strings for common vehicle situations in InThisWorld and Second Life. Each string maps directly to the LSL vehicle physics API — click to expand the LSL translation.</p>
+  <p>VMN strings for vehicle physics states. The virtual environment makes them visible, but the strings themselves are platform-neutral — they map directly to the LSL vehicle physics API for Second Life / OpenSim, and could equally drive a simulator or documentation tool.</p>
 </div>
 
 <div class="grid">
@@ -573,8 +577,8 @@ if (p >= 0.95) llSetVehicleType(VEHICLE_TYPE_BOAT);</pre></div>
 ══════════════════════════════════════════ -->
 <div class="section-hdr" style="margin-top:52px">
   <div class="tag" style="color:var(--purple2);border-color:var(--purple2);background:rgba(139,92,246,.07)">● MNN + FNN + VMN · Scene</div>
-  <h2>Inhabited Vehicles</h2>
-  <p>Complete scene strings — avatar body state, facial expression, and vehicle physics all captured at one moment. No other notation system encodes all three simultaneously.</p>
+  <h2>Inhabited Vehicles — Body + Vehicle + Face</h2>
+  <p>The notation has no separate layer for “something riding something else” — you just compose the protocols. A physiotherapist documenting posture during driving, a simulator instructor logging pilot position under load, or a game designer scripting a cockpit scene all use the same string format.</p>
 </div>
 
 <div class="grid">
@@ -658,7 +662,7 @@ if (p >= 0.95) llSetVehicleType(VEHICLE_TYPE_BOAT);</pre></div>
 <div class="section-hdr" style="margin-top:52px">
   <div class="tag" style="color:#94a3b8;border-color:#94a3b8;background:rgba(148,163,184,.07)">&#9679; AGENT + BEH &middot; NPCs</div>
   <h2>NPCs, Pets &amp; Companions</h2>
-  <p>The <code style="color:#94a3b8;background:rgba(0,0,0,.3);padding:2px 6px;border-radius:4px;font-size:.82rem">@AGENT()</code> tag identifies <em>who</em> is acting. <code style="color:#94a3b8;background:rgba(0,0,0,.3);padding:2px 6px;border-radius:4px;font-size:.82rem">@BEH()</code> encodes the AI directive — what the NPC is programmed to do right now. The MNN/FNN/VRN blocks below them describe what the body IS doing at this moment.</p>
+  <p>In virtual worlds, NPCs are the use case. In physical rehab, the trainer watches while the patient moves — the notation captures both the intended behavior and the actual body state. The same structure applies: an identifier, an intended state (BEH or care plan), and the actual movement state (MNN/FNN).</p>
   <div style="margin-top:10px;padding:12px 16px;background:rgba(148,163,184,.06);border:1px solid rgba(148,163,184,.2);border-radius:8px;font-size:.8rem;line-height:1.9;color:var(--text2)">
     <strong style="color:#94a3b8">@AGENT(id, type, species, role)</strong> = who  · 
     <strong style="color:#94a3b8">@BEH(state, target, radius)</strong> = AI goal  · 
@@ -772,8 +776,8 @@ if (p >= 0.95) llSetVehicleType(VEHICLE_TYPE_BOAT);</pre></div>
 
 <div class="section-hdr" style="margin-top:40px">
   <div class="tag" style="color:#94a3b8;border-color:#94a3b8;background:rgba(148,163,184,.07)">&#9679; Multi-Agent</div>
-  <h2>Full Scene — Player + Companion + Pet</h2>
-  <p>Multiple agents composing one scene string. Each @AGENT block identifies its character; the notation blocks below it describe that character's state at moment T.</p>
+  <h2>Full Scene — Multiple Agents</h2>
+  <p>Multiple subjects in one notation snapshot. In a virtual world this is players, NPCs, and pets. In a clinical setting it could be a patient and a physical therapist. In a training session, an athlete and a coach. The notation is the same in all cases.</p>
 </div>
 
 <div class="codeblock" style="max-width:100%;margin-bottom:16px">
