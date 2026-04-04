@@ -153,12 +153,13 @@ footer a{color:var(--purple2);text-decoration:none;}
 <div class="hero">
   <div class="hero-eyebrow">Universal Movement Notation</div>
   <h1>Every movement in a<br><span>virtual world</span>, notated</h1>
-  <p class="hero-sub">UMN is a plain-text notation system for avatar states, social interactions, vehicle physics, and voice — all composable into a single scene string.</p>
+  <p class="hero-sub">UMN is a plain-text notation system for avatar states, social interactions, vehicle physics, voice, and NPC agents — all composable into a single scene string.</p>
   <div class="hero-tags">
     <span class="htag" style="color:var(--mnn);border-color:var(--mnn);background:rgba(52,211,153,.08)">MNN · Body</span>
     <span class="htag" style="color:var(--fnn);border-color:var(--fnn);background:rgba(244,114,182,.08)">FNN · Face</span>
     <span class="htag" style="color:var(--vmn);border-color:var(--vmn);background:rgba(34,211,238,.08)">VMN · Vehicle</span>
     <span class="htag" style="color:var(--vrn);border-color:var(--vrn);background:rgba(251,146,60,.08)">VRN · Voice</span>
+    <span class="htag" style="color:#94a3b8;border-color:#94a3b8;background:rgba(148,163,184,.08)">AGENT · NPC</span>
   </div>
 </div>
 
@@ -169,6 +170,8 @@ footer a{color:var(--purple2);text-decoration:none;}
   <div class="proto-item"><span class="pdot" style="background:var(--fnn)"></span><span class="pcode" style="color:var(--fnn)">@FNN()</span><span style="color:var(--text2)">Facial state</span></div>
   <div class="proto-item"><span class="pdot" style="background:var(--vmn)"></span><span class="pcode" style="color:var(--vmn)">@VMN()</span><span style="color:var(--text2)">Vehicle class</span></div>
   <div class="proto-item"><span class="pdot" style="background:var(--vrn)"></span><span class="pcode" style="color:var(--vrn)">@RES()</span><span style="color:var(--text2)">Voice resonance</span></div>
+  <div class="proto-item"><span class="pdot" style="background:#94a3b8"></span><span class="pcode" style="color:#94a3b8">@AGENT()</span><span style="color:var(--text2)">Agent identity</span></div>
+  <div class="proto-item"><span class="pdot" style="background:#94a3b8"></span><span class="pcode" style="color:#94a3b8">@BEH()</span><span style="color:var(--text2)">AI behavior</span></div>
 </div>
 
 <div class="content">
@@ -649,17 +652,164 @@ if (p >= 0.95) llSetVehicleType(VEHICLE_TYPE_BOAT);</pre></div>
 </div><!-- /grid -->
 
 
+<!-- ══════════════════════════════════════════════
+  SECTION 5: NPCs, PETS & COMPANIONS
+══════════════════════════════════════════════ -->
+<div class="section-hdr" style="margin-top:52px">
+  <div class="tag" style="color:#94a3b8;border-color:#94a3b8;background:rgba(148,163,184,.07)">&#9679; AGENT + BEH &middot; NPCs</div>
+  <h2>NPCs, Pets &amp; Companions</h2>
+  <p>The <code style="color:#94a3b8;background:rgba(0,0,0,.3);padding:2px 6px;border-radius:4px;font-size:.82rem">@AGENT()</code> tag identifies <em>who</em> is acting. <code style="color:#94a3b8;background:rgba(0,0,0,.3);padding:2px 6px;border-radius:4px;font-size:.82rem">@BEH()</code> encodes the AI directive — what the NPC is programmed to do right now. The MNN/FNN/VRN blocks below them describe what the body IS doing at this moment.</p>
+  <div style="margin-top:10px;padding:12px 16px;background:rgba(148,163,184,.06);border:1px solid rgba(148,163,184,.2);border-radius:8px;font-size:.8rem;line-height:1.9;color:var(--text2)">
+    <strong style="color:#94a3b8">@AGENT(id, type, species, role)</strong> = who  · 
+    <strong style="color:#94a3b8">@BEH(state, target, radius)</strong> = AI goal  · 
+    <strong style="color:var(--mnn)">MNN</strong> = current body state  · 
+    <strong style="color:var(--fnn)">FNN</strong> = current face state
+  </div>
+</div>
+
+<div class="grid">
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Pet Cat &mdash; Following Player</div>
+      <div class="card-desc">NPC cat trotting behind its owner. The species field in @AGENT tells the renderer to use a quadruped rig. The MNN patterns are the same.</div>
+    </div>
+    <div class="card-body">
+      <div class="codeblock"><span class="cbadge" style="background:rgba(148,163,184,.12);color:#94a3b8">AGENT</span>
+        <pre><span style="color:#94a3b8">@AGENT(id=Mittens,type=Pet,species=Cat)</span>
+<span style="color:#94a3b8">@BEH(Follow:Player1,Radius=1.5m)</span>
+<span class="t-mov">@MOV(Walk)</span> <span class="t-act">@ACT(Ers:1)</span> <span class="t-nerve">&gt;&gt; DorsRami</span>
+<span class="t-fnn">@FNN(Orb.Oc.O:2)</span></pre>
+      </div>
+      <div class="compound-note">@AGENT = who &nbsp;&rarr;&nbsp; @BEH = AI goal &nbsp;&rarr;&nbsp; MNN+FNN = current state at this moment</div>
+      <button class="copy-btn" onclick="copy('@AGENT(id=Mittens,type=Pet,species=Cat)\n@BEH(Follow:Player1,Radius=1.5m)\n@MOV(Walk) @ACT(Ers:1) >> DorsRami\n@FNN(Orb.Oc.O:2)', this)">⍘ Copy String</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Companion NPC &mdash; Idle Chat</div>
+      <div class="card-desc">Humanoid companion standing and speaking. Full body, face, and voice state in one string.</div>
+    </div>
+    <div class="card-body">
+      <div class="codeblock"><span class="cbadge" style="background:rgba(148,163,184,.12);color:#94a3b8">AGENT</span>
+        <pre><span style="color:#94a3b8">@AGENT(id=Aria,type=NPC,role=Companion)</span>
+<span style="color:#94a3b8">@BEH(Idle)</span>
+<span class="t-mov">@MOV(Idle)</span> <span class="t-act">@ACT(TrA:1)</span>
+<span class="t-fnn">@FNN(Zyg.Mj:2, Orb.Oc.O:1)</span> <span class="t-nerve">&gt;&gt; CNVII</span>
+<span class="t-res">@RES(Ch:2, Or:1)</span> <span class="t-plc">@PLC(A)</span> <span class="t-voc">@VOC(Fl)</span> <span class="t-res">@BR(Sp2)</span></pre>
+      </div>
+      <button class="copy-btn" onclick="copy('@AGENT(id=Aria,type=NPC,role=Companion)\n@BEH(Idle)\n@MOV(Idle) @ACT(TrA:1)\n@FNN(Zyg.Mj:2, Orb.Oc.O:1) >> CNVII\n@RES(Ch:2, Or:1) @PLC(A) @VOC(Fl) @BR(Sp2)', this)">⍘ Copy String</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Guard NPC &mdash; Patrol Route</div>
+      <div class="card-desc">Guard walking a 10m patrol loop. Alert posture, brow slightly furrowed. BEH encodes the patrol radius.</div>
+    </div>
+    <div class="card-body">
+      <div class="codeblock"><span class="cbadge" style="background:rgba(148,163,184,.12);color:#94a3b8">AGENT</span>
+        <pre><span style="color:#94a3b8">@AGENT(id=Guard1,type=NPC,role=Guard)</span>
+<span style="color:#94a3b8">@BEH(Patrol,Radius=10m)</span>
+<span class="t-mov">@MOV(Walk)</span> <span class="t-act">@ACT(Trp.U:1, Ers:1)</span>
+<span class="t-fnn">@FNN(Corr:1)</span> <span class="t-nerve">&gt;&gt; CNVII/Temp</span></pre>
+      </div>
+      <button class="copy-btn" onclick="copy('@AGENT(id=Guard1,type=NPC,role=Guard)\n@BEH(Patrol,Radius=10m)\n@MOV(Walk) @ACT(Trp.U:1, Ers:1)\n@FNN(Corr:1) >> CNVII/Temp', this)">⍘ Copy String</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Dog &mdash; Excited Greeting</div>
+      <div class="card-desc">Dog running toward player with a happy expression. High-energy gait, open mouth, wide eyes.</div>
+    </div>
+    <div class="card-body">
+      <div class="codeblock"><span class="cbadge" style="background:rgba(148,163,184,.12);color:#94a3b8">AGENT</span>
+        <pre><span style="color:#94a3b8">@AGENT(id=Rex,type=Pet,species=Dog)</span>
+<span style="color:#94a3b8">@BEH(Greet:Player1)</span>
+<span class="t-mov">@MOV(Run)</span> <span class="t-act">@ACT(Glu.Mx:3, Quad.RF:3, Gas:2)</span>
+<span class="t-fnn">@FNN(Zyg.Mj:3, Orb.Oc.O:2, Dep.Lab:1)</span></pre>
+      </div>
+      <button class="copy-btn" onclick="copy('@AGENT(id=Rex,type=Pet,species=Dog)\n@BEH(Greet:Player1)\n@MOV(Run) @ACT(Glu.Mx:3, Quad.RF:3, Gas:2)\n@FNN(Zyg.Mj:3, Orb.Oc.O:2, Dep.Lab:1)', this)">⍘ Copy String</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Merchant NPC &mdash; Seated at Stall</div>
+      <div class="card-desc">Shop keeper sitting idle. Relaxed posture, subtle smile. Classic NPC configuration.</div>
+    </div>
+    <div class="card-body">
+      <div class="codeblock"><span class="cbadge" style="background:rgba(148,163,184,.12);color:#94a3b8">AGENT</span>
+        <pre><span style="color:#94a3b8">@AGENT(id=Shopkeeper,type=NPC,role=Merchant)</span>
+<span style="color:#94a3b8">@BEH(Idle)</span>
+<span class="t-mov">@MOV(Sit)</span> <span class="t-act">@ACT(HpFl:1, Ers:1)</span>
+<span class="t-jnt">@JNT(Bi.Hip:Flex=90 Bi.Kn:Flex=90)</span>
+<span class="t-fnn">@FNN(Zyg.Mj:1)</span></pre>
+      </div>
+      <button class="copy-btn" onclick="copy('@AGENT(id=Shopkeeper,type=NPC,role=Merchant)\n@BEH(Idle)\n@MOV(Sit) @ACT(HpFl:1, Ers:1) @JNT(Bi.Hip:Flex=90 Bi.Kn:Flex=90)\n@FNN(Zyg.Mj:1)', this)">⍘ Copy String</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Dragon &mdash; Perched Idle</div>
+      <div class="card-desc">Creature NPC at rest. Same notation system as all others — species drives the renderer, not the string.</div>
+    </div>
+    <div class="card-body">
+      <div class="codeblock"><span class="cbadge" style="background:rgba(148,163,184,.12);color:#94a3b8">AGENT</span>
+        <pre><span style="color:#94a3b8">@AGENT(id=Drake,type=Creature,species=Dragon)</span>
+<span style="color:#94a3b8">@BEH(Idle)</span>
+<span class="t-mov">@MOV(Sit.Floor)</span> <span class="t-act">@ACT(Ers:2, TrA:1)</span>
+<span class="t-fnn">@FNN(Orb.Oc.O:2)</span></pre>
+      </div>
+      <button class="copy-btn" onclick="copy('@AGENT(id=Drake,type=Creature,species=Dragon)\n@BEH(Idle)\n@MOV(Sit.Floor) @ACT(Ers:2, TrA:1)\n@FNN(Orb.Oc.O:2)', this)">⍘ Copy String</button>
+    </div>
+  </div>
+
+</div><!-- /NPC grid -->
+
+<div class="section-hdr" style="margin-top:40px">
+  <div class="tag" style="color:#94a3b8;border-color:#94a3b8;background:rgba(148,163,184,.07)">&#9679; Multi-Agent</div>
+  <h2>Full Scene — Player + Companion + Pet</h2>
+  <p>Multiple agents composing one scene string. Each @AGENT block identifies its character; the notation blocks below it describe that character's state at moment T.</p>
+</div>
+
+<div class="codeblock" style="max-width:100%;margin-bottom:16px">
+  <pre style="font-size:.78rem;line-height:2.1"><span style="color:#4ade80">@ENS(Preset:MidSummerNoon)</span>
+
+<span style="color:#6b7280">// Player avatar</span>
+<span style="color:#94a3b8">@AGENT(id=Player1,type=Avatar)</span>
+<span style="color:#818cf8">@MOV(Walk)</span> <span style="color:#34d399">@ACT(Glu.Mx:2, Quad.RF:2)</span>
+<span style="color:#f472b6">@FNN(Zyg.Mj:2)</span>
+
+<span style="color:#6b7280">// Companion NPC following</span>
+<span style="color:#94a3b8">@AGENT(id=Aria,type=NPC,role=Companion)</span> <span style="color:#94a3b8">@BEH(Follow:Player1)</span>
+<span style="color:#818cf8">@MOV(Walk)</span> <span style="color:#f472b6">@FNN(Zyg.Mj:1, Orb.Oc.O:1)</span>
+
+<span style="color:#6b7280">// Pet dog at 2m</span>
+<span style="color:#94a3b8">@AGENT(id=Rex,type=Pet,species=Dog)</span> <span style="color:#94a3b8">@BEH(Follow:Player1,Radius=2m)</span>
+<span style="color:#818cf8">@MOV(Walk)</span> <span style="color:#34d399">@ACT(Glu.Mx:1)</span></pre>
+</div>
+<button class="copy-btn" style="max-width:320px;margin-bottom:24px" onclick="copy('@ENS(Preset:MidSummerNoon)\n\n@AGENT(id=Player1,type=Avatar)\n@MOV(Walk) @ACT(Glu.Mx:2, Quad.RF:2)\n@FNN(Zyg.Mj:2)\n\n@AGENT(id=Aria,type=NPC,role=Companion) @BEH(Follow:Player1)\n@MOV(Walk) @FNN(Zyg.Mj:1, Orb.Oc.O:1)\n\n@AGENT(id=Rex,type=Pet,species=Dog) @BEH(Follow:Player1,Radius=2m)\n@MOV(Walk) @ACT(Glu.Mx:1)', this)">⍘ Copy Full Scene String</button>
+
+<div style="padding:14px 18px;background:rgba(148,163,184,.06);border:1px solid rgba(148,163,184,.2);border-radius:10px;font-size:.82rem;line-height:1.9;color:var(--text2);margin-bottom:20px">
+  <strong style="color:#94a3b8">Animal notation:</strong> Cats, dogs, horses, dragons all use the same MNN joint symbols as bipeds. The <code style="color:#94a3b8">species=</code> field in @AGENT() tells the rendering engine which rig to use — quadruped, avian, or custom. The notation string doesn't change; the renderer interprets it. This means one notation system covers all character types in one virtual world.
+</div>
+
+
 <!-- CTA -->
 <div class="cta-bar">
   <h3>Build your own UMN strings</h3>
-  <p>The UMN Studio lets you construct MNN, FNN, VMN, and VRN strings interactively — pick symbols, set values, and copy the result anywhere.</p>
+  <p>The UMN Studio lets you construct MNN, FNN, VMN, VRN and AGENT strings interactively — including NPC characters, pets, and companions.</p>
   <a class="cta-btn" href="https://aiunites.com/notation-studio.html" target="_blank">◆ Open UMN Studio</a>
 </div>
 
 </div><!-- /content -->
 
 <footer>
-  <p>UMN — Universal Movement Notation · © 2026 AIUNITES LLC · MNN v2.0 · FNN v1.0 · VMN v1.0 · VRN v1.0</p>
+  <p>UMN — Universal Movement Notation · © 2026 AIUNITES LLC · MNN v2.0 · FNN v1.0 · VMN v1.0 · VRN v1.0 · AGENT v1.0</p>
   <p style="margin-top:6px"><a href="https://aiunites.com">AIUNITES.com</a> · <a href="https://aiunites.com/notation-studio.html">UMN Studio</a> · <a href="vmn-vehicles.html">VMN Spec</a></p>
 </footer>
 
