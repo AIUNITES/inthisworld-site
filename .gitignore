@@ -1,5 +1,6 @@
 
 # Internal docs - do not publish
+thewords/
 
 # GitHub chat token (contains secret - never commit)
 js/github-chat-token.js
