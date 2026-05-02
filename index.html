@@ -79,9 +79,9 @@
 <button class="wb-arrow wb-right" id="wb-right" aria-label="Scroll webring right">&#8250;</button>
 <script>(function(){
   var IS_LOCAL = location.protocol==='file:' || location.hostname==='localhost' || location.hostname==='127.0.0.1';
-  var BASE = IS_LOCAL ? '../' : 'https://aiunites.github.io/';
+  var BASE = IS_LOCAL ? '/' : 'https://aiunites.github.io/';
   var JSON_URL = IS_LOCAL
-    ? '../aiunites-site/data/webring.json'
+    ? '/aiunites-site/data/webring.json'
     : 'https://aiunites.github.io/aiunites-site/data/webring.json';
 
   var c = document.getElementById('wb-content');
