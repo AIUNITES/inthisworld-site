@@ -1,0 +1,560 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-VP15KRLV6P"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-VP15KRLV6P');</script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4573596965267859" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buoy Run &mdash; Powerboat Racing | InThisWorld</title>
+<meta name="description" content="3-lap powerboat race through a buoy course on open water. Wake hopping, inside-line turns, two AI opponents. Browser-based 3D built with Three.js.">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#000;color:#fff;overflow:hidden}
+canvas{display:block;width:100vw;height:100vh}
+a{color:inherit;text-decoration:none}
+#hud{position:fixed;top:0;left:0;right:0;padding:14px 20px;display:none;justify-content:space-between;z-index:50;pointer-events:none;font-weight:600;text-shadow:0 1px 4px #000}
+#hud > div small{display:block;color:#888;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px}
+#hud-lap{font-size:1.2rem;color:#5eead4}
+#hud-pos{text-align:center;font-size:1.4rem;color:#fbbf24}
+#hud-time{text-align:right;font-size:1rem;color:#5eead4;font-family:'SF Mono',Consolas,monospace}
+#hud-time .best{color:#86efac;font-size:.85rem}
+#speedo{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:50;pointer-events:none;display:none;text-align:center}
+#speed-num{font-size:3.5rem;font-weight:800;background:linear-gradient(135deg,#14b8a6,#fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-family:'SF Mono',Consolas,monospace}
+#speed-lbl{font-size:.7rem;color:#888;letter-spacing:.15em;text-transform:uppercase;margin-top:4px}
+#wake-readout{position:fixed;bottom:24px;right:24px;z-index:50;pointer-events:none;display:none;text-align:right;color:#86efac;font-family:'SF Mono',Consolas,monospace}
+#wake-readout big{font-size:1.6rem;font-weight:800;display:block}
+#wake-readout small{font-size:.65rem;color:#888;letter-spacing:.1em;text-transform:uppercase}
+#countdown{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:8rem;font-weight:900;color:#5eead4;text-shadow:0 0 30px rgba(20,184,166,.7);z-index:60;display:none;font-family:'SF Mono',Consolas,monospace}
+#overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;text-align:center;padding:2rem}
+#overlay h1{font-size:2.5rem;font-weight:800;margin-bottom:.5rem;background:linear-gradient(135deg,#14b8a6,#fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+#overlay h1 small{display:block;font-size:.7rem;color:#5eead4;letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px;-webkit-text-fill-color:#5eead4}
+#overlay p{color:#aaa;max-width:480px;font-size:.95rem;line-height:1.7;margin-bottom:1.6rem}
+#overlay .keys{display:flex;gap:1rem;justify-content:center;margin-bottom:1.5rem;flex-wrap:wrap}
+#overlay .key{background:#1a1a22;border:1px solid #333;border-radius:6px;padding:.4rem .9rem;font-size:.78rem;color:#bbb;font-family:'SF Mono',Consolas,monospace}
+#overlay .key strong{color:#5eead4}
+#start-btn{padding:.95rem 2.5rem;border-radius:10px;background:linear-gradient(135deg,#14b8a6,#0d9488);border:none;color:#fff;font-size:1.05rem;font-weight:800;font-family:inherit;cursor:pointer;letter-spacing:.05em;text-transform:uppercase}
+#start-btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(20,184,166,.5)}
+#nav-back{position:fixed;top:14px;left:14px;z-index:55;padding:.5rem 1rem;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);border-radius:8px;font-size:.75rem;color:#ccc;display:none}
+#results{position:fixed;inset:0;background:rgba(0,0,0,.94);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:300;padding:2rem;text-align:center}
+#results h1{font-size:3.5rem;font-weight:900;margin-bottom:.5rem;background:linear-gradient(135deg,#fbbf24,#5eead4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+#results h1 small{display:block;font-size:.8rem;color:#aaa;letter-spacing:.3em;text-transform:uppercase;margin-bottom:6px;-webkit-text-fill-color:#aaa}
+.standings{margin:1.5rem 0;display:flex;flex-direction:column;gap:.5rem;width:100%;max-width:380px}
+.standing{display:grid;grid-template-columns:50px 1fr 100px;gap:.8rem;padding:.7rem 1rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:8px;text-align:left}
+.standing.you{background:rgba(20,184,166,.15);border-color:rgba(20,184,166,.4)}
+.standing-pos{font-size:1.3rem;font-weight:800;color:#fbbf24}
+.standing-name{font-size:.95rem;font-weight:700}
+.standing-name small{display:block;color:#888;font-size:.7rem;font-weight:500}
+.standing-time{text-align:right;font-family:'SF Mono',Consolas,monospace;color:#5eead4;font-size:.9rem}
+#restart-btn{margin-top:1.5rem;padding:.85rem 2.2rem;border-radius:10px;background:linear-gradient(135deg,#14b8a6,#0d9488);border:none;color:#fff;font-size:.95rem;font-weight:800;font-family:inherit;cursor:pointer;letter-spacing:.05em;text-transform:uppercase}
+#back-btn{margin-top:.5rem;padding:.7rem 2.2rem;border-radius:10px;background:transparent;border:1px solid #333;color:#888;font-size:.85rem;font-weight:600;font-family:inherit;cursor:pointer;text-decoration:none;display:inline-block}
+</style>
+</head>
+<body>
+<a id="nav-back" href="index.html">&larr; Games</a>
+<div id="hud">
+  <div id="hud-lap"><small>Lap</small><span id="lap-text">1 / 3</span></div>
+  <div id="hud-pos"><small>Position</small><span id="pos-text">1st</span></div>
+  <div id="hud-time"><small>Lap Time</small><span id="time-text">0:00.00</span><div class="best" id="best-text">Best: --:--.--</div></div>
+</div>
+<div id="speedo"><div id="speed-num">0</div><div id="speed-lbl">MPH</div></div>
+<div id="wake-readout"><big id="throttle-num">0</big><small>% Throttle</small></div>
+<div id="countdown"></div>
+<div id="overlay">
+  <h1><small>Buoy Run</small>Powerboat Racing</h1>
+  <p>Three laps through a buoy course on open water. Hop the wake, take the inside line on the turns, and outrun two AI opponents. Hard turns slow you; smooth racing lines win.</p>
+  <div class="keys">
+    <span class="key"><strong>W</strong> Throttle</span>
+    <span class="key"><strong>S</strong> Reverse</span>
+    <span class="key"><strong>A D</strong> Steer</span>
+    <span class="key"><strong>Shift</strong> Boost</span>
+  </div>
+  <button id="start-btn">Cast Off &#8594;</button>
+</div>
+<div id="results">
+  <h1><small>Race Complete</small><span id="result-headline">P1</span></h1>
+  <div class="standings" id="standings"></div>
+  <button id="restart-btn">Race Again &#8635;</button>
+  <a id="back-btn" href="index.html">&larr; Back to Games</a>
+</div>
+<canvas id="c"></canvas>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const canvas = document.getElementById('c');
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x7ec0d8);
+scene.fog = new THREE.Fog(0x7ec0d8, 100, 480);
+const camera = new THREE.PerspectiveCamera(75, innerWidth/innerHeight, 0.1, 700);
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+addEventListener('resize', () => { camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+
+scene.add(new THREE.AmbientLight(0xc0d8ff, 0.65));
+const sun = new THREE.DirectionalLight(0xffffe8, 0.95);
+sun.position.set(80, 120, 60); scene.add(sun);
+
+// Sky dome with simple gradient
+const sky = new THREE.Mesh(
+  new THREE.SphereGeometry(540, 32, 16),
+  new THREE.ShaderMaterial({
+    side: THREE.BackSide,
+    uniforms: {},
+    vertexShader: 'varying vec3 vP; void main(){vP=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+    fragmentShader: 'varying vec3 vP; void main(){float t=clamp(vP.y/350.0+0.4,0.,1.);vec3 c=mix(vec3(0.85,0.92,0.96),vec3(0.20,0.45,0.75),t);gl_FragColor=vec4(c,1.);}'
+  })
+);
+scene.add(sky);
+
+// Water plane (segmented for vertex wave animation)
+const waterGeo = new THREE.PlaneGeometry(1200, 1200, 80, 80);
+const water = new THREE.Mesh(
+  waterGeo,
+  new THREE.MeshLambertMaterial({color: 0x1e6a8c, transparent:true, opacity:0.96})
+);
+water.rotation.x = -Math.PI/2;
+water.position.y = 0;
+scene.add(water);
+// Cache original Y values for wave displacement
+const waterPos = waterGeo.attributes.position;
+const waterY0 = new Float32Array(waterPos.count);
+for (let i = 0; i < waterPos.count; i++) waterY0[i] = waterPos.getZ(i); // pre-rotation Z = world Y
+
+// Distant low islands for visual reference
+for (let i = 0; i < 14; i++) {
+  const a = (i / 14) * Math.PI * 2 + Math.random() * 0.3;
+  const r = 380 + Math.random() * 50;
+  const island = new THREE.Mesh(
+    new THREE.ConeGeometry(18 + Math.random() * 12, 8 + Math.random() * 6, 5),
+    new THREE.MeshLambertMaterial({color: 0x556b3a})
+  );
+  island.position.set(Math.cos(a) * r, 1, Math.sin(a) * r);
+  scene.add(island);
+}
+
+// Clouds (low and distant)
+for (let i = 0; i < 12; i++) {
+  const grp = new THREE.Group();
+  for (let j = 0; j < 4; j++) {
+    const cl = new THREE.Mesh(
+      new THREE.SphereGeometry(7 + Math.random() * 5, 8, 6),
+      new THREE.MeshLambertMaterial({color: 0xffffff, transparent: true, opacity: 0.85})
+    );
+    cl.position.set((Math.random() - 0.5) * 14, (Math.random() - 0.5) * 3, (Math.random() - 0.5) * 14);
+    grp.add(cl);
+  }
+  grp.position.set((Math.random() - 0.5) * 500, 60 + Math.random() * 35, (Math.random() - 0.5) * 500);
+  scene.add(grp);
+}
+
+// Track waypoints (buoys all at water level; the buoy mesh sits on the surface)
+const TRACK = [
+  new THREE.Vector3(   0, 0,  60),
+  new THREE.Vector3(  55, 0,  40),
+  new THREE.Vector3(  80, 0, -20),
+  new THREE.Vector3(  55, 0, -70),
+  new THREE.Vector3(   0, 0, -90),
+  new THREE.Vector3( -55, 0, -70),
+  new THREE.Vector3( -80, 0, -20),
+  new THREE.Vector3( -55, 0,  40),
+];
+const TRACK_LEN = TRACK.length;
+const SEG_LEN = []; let TOTAL_LEN = 0;
+for (let i = 0; i < TRACK_LEN; i++) {
+  const len = TRACK[i].distanceTo(TRACK[(i+1) % TRACK_LEN]);
+  SEG_LEN.push(len); TOTAL_LEN += len;
+}
+
+// Buoy markers (twin buoys defining a gate at each waypoint)
+const buoyMeshes = [];
+TRACK.forEach((wp, i) => {
+  const next = TRACK[(i+1) % TRACK_LEN];
+  const fwd = new THREE.Vector3().subVectors(next, wp).normalize();
+  const left = new THREE.Vector3(-fwd.z, 0, fwd.x).normalize();
+  const c = i === 0 ? 0xfbbf24 : 0xef4444;
+  for (let s of [-1, 1]) {
+    const grp = new THREE.Group();
+    // Float (red/yellow conical buoy floating on the water)
+    const float = new THREE.Mesh(
+      new THREE.ConeGeometry(1.2, 2.4, 8),
+      new THREE.MeshLambertMaterial({color: c})
+    );
+    float.position.y = 1.2;
+    grp.add(float);
+    // White stripe band (visual)
+    const band = new THREE.Mesh(
+      new THREE.CylinderGeometry(1.0, 1.0, 0.35, 8),
+      new THREE.MeshLambertMaterial({color: 0xffffff})
+    );
+    band.position.y = 1.2;
+    grp.add(band);
+    // Top antenna
+    const ant = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.06, 0.06, 1.5, 6),
+      new THREE.MeshLambertMaterial({color: 0x222222})
+    );
+    ant.position.y = 3.1;
+    grp.add(ant);
+    // Top sphere (light)
+    const lite = new THREE.Mesh(
+      new THREE.SphereGeometry(0.32, 8, 6),
+      new THREE.MeshBasicMaterial({color: c})
+    );
+    lite.position.y = 3.95;
+    grp.add(lite);
+
+    grp.position.set(wp.x + left.x * 7 * s, 0, wp.z + left.z * 7 * s);
+    grp.userData.bobPhase = Math.random() * Math.PI * 2;
+    scene.add(grp);
+    buoyMeshes.push(grp);
+  }
+});
+
+// Boat factory: hull, cabin, bow, transom, simple but readable from chase cam
+function makeBoat(color) {
+  const grp = new THREE.Group();
+  // Hull bottom (wider rear, narrower bow)
+  const hull = new THREE.Mesh(
+    new THREE.BoxGeometry(1.6, 0.5, 4.0),
+    new THREE.MeshLambertMaterial({color: 0xffffff})
+  );
+  hull.position.y = 0.25;
+  grp.add(hull);
+  // Hull side trim (the colored stripe along the gunwale)
+  const trim = new THREE.Mesh(
+    new THREE.BoxGeometry(1.7, 0.15, 4.05),
+    new THREE.MeshLambertMaterial({color})
+  );
+  trim.position.y = 0.55;
+  grp.add(trim);
+  // Bow (raised front section)
+  const bow = new THREE.Mesh(
+    new THREE.ConeGeometry(0.85, 1.3, 4),
+    new THREE.MeshLambertMaterial({color: 0xffffff})
+  );
+  bow.rotation.x = Math.PI / 2;
+  bow.rotation.z = Math.PI / 4;
+  bow.position.set(0, 0.5, 2.5);
+  grp.add(bow);
+  // Cabin / windshield
+  const cabin = new THREE.Mesh(
+    new THREE.BoxGeometry(1.2, 0.8, 1.0),
+    new THREE.MeshLambertMaterial({color: 0x1f2937})
+  );
+  cabin.position.set(0, 1.0, 0.2);
+  grp.add(cabin);
+  // Windshield (transparent slab on the front of the cabin)
+  const windshield = new THREE.Mesh(
+    new THREE.BoxGeometry(1.15, 0.55, 0.05),
+    new THREE.MeshLambertMaterial({color: 0x88c0e0, transparent: true, opacity: 0.65})
+  );
+  windshield.position.set(0, 1.05, 0.72);
+  grp.add(windshield);
+  // Outboard / transom motor
+  const motor = new THREE.Mesh(
+    new THREE.BoxGeometry(0.5, 0.6, 0.4),
+    new THREE.MeshLambertMaterial({color: 0x333333})
+  );
+  motor.position.set(0, 0.55, -2.1);
+  grp.add(motor);
+  return grp;
+}
+
+// Wake trail: ring of decreasing-opacity quads emitted behind the boat
+class Wake {
+  constructor() {
+    this.particles = [];
+    this.maxParticles = 28;
+    this.spawnTimer = 0;
+  }
+  spawn(pos, fwdAngle, speed) {
+    if (speed < 4) return;
+    const geo = new THREE.PlaneGeometry(2.5, 2.5);
+    const mat = new THREE.MeshBasicMaterial({
+      color: 0xffffff, transparent: true, opacity: 0.6, depthWrite: false
+    });
+    const m = new THREE.Mesh(geo, mat);
+    m.rotation.x = -Math.PI / 2;
+    m.position.set(pos.x - Math.sin(fwdAngle) * 2.5, 0.06, pos.z - Math.cos(fwdAngle) * 2.5);
+    m.userData.life = 1.0;
+    m.userData.scaleRate = 0.6;
+    scene.add(m);
+    this.particles.push(m);
+    if (this.particles.length > this.maxParticles) {
+      const old = this.particles.shift();
+      scene.remove(old); old.geometry.dispose(); old.material.dispose();
+    }
+  }
+  update(dt) {
+    for (let i = this.particles.length - 1; i >= 0; i--) {
+      const p = this.particles[i];
+      p.userData.life -= dt * 0.7;
+      p.material.opacity = Math.max(0, p.userData.life * 0.5);
+      const s = 1 + (1 - p.userData.life) * p.userData.scaleRate;
+      p.scale.set(s, s, 1);
+      if (p.userData.life <= 0) {
+        scene.remove(p); p.geometry.dispose(); p.material.dispose();
+        this.particles.splice(i, 1);
+      }
+    }
+  }
+}
+
+class Boat {
+  constructor(color, name, isPlayer, offset) {
+    this.color = color; this.name = name; this.isPlayer = isPlayer;
+    this.position = TRACK[0].clone().add(new THREE.Vector3(offset.x, 0, offset.z - 8));
+    this.heading = Math.atan2(TRACK[1].x - this.position.x, TRACK[1].z - this.position.z);
+    this.velocity = 0;
+    this.throttle = 0;          // 0..1, what the player is asking for
+    this.lateralRoll = 0;       // visual roll on hard turns
+    this.bobPhase = Math.random() * Math.PI * 2;
+    this.lap = 0; this.nextWaypoint = 1; this.lapStart = 0; this.bestLap = Infinity;
+    this.finished = false; this.finishTime = 0;
+    this.mesh = makeBoat(color);
+    this.mesh.position.copy(this.position);
+    scene.add(this.mesh);
+    this.wake = new Wake();
+    this.aiSpeedTarget = 28 + Math.random() * 5;
+  }
+  progress() {
+    let d = this.lap * TOTAL_LEN;
+    const wp = (this.nextWaypoint - 1 + TRACK_LEN) % TRACK_LEN;
+    for (let i = 0; i < wp; i++) d += SEG_LEN[i];
+    d += Math.min(SEG_LEN[wp], this.position.distanceTo(TRACK[wp]));
+    return d;
+  }
+}
+
+const PLAYER = new Boat(0x14b8a6, 'You', true, {x: 0, z: 0});
+const AI1 = new Boat(0xfbbf24, 'Mariner', false, {x: 7, z: 0});
+const AI2 = new Boat(0xef4444, 'Stinger', false, {x: -7, z: 0});
+const boats = [PLAYER, AI1, AI2];
+
+const keys = {};
+addEventListener('keydown', e => { keys[e.code] = true; if (['ShiftLeft','Space'].includes(e.code)) e.preventDefault(); });
+addEventListener('keyup', e => keys[e.code] = false);
+
+const TURN_RATE = 1.6;       // radians/sec at full lock
+const TOP_SPEED = 32;        // mph cruise
+const BOOST_SPEED = 50;      // mph boost
+const ACCEL = 14;            // throttle on
+const DRAG = 6;              // passive deceleration
+const TURN_DRAG = 0.6;       // extra drag in hard turns
+
+function updatePlayer(dt) {
+  const fwdInput = (keys['KeyW'] ? 1 : 0) + (keys['KeyS'] ? -0.6 : 0);
+  const turnInput = (keys['KeyA'] ? 1 : 0) + (keys['KeyD'] ? -1 : 0);
+  const boost = keys['ShiftLeft'] && fwdInput > 0;
+
+  // Throttle smoothing
+  PLAYER.throttle += (Math.max(0, fwdInput) - PLAYER.throttle) * 3 * dt;
+
+  // Speed: accelerate toward target, drag back when not throttling
+  const target = boost ? BOOST_SPEED : TOP_SPEED * fwdInput;
+  if (fwdInput > 0) {
+    PLAYER.velocity += ACCEL * dt;
+    if (PLAYER.velocity > target) PLAYER.velocity = target;
+  } else if (fwdInput < 0) {
+    PLAYER.velocity += fwdInput * ACCEL * dt;
+  } else {
+    PLAYER.velocity -= DRAG * dt;
+  }
+  if (PLAYER.velocity < -10) PLAYER.velocity = -10;
+
+  // Steering only effective with some forward speed
+  const turnEffectiveness = Math.min(1, Math.abs(PLAYER.velocity) / 8);
+  PLAYER.heading += turnInput * TURN_RATE * dt * turnEffectiveness;
+
+  // Hard turn = extra drag, more visual roll
+  if (Math.abs(turnInput) > 0.1 && PLAYER.velocity > 10) {
+    PLAYER.velocity -= TURN_DRAG * Math.abs(turnInput) * dt * (PLAYER.velocity / TOP_SPEED);
+  }
+  PLAYER.lateralRoll += (turnInput * -0.25 - PLAYER.lateralRoll) * 5 * dt;
+}
+
+function updateAI(b, dt) {
+  // Steer toward next waypoint, racing-line shortcut: aim slightly past it toward the one after
+  const target = TRACK[b.nextWaypoint];
+  const dz = target.z - b.position.z;
+  const dx = target.x - b.position.x;
+  const wantHeading = Math.atan2(dx, dz);
+  let delta = wantHeading - b.heading;
+  while (delta > Math.PI) delta -= Math.PI * 2;
+  while (delta < -Math.PI) delta += Math.PI * 2;
+  const turn = Math.max(-1, Math.min(1, delta * 2));
+  b.heading += turn * TURN_RATE * dt * 0.9;
+  b.lateralRoll += (turn * -0.25 - b.lateralRoll) * 5 * dt;
+
+  // Speed: ease toward target; slow slightly in hard turns
+  const turnPenalty = Math.abs(turn) > 0.4 ? 0.7 : 1.0;
+  const want = b.aiSpeedTarget * turnPenalty;
+  b.velocity += (want - b.velocity) * 1.2 * dt;
+  b.throttle = b.velocity / TOP_SPEED;
+}
+
+function moveBoat(b, dt, time) {
+  const fwd = new THREE.Vector3(Math.sin(b.heading), 0, Math.cos(b.heading));
+  b.position.addScaledVector(fwd, b.velocity * dt);
+
+  // World bounds (water plane is 1200x1200, keep boats inside reasonable area)
+  const W = 380;
+  if (b.position.x > W) b.position.x = W;
+  if (b.position.x < -W) b.position.x = -W;
+  if (b.position.z > W) b.position.z = W;
+  if (b.position.z < -W) b.position.z = -W;
+
+  // Wave bob: smooth sine bob plus a small forward-pitch tied to throttle
+  b.bobPhase += dt * (1.0 + b.velocity / 40);
+  const bobY = Math.sin(b.bobPhase) * 0.15 + Math.sin(b.bobPhase * 0.5) * 0.1;
+  const planingPitch = Math.min(0.18, b.velocity / TOP_SPEED * 0.18);
+
+  b.mesh.position.set(b.position.x, bobY, b.position.z);
+  b.mesh.rotation.set(-planingPitch, b.heading, b.lateralRoll);
+
+  // Wake spawn
+  b.wake.spawnTimer = (b.wake.spawnTimer || 0) - dt;
+  if (b.wake.spawnTimer <= 0) {
+    b.wake.spawn(b.position, b.heading, b.velocity);
+    b.wake.spawnTimer = 0.07;
+  }
+  b.wake.update(dt);
+}
+
+function checkBuoy(b) {
+  if (b.position.distanceTo(TRACK[b.nextWaypoint]) < 9) {
+    b.nextWaypoint = (b.nextWaypoint + 1) % TRACK_LEN;
+    if (b.nextWaypoint === 1) {
+      const now = state.elapsed;
+      if (b.lap > 0) b.bestLap = Math.min(b.bestLap, now - b.lapStart);
+      b.lapStart = now;
+      b.lap++;
+      if (b.lap > LAPS) { b.finished = true; b.finishTime = now; }
+    }
+  }
+}
+
+const LAPS = 3;
+const state = { phase: 'pre', elapsed: 0, countdown: 0 };
+
+function startCountdown() {
+  state.phase = 'countdown'; state.countdown = 3.5;
+  document.getElementById('overlay').style.display = 'none';
+  document.getElementById('hud').style.display = 'flex';
+  document.getElementById('speedo').style.display = 'block';
+  document.getElementById('wake-readout').style.display = 'block';
+  document.getElementById('nav-back').style.display = 'block';
+  document.getElementById('countdown').style.display = 'block';
+}
+document.getElementById('start-btn').addEventListener('click', startCountdown);
+document.getElementById('restart-btn').addEventListener('click', () => location.reload());
+
+function fmt(s){if(!isFinite(s))return '--:--.--';const m=Math.floor(s/60);return `${m}:${(s-m*60).toFixed(2).padStart(5,'0')}`;}
+function ord(n){return n+(['st','nd','rd'][n-1]||'th');}
+
+function updateHUD() {
+  document.getElementById('lap-text').textContent = `${Math.min(LAPS, Math.max(1, PLAYER.lap))} / ${LAPS}`;
+  const sorted = boats.slice().sort((a,b) => b.progress() - a.progress());
+  document.getElementById('pos-text').textContent = ord(sorted.indexOf(PLAYER) + 1);
+  document.getElementById('time-text').textContent = fmt(state.elapsed - PLAYER.lapStart);
+  document.getElementById('best-text').textContent = 'Best: ' + fmt(PLAYER.bestLap);
+  document.getElementById('speed-num').textContent = Math.round(Math.max(0, PLAYER.velocity));
+  document.getElementById('throttle-num').textContent = Math.round(PLAYER.throttle * 100);
+}
+
+const camPos = new THREE.Vector3();
+const camTarget = new THREE.Vector3();
+function updateCamera(dt) {
+  const fwd = new THREE.Vector3(Math.sin(PLAYER.heading), 0, Math.cos(PLAYER.heading));
+  const back = PLAYER.position.clone().add(new THREE.Vector3(-fwd.x * 9, 4.5, -fwd.z * 9));
+  const look = PLAYER.position.clone().add(new THREE.Vector3(fwd.x * 12, 1, fwd.z * 12));
+  const lerp = 1 - Math.pow(0.0008, dt);
+  camPos.lerp(back, lerp); camTarget.lerp(look, lerp);
+  camera.position.copy(camPos); camera.lookAt(camTarget);
+}
+camPos.copy(PLAYER.position).add(new THREE.Vector3(0, 6, -12)); camera.position.copy(camPos);
+
+function updateWater(time) {
+  // Animate water vertices with two layered sine waves
+  for (let i = 0; i < waterPos.count; i++) {
+    const x = waterPos.getX(i);
+    const y = waterPos.getY(i);
+    const w1 = Math.sin(x * 0.06 + time * 0.7) * 0.4;
+    const w2 = Math.sin(y * 0.045 + time * 0.55) * 0.35;
+    waterPos.setZ(i, w1 + w2);
+  }
+  waterPos.needsUpdate = true;
+}
+
+function updateBuoys(time) {
+  for (const b of buoyMeshes) {
+    b.position.y = Math.sin(time * 1.5 + b.userData.bobPhase) * 0.25;
+    b.rotation.z = Math.sin(time * 1.2 + b.userData.bobPhase) * 0.06;
+  }
+}
+
+function showResults() {
+  state.phase = 'done';
+  const sorted = boats.slice().sort((a,b) => {
+    if (a.finished && b.finished) return a.finishTime - b.finishTime;
+    if (a.finished) return -1; if (b.finished) return 1;
+    return b.progress() - a.progress();
+  });
+  const p = sorted.indexOf(PLAYER) + 1;
+  document.getElementById('result-headline').textContent = p === 1 ? 'WINNER' : (p === 2 ? 'P2' : 'P3');
+  const st = document.getElementById('standings'); st.innerHTML = '';
+  sorted.forEach((c, i) => {
+    const r = document.createElement('div'); r.className = 'standing' + (c === PLAYER ? ' you' : '');
+    const time = c.finished ? fmt(c.finishTime) : '+DNF';
+    const best = isFinite(c.bestLap) ? `Best: ${fmt(c.bestLap)}` : '';
+    r.innerHTML = `<div class="standing-pos">${ord(i+1)}</div><div class="standing-name">${c.name}<small>${best}</small></div><div class="standing-time">${time}</div>`;
+    st.appendChild(r);
+  });
+  ['hud','speedo','wake-readout','countdown'].forEach(id => document.getElementById(id).style.display = 'none');
+  document.getElementById('results').style.display = 'flex';
+}
+
+const clock = new THREE.Clock();
+let totalTime = 0;
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = Math.min(clock.getDelta(), 0.05);
+  totalTime += dt;
+  updateWater(totalTime);
+  updateBuoys(totalTime);
+
+  if (state.phase === 'countdown') {
+    state.countdown -= dt;
+    const cd = document.getElementById('countdown');
+    if (state.countdown > 2.5) cd.textContent = '3';
+    else if (state.countdown > 1.5) cd.textContent = '2';
+    else if (state.countdown > 0.5) cd.textContent = '1';
+    else if (state.countdown > -0.5) { cd.textContent = 'GO!'; cd.style.color = '#10b981'; }
+    else { cd.style.display = 'none'; state.phase = 'racing'; boats.forEach(p => p.lapStart = state.elapsed); }
+  }
+  if (state.phase === 'racing') {
+    state.elapsed += dt;
+    if (!PLAYER.finished) updatePlayer(dt);
+    boats.forEach(b => {
+      if (!b.finished) {
+        if (!b.isPlayer) updateAI(b, dt);
+        moveBoat(b, dt, totalTime);
+        checkBuoy(b);
+      }
+    });
+    updateHUD();
+    if (boats.every(b => b.finished)) { setTimeout(showResults, 800); state.phase = 'finishing'; }
+  }
+  if (state.phase !== 'pre') updateCamera(dt);
+  else {
+    state.elapsed += dt * 0.3;
+    camera.position.set(Math.sin(state.elapsed) * 35, 12, 70 + Math.cos(state.elapsed) * 12);
+    camera.lookAt(0, 1, 60);
+    boats.forEach(b => moveBoat(b, dt * 0, totalTime)); // bob in place
+  }
+  renderer.render(scene, camera);
+}
+animate();
+</script>
+</body>
+</html>
