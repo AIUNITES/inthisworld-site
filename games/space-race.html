@@ -1,0 +1,399 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-VP15KRLV6P"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-VP15KRLV6P');</script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4573596965267859" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nebula Sprint — Space Racing | InThisWorld</title>
+<meta name="description" content="3-lap space race through floating ring checkpoints. Zero-gravity flight, asteroid hazards, two AI opponents. Browser-based 3D built with Three.js.">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#000;color:#fff;overflow:hidden}
+canvas{display:block;width:100vw;height:100vh}
+a{color:inherit;text-decoration:none}
+#hud{position:fixed;top:0;left:0;right:0;padding:14px 20px;display:none;justify-content:space-between;z-index:50;pointer-events:none;font-weight:600;text-shadow:0 1px 4px #000}
+#hud > div small{display:block;color:#888;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px}
+#hud-lap{font-size:1.2rem;color:#a5b4fc}
+#hud-pos{text-align:center;font-size:1.4rem;color:#fbbf24}
+#hud-time{text-align:right;font-size:1rem;color:#7dd3fc;font-family:'SF Mono',Consolas,monospace}
+#hud-time .best{color:#86efac;font-size:.85rem}
+#speedo{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:50;pointer-events:none;display:none;text-align:center}
+#speed-num{font-size:3.5rem;font-weight:800;background:linear-gradient(135deg,#6366f1,#fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-family:'SF Mono',Consolas,monospace}
+#speed-lbl{font-size:.7rem;color:#888;letter-spacing:.15em;text-transform:uppercase;margin-top:4px}
+#countdown{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:8rem;font-weight:900;color:#a5b4fc;text-shadow:0 0 30px rgba(99,102,241,.7);z-index:60;display:none;font-family:'SF Mono',Consolas,monospace}
+#overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;text-align:center;padding:2rem}
+#overlay h1{font-size:2.5rem;font-weight:800;margin-bottom:.5rem;background:linear-gradient(135deg,#6366f1,#fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+#overlay h1 small{display:block;font-size:.7rem;color:#a5b4fc;letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px;-webkit-text-fill-color:#a5b4fc}
+#overlay p{color:#aaa;max-width:480px;font-size:.95rem;line-height:1.7;margin-bottom:1.6rem}
+#overlay .keys{display:flex;gap:1rem;justify-content:center;margin-bottom:1.5rem;flex-wrap:wrap}
+#overlay .key{background:#1a1a22;border:1px solid #333;border-radius:6px;padding:.4rem .9rem;font-size:.78rem;color:#bbb;font-family:'SF Mono',Consolas,monospace}
+#overlay .key strong{color:#a5b4fc}
+#start-btn{padding:.95rem 2.5rem;border-radius:10px;background:linear-gradient(135deg,#6366f1,#4f46e5);border:none;color:#fff;font-size:1.05rem;font-weight:800;font-family:inherit;cursor:pointer;letter-spacing:.05em;text-transform:uppercase;transition:all .2s}
+#start-btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(99,102,241,.5)}
+#nav-back{position:fixed;top:14px;left:14px;z-index:55;padding:.5rem 1rem;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);border-radius:8px;font-size:.75rem;color:#ccc;display:none}
+#nav-back:hover{border-color:#a5b4fc;color:#a5b4fc}
+#results{position:fixed;inset:0;background:rgba(0,0,0,.94);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:300;padding:2rem;text-align:center}
+#results h1{font-size:3.5rem;font-weight:900;margin-bottom:.5rem;background:linear-gradient(135deg,#fbbf24,#a5b4fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+#results h1 small{display:block;font-size:.8rem;color:#aaa;letter-spacing:.3em;text-transform:uppercase;margin-bottom:6px;-webkit-text-fill-color:#aaa}
+.standings{margin:1.5rem 0;display:flex;flex-direction:column;gap:.5rem;width:100%;max-width:380px}
+.standing{display:grid;grid-template-columns:50px 1fr 100px;gap:.8rem;padding:.7rem 1rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:8px;text-align:left}
+.standing.you{background:rgba(99,102,241,.15);border-color:rgba(99,102,241,.4)}
+.standing-pos{font-size:1.3rem;font-weight:800;color:#fbbf24}
+.standing-name{font-size:.95rem;font-weight:700}
+.standing-name small{display:block;color:#888;font-size:.7rem;font-weight:500}
+.standing-time{text-align:right;font-family:'SF Mono',Consolas,monospace;color:#7dd3fc;font-size:.9rem}
+#restart-btn{margin-top:1.5rem;padding:.85rem 2.2rem;border-radius:10px;background:linear-gradient(135deg,#6366f1,#4f46e5);border:none;color:#fff;font-size:.95rem;font-weight:800;font-family:inherit;cursor:pointer;letter-spacing:.05em;text-transform:uppercase}
+#back-btn{margin-top:.5rem;padding:.7rem 2.2rem;border-radius:10px;background:transparent;border:1px solid #333;color:#888;font-size:.85rem;font-weight:600;font-family:inherit;cursor:pointer;text-decoration:none;display:inline-block}
+</style>
+</head>
+<body>
+<a id="nav-back" href="index.html">&larr; Games</a>
+<div id="hud">
+  <div id="hud-lap"><small>Lap</small><span id="lap-text">1 / 3</span></div>
+  <div id="hud-pos"><small>Position</small><span id="pos-text">1st</span></div>
+  <div id="hud-time"><small>Lap Time</small><span id="time-text">0:00.00</span><div class="best" id="best-text">Best: --:--.--</div></div>
+</div>
+<div id="speedo"><div id="speed-num">0</div><div id="speed-lbl">VEL</div></div>
+<div id="countdown"></div>
+<div id="overlay">
+  <h1><small>Nebula Sprint</small>Zero-G Race</h1>
+  <p>Three laps through floating ring checkpoints in deep space. Pitch and yaw to steer, throttle to burn fuel, boost for the straights. Fly through every ring; missed rings cost time.</p>
+  <div class="keys">
+    <span class="key"><strong>W S</strong> Pitch</span>
+    <span class="key"><strong>A D</strong> Yaw</span>
+    <span class="key"><strong>Shift</strong> Boost</span>
+    <span class="key"><strong>Ctrl</strong> Brake</span>
+  </div>
+  <button id="start-btn">Launch &#8594;</button>
+</div>
+<div id="results">
+  <h1><small>Race Complete</small><span id="result-headline">P1</span></h1>
+  <div class="standings" id="standings"></div>
+  <button id="restart-btn">Race Again &#8635;</button>
+  <a id="back-btn" href="index.html">&larr; Back to Games</a>
+</div>
+<canvas id="c"></canvas>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const canvas = document.getElementById('c');
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x000010);
+scene.fog = new THREE.FogExp2(0x000010, 0.003);
+const camera = new THREE.PerspectiveCamera(75, innerWidth/innerHeight, 0.1, 600);
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+addEventListener('resize', () => { camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+
+scene.add(new THREE.AmbientLight(0x4040ff, 0.4));
+const sun = new THREE.PointLight(0xffeecc, 1.2, 400);
+sun.position.set(80, 40, 60); scene.add(sun);
+
+// Starfield
+const starGeo = new THREE.BufferGeometry();
+const starPos = [];
+for (let i = 0; i < 1500; i++) {
+  const r = 200 + Math.random() * 200;
+  const t = Math.random() * Math.PI * 2;
+  const p = (Math.random() - 0.5) * Math.PI;
+  starPos.push(r * Math.cos(t) * Math.cos(p), r * Math.sin(p), r * Math.sin(t) * Math.cos(p));
+}
+starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPos, 3));
+scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({color: 0xffffff, size: 0.8, sizeAttenuation: true})));
+
+// Distant nebula (large faint colored sphere)
+const nebula = new THREE.Mesh(
+  new THREE.SphereGeometry(180, 32, 16),
+  new THREE.MeshBasicMaterial({color: 0x3322aa, transparent: true, opacity: 0.12, side: THREE.BackSide})
+);
+scene.add(nebula);
+
+// Ring waypoints in 3D space (irregular loop)
+const TRACK = [
+  new THREE.Vector3(  0,   0,  60),
+  new THREE.Vector3( 35,  10,  45),
+  new THREE.Vector3( 60,  -5,  10),
+  new THREE.Vector3( 55, -15, -25),
+  new THREE.Vector3( 25, -10, -50),
+  new THREE.Vector3(-15,   5, -55),
+  new THREE.Vector3(-45,  10, -30),
+  new THREE.Vector3(-55,   0,   5),
+  new THREE.Vector3(-40, -10,  35),
+  new THREE.Vector3(-15,   0,  55),
+];
+const TRACK_LEN = TRACK.length;
+const SEG_LEN = [];
+let TOTAL_LEN = 0;
+for (let i = 0; i < TRACK_LEN; i++) {
+  const a = TRACK[i], b = TRACK[(i+1) % TRACK_LEN];
+  const len = a.distanceTo(b);
+  SEG_LEN.push(len); TOTAL_LEN += len;
+}
+
+// Build rings at each waypoint, oriented toward next waypoint
+TRACK.forEach((wp, i) => {
+  const next = TRACK[(i+1) % TRACK_LEN];
+  const ringGeo = new THREE.TorusGeometry(5, 0.4, 8, 24);
+  const ringMat = new THREE.MeshBasicMaterial({color: i === 0 ? 0xfbbf24 : 0x6366f1, transparent: true, opacity: 0.85});
+  const ring = new THREE.Mesh(ringGeo, ringMat);
+  ring.position.copy(wp);
+  ring.lookAt(next);
+  scene.add(ring);
+  // glow ring slightly larger
+  const glow = new THREE.Mesh(
+    new THREE.TorusGeometry(5.6, 0.15, 6, 24),
+    new THREE.MeshBasicMaterial({color: i === 0 ? 0xfde047 : 0xa5b4fc, transparent: true, opacity: 0.5})
+  );
+  glow.position.copy(wp); glow.lookAt(next); scene.add(glow);
+});
+
+// Asteroids scattered between waypoints
+for (let i = 0; i < 40; i++) {
+  const angle = Math.random() * Math.PI * 2;
+  const r = 30 + Math.random() * 40;
+  const ast = new THREE.Mesh(
+    new THREE.IcosahedronGeometry(0.6 + Math.random() * 1.6, 0),
+    new THREE.MeshLambertMaterial({color: 0x554433})
+  );
+  ast.position.set(Math.cos(angle) * r, (Math.random() - 0.5) * 30, Math.sin(angle) * r);
+  ast.rotation.set(Math.random()*3, Math.random()*3, Math.random()*3);
+  scene.add(ast);
+}
+
+// Ship factory
+function makeShip(color) {
+  const grp = new THREE.Group();
+  // main hull
+  const hull = new THREE.Mesh(
+    new THREE.ConeGeometry(0.8, 3, 6),
+    new THREE.MeshLambertMaterial({color})
+  );
+  hull.rotation.x = Math.PI / 2;
+  grp.add(hull);
+  // wings
+  const wing = new THREE.Mesh(
+    new THREE.BoxGeometry(2.4, 0.15, 0.8),
+    new THREE.MeshLambertMaterial({color: 0x333344})
+  );
+  wing.position.set(0, 0, -0.4); grp.add(wing);
+  // engine glow
+  const eng = new THREE.Mesh(
+    new THREE.SphereGeometry(0.5, 12, 8),
+    new THREE.MeshBasicMaterial({color: 0xff8844})
+  );
+  eng.position.set(0, 0, -1.5); grp.add(eng);
+  return grp;
+}
+
+class Ship {
+  constructor(color, name, isPlayer, offset) {
+    this.color = color; this.name = name; this.isPlayer = isPlayer;
+    this.position = TRACK[0].clone()
+      .add(new THREE.Vector3(offset.x, offset.y, -8 - offset.z));
+    this.quaternion = new THREE.Quaternion();
+    // Initially face waypoint 1
+    const lookAt = TRACK[1].clone();
+    const m = new THREE.Matrix4().lookAt(this.position, lookAt, new THREE.Vector3(0,1,0));
+    this.quaternion.setFromRotationMatrix(m);
+    this.velocity = 0;
+    this.lap = 0;
+    this.nextWaypoint = 1;
+    this.lapStart = 0;
+    this.bestLap = Infinity;
+    this.finished = false;
+    this.finishTime = 0;
+    this.mesh = makeShip(color);
+    this.mesh.position.copy(this.position);
+    this.mesh.quaternion.copy(this.quaternion);
+    scene.add(this.mesh);
+    this.aiAggression = 0.85 + Math.random() * 0.15;
+  }
+  forward() { return new THREE.Vector3(0, 0, 1).applyQuaternion(this.quaternion); }
+  progress() {
+    let d = this.lap * TOTAL_LEN;
+    const wpFrom = (this.nextWaypoint - 1 + TRACK_LEN) % TRACK_LEN;
+    for (let i = 0; i < wpFrom; i++) d += SEG_LEN[i];
+    const dToCurrent = this.position.distanceTo(TRACK[wpFrom]);
+    d += Math.min(SEG_LEN[wpFrom], dToCurrent);
+    return d;
+  }
+}
+
+const PLAYER = new Ship(0x6366f1, 'You', true, {x: 0, y: 0, z: 0});
+const AI1 = new Ship(0xfbbf24, 'Comet-9', false, {x: 4, y: 0, z: 4});
+const AI2 = new Ship(0x10b981, 'Pulsar-2', false, {x: -4, y: 0, z: 4});
+const ships = [PLAYER, AI1, AI2];
+
+const keys = {};
+addEventListener('keydown', e => { keys[e.code] = true; if (['Space','ShiftLeft','ControlLeft'].includes(e.code)) e.preventDefault(); });
+addEventListener('keyup', e => keys[e.code] = false);
+
+const MAX_SPEED = 30;
+const BOOST_SPEED = 50;
+const ACCEL = 18;
+const TURN_RATE = 1.5;
+
+const _q = new THREE.Quaternion();
+
+function updatePlayer(dt) {
+  const pitch = (keys['KeyW'] ? 1 : 0) + (keys['KeyS'] ? -1 : 0);
+  const yaw = (keys['KeyA'] ? 1 : 0) + (keys['KeyD'] ? -1 : 0);
+  const boost = keys['ShiftLeft'] || keys['ShiftRight'];
+  const brake = keys['ControlLeft'] || keys['ControlRight'];
+
+  // Apply rotation in local frame
+  if (pitch) { _q.setFromAxisAngle(new THREE.Vector3(1,0,0), pitch * TURN_RATE * dt); PLAYER.quaternion.multiply(_q); }
+  if (yaw)   { _q.setFromAxisAngle(new THREE.Vector3(0,1,0), yaw * TURN_RATE * dt);   PLAYER.quaternion.multiply(_q); }
+
+  const target = boost ? BOOST_SPEED : (brake ? 5 : MAX_SPEED);
+  if (PLAYER.velocity < target) PLAYER.velocity += ACCEL * dt;
+  else PLAYER.velocity = Math.max(target, PLAYER.velocity - ACCEL * dt);
+}
+
+function updateAI(s, dt) {
+  const target = TRACK[s.nextWaypoint];
+  const fwd = s.forward();
+  const toTarget = new THREE.Vector3().subVectors(target, s.position).normalize();
+
+  // Steer using shortest-arc rotation
+  const axis = new THREE.Vector3().crossVectors(fwd, toTarget);
+  const ang = Math.acos(Math.max(-1, Math.min(1, fwd.dot(toTarget))));
+  if (axis.lengthSq() > 0.0001) {
+    axis.normalize();
+    const rot = Math.min(ang, TURN_RATE * dt);
+    _q.setFromAxisAngle(axis, rot);
+    s.quaternion.premultiply(_q);
+  }
+  const targetSpeed = MAX_SPEED * s.aiAggression;
+  if (s.velocity < targetSpeed) s.velocity += ACCEL * dt;
+}
+
+function moveShip(s, dt) {
+  s.position.addScaledVector(s.forward(), s.velocity * dt);
+  s.mesh.position.copy(s.position);
+  s.mesh.quaternion.copy(s.quaternion);
+}
+
+function checkRing(s) {
+  const wp = TRACK[s.nextWaypoint];
+  if (s.position.distanceTo(wp) < 6.5) {
+    s.nextWaypoint = (s.nextWaypoint + 1) % TRACK_LEN;
+    if (s.nextWaypoint === 1 && s.lap >= 0) {
+      const now = state.elapsed;
+      if (s.lap > 0) {
+        const lap = now - s.lapStart;
+        s.bestLap = Math.min(s.bestLap, lap);
+      }
+      s.lapStart = now;
+      s.lap++;
+      if (s.lap > LAPS) { s.finished = true; s.finishTime = now; }
+    }
+  }
+}
+
+const LAPS = 3;
+const state = { phase: 'pre', elapsed: 0, countdown: 0 };
+
+function startCountdown() {
+  state.phase = 'countdown'; state.countdown = 3.5;
+  document.getElementById('overlay').style.display = 'none';
+  document.getElementById('hud').style.display = 'flex';
+  document.getElementById('speedo').style.display = 'block';
+  document.getElementById('nav-back').style.display = 'block';
+  document.getElementById('countdown').style.display = 'block';
+}
+document.getElementById('start-btn').addEventListener('click', startCountdown);
+document.getElementById('restart-btn').addEventListener('click', () => location.reload());
+
+function fmt(s){if(!isFinite(s))return '--:--.--';const m=Math.floor(s/60);return `${m}:${(s-m*60).toFixed(2).padStart(5,'0')}`;}
+function ord(n){return n+(['st','nd','rd'][n-1]||'th');}
+
+function updateHUD() {
+  document.getElementById('lap-text').textContent = `${Math.min(LAPS, Math.max(1, PLAYER.lap))} / ${LAPS}`;
+  const sorted = ships.slice().sort((a,b) => b.progress() - a.progress());
+  document.getElementById('pos-text').textContent = ord(sorted.indexOf(PLAYER) + 1);
+  document.getElementById('time-text').textContent = fmt(state.elapsed - PLAYER.lapStart);
+  document.getElementById('best-text').textContent = 'Best: ' + fmt(PLAYER.bestLap);
+  document.getElementById('speed-num').textContent = Math.round(PLAYER.velocity);
+}
+
+const camTarget = new THREE.Vector3();
+const camPos = new THREE.Vector3();
+function updateCamera(dt) {
+  const back = new THREE.Vector3(0, 1.5, -8).applyQuaternion(PLAYER.quaternion).add(PLAYER.position);
+  const look = PLAYER.forward().multiplyScalar(15).add(PLAYER.position);
+  const lerp = 1 - Math.pow(0.001, dt);
+  camPos.lerp(back, lerp);
+  camTarget.lerp(look, lerp);
+  camera.position.copy(camPos);
+  camera.lookAt(camTarget);
+  camera.up.copy(new THREE.Vector3(0, 1, 0).applyQuaternion(PLAYER.quaternion));
+}
+
+camPos.copy(PLAYER.position).add(new THREE.Vector3(0, 5, -10));
+camera.position.copy(camPos);
+
+function showResults() {
+  state.phase = 'done';
+  const sorted = ships.slice().sort((a,b) => {
+    if (a.finished && b.finished) return a.finishTime - b.finishTime;
+    if (a.finished) return -1; if (b.finished) return 1;
+    return b.progress() - a.progress();
+  });
+  const p = sorted.indexOf(PLAYER) + 1;
+  document.getElementById('result-headline').textContent = p === 1 ? 'WINNER' : (p === 2 ? 'P2' : 'P3');
+  const st = document.getElementById('standings'); st.innerHTML = '';
+  sorted.forEach((c, i) => {
+    const r = document.createElement('div'); r.className = 'standing' + (c === PLAYER ? ' you' : '');
+    const time = c.finished ? fmt(c.finishTime) : '+DNF';
+    const best = isFinite(c.bestLap) ? `Best: ${fmt(c.bestLap)}` : '';
+    r.innerHTML = `<div class="standing-pos">${ord(i+1)}</div><div class="standing-name">${c.name}<small>${best}</small></div><div class="standing-time">${time}</div>`;
+    st.appendChild(r);
+  });
+  ['hud','speedo','countdown'].forEach(id => document.getElementById(id).style.display = 'none');
+  document.getElementById('results').style.display = 'flex';
+}
+
+const clock = new THREE.Clock();
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = Math.min(clock.getDelta(), 0.05);
+
+  if (state.phase === 'countdown') {
+    state.countdown -= dt;
+    const cd = document.getElementById('countdown');
+    if (state.countdown > 2.5) cd.textContent = '3';
+    else if (state.countdown > 1.5) cd.textContent = '2';
+    else if (state.countdown > 0.5) cd.textContent = '1';
+    else if (state.countdown > -0.5) { cd.textContent = 'GO!'; cd.style.color = '#10b981'; }
+    else { cd.style.display = 'none'; state.phase = 'racing'; ships.forEach(s => s.lapStart = state.elapsed); }
+  }
+
+  if (state.phase === 'racing') {
+    state.elapsed += dt;
+    if (!PLAYER.finished) updatePlayer(dt);
+    ships.forEach(s => {
+      if (!s.finished) {
+        if (!s.isPlayer) updateAI(s, dt);
+        moveShip(s, dt); checkRing(s);
+      }
+    });
+    updateHUD();
+    if (ships.every(s => s.finished)) { setTimeout(showResults, 800); state.phase = 'finishing'; }
+  }
+
+  if (state.phase !== 'pre') updateCamera(dt);
+  else {
+    state.elapsed += dt * 0.3;
+    camera.position.set(Math.sin(state.elapsed) * 25, 5, 50 + Math.cos(state.elapsed) * 5);
+    camera.lookAt(0, 0, 60);
+  }
+
+  renderer.render(scene, camera);
+}
+animate();
+</script>
+</body>
+</html>

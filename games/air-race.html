@@ -1,0 +1,431 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-VP15KRLV6P"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-VP15KRLV6P');</script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4573596965267859" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pylon Race — Aerobatic Racing | InThisWorld</title>
+<meta name="description" content="3-lap aerobatic plane race through pylon gates above a coastal landscape. Pitch, roll, throttle. Browser-based 3D built with Three.js.">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#000;color:#fff;overflow:hidden}
+canvas{display:block;width:100vw;height:100vh}
+a{color:inherit;text-decoration:none}
+#hud{position:fixed;top:0;left:0;right:0;padding:14px 20px;display:none;justify-content:space-between;z-index:50;pointer-events:none;font-weight:600;text-shadow:0 1px 4px #000}
+#hud > div small{display:block;color:#888;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px}
+#hud-lap{font-size:1.2rem;color:#7dd3fc}
+#hud-pos{text-align:center;font-size:1.4rem;color:#fbbf24}
+#hud-time{text-align:right;font-size:1rem;color:#7dd3fc;font-family:'SF Mono',Consolas,monospace}
+#hud-time .best{color:#86efac;font-size:.85rem}
+#speedo{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:50;pointer-events:none;display:none;text-align:center}
+#speed-num{font-size:3.5rem;font-weight:800;background:linear-gradient(135deg,#0ea5e9,#fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-family:'SF Mono',Consolas,monospace}
+#speed-lbl{font-size:.7rem;color:#888;letter-spacing:.15em;text-transform:uppercase;margin-top:4px}
+#alt-readout{position:fixed;bottom:24px;right:24px;z-index:50;pointer-events:none;display:none;text-align:right;color:#86efac;font-family:'SF Mono',Consolas,monospace}
+#alt-readout big{font-size:1.6rem;font-weight:800;display:block}
+#alt-readout small{font-size:.65rem;color:#888;letter-spacing:.1em;text-transform:uppercase}
+#countdown{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:8rem;font-weight:900;color:#7dd3fc;text-shadow:0 0 30px rgba(14,165,233,.7);z-index:60;display:none;font-family:'SF Mono',Consolas,monospace}
+#overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;text-align:center;padding:2rem}
+#overlay h1{font-size:2.5rem;font-weight:800;margin-bottom:.5rem;background:linear-gradient(135deg,#0ea5e9,#fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+#overlay h1 small{display:block;font-size:.7rem;color:#7dd3fc;letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px;-webkit-text-fill-color:#7dd3fc}
+#overlay p{color:#aaa;max-width:480px;font-size:.95rem;line-height:1.7;margin-bottom:1.6rem}
+#overlay .keys{display:flex;gap:1rem;justify-content:center;margin-bottom:1.5rem;flex-wrap:wrap}
+#overlay .key{background:#1a1a22;border:1px solid #333;border-radius:6px;padding:.4rem .9rem;font-size:.78rem;color:#bbb;font-family:'SF Mono',Consolas,monospace}
+#overlay .key strong{color:#7dd3fc}
+#start-btn{padding:.95rem 2.5rem;border-radius:10px;background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;color:#fff;font-size:1.05rem;font-weight:800;font-family:inherit;cursor:pointer;letter-spacing:.05em;text-transform:uppercase}
+#start-btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(14,165,233,.5)}
+#nav-back{position:fixed;top:14px;left:14px;z-index:55;padding:.5rem 1rem;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);border-radius:8px;font-size:.75rem;color:#ccc;display:none}
+#results{position:fixed;inset:0;background:rgba(0,0,0,.94);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:300;padding:2rem;text-align:center}
+#results h1{font-size:3.5rem;font-weight:900;margin-bottom:.5rem;background:linear-gradient(135deg,#fbbf24,#7dd3fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+#results h1 small{display:block;font-size:.8rem;color:#aaa;letter-spacing:.3em;text-transform:uppercase;margin-bottom:6px;-webkit-text-fill-color:#aaa}
+.standings{margin:1.5rem 0;display:flex;flex-direction:column;gap:.5rem;width:100%;max-width:380px}
+.standing{display:grid;grid-template-columns:50px 1fr 100px;gap:.8rem;padding:.7rem 1rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:8px;text-align:left}
+.standing.you{background:rgba(14,165,233,.15);border-color:rgba(14,165,233,.4)}
+.standing-pos{font-size:1.3rem;font-weight:800;color:#fbbf24}
+.standing-name{font-size:.95rem;font-weight:700}
+.standing-name small{display:block;color:#888;font-size:.7rem;font-weight:500}
+.standing-time{text-align:right;font-family:'SF Mono',Consolas,monospace;color:#7dd3fc;font-size:.9rem}
+#restart-btn{margin-top:1.5rem;padding:.85rem 2.2rem;border-radius:10px;background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;color:#fff;font-size:.95rem;font-weight:800;font-family:inherit;cursor:pointer;letter-spacing:.05em;text-transform:uppercase}
+#back-btn{margin-top:.5rem;padding:.7rem 2.2rem;border-radius:10px;background:transparent;border:1px solid #333;color:#888;font-size:.85rem;font-weight:600;font-family:inherit;cursor:pointer;text-decoration:none;display:inline-block}
+</style>
+</head>
+<body>
+<a id="nav-back" href="index.html">&larr; Games</a>
+<div id="hud">
+  <div id="hud-lap"><small>Lap</small><span id="lap-text">1 / 3</span></div>
+  <div id="hud-pos"><small>Position</small><span id="pos-text">1st</span></div>
+  <div id="hud-time"><small>Lap Time</small><span id="time-text">0:00.00</span><div class="best" id="best-text">Best: --:--.--</div></div>
+</div>
+<div id="speedo"><div id="speed-num">0</div><div id="speed-lbl">KTS</div></div>
+<div id="alt-readout"><big id="alt-num">0</big><small>FT ALT</small></div>
+<div id="countdown"></div>
+<div id="overlay">
+  <h1><small>Pylon Race</small>Coastal Sprint</h1>
+  <p>Three laps through pylon gates above a coastal landscape. Banked turns, full aerobatic control. Miss a gate and you'll lose seconds doubling back. Sunset light makes the whole course glow.</p>
+  <div class="keys">
+    <span class="key"><strong>W S</strong> Pitch</span>
+    <span class="key"><strong>A D</strong> Roll</span>
+    <span class="key"><strong>Q E</strong> Yaw</span>
+    <span class="key"><strong>Shift</strong> Boost</span>
+  </div>
+  <button id="start-btn">Take Off &#8594;</button>
+</div>
+<div id="results">
+  <h1><small>Race Complete</small><span id="result-headline">P1</span></h1>
+  <div class="standings" id="standings"></div>
+  <button id="restart-btn">Race Again &#8635;</button>
+  <a id="back-btn" href="index.html">&larr; Back to Games</a>
+</div>
+<canvas id="c"></canvas>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const canvas = document.getElementById('c');
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xff9a7a);
+scene.fog = new THREE.Fog(0xff9a7a, 80, 380);
+const camera = new THREE.PerspectiveCamera(75, innerWidth/innerHeight, 0.1, 600);
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+addEventListener('resize', () => { camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+
+scene.add(new THREE.AmbientLight(0xffaa88, 0.55));
+const sun = new THREE.DirectionalLight(0xffd0a0, 1.0);
+sun.position.set(-100, 60, 50); scene.add(sun);
+
+// Sky gradient (simple second sphere)
+const sky = new THREE.Mesh(
+  new THREE.SphereGeometry(450, 32, 16),
+  new THREE.ShaderMaterial({
+    side: THREE.BackSide,
+    uniforms: {},
+    vertexShader: 'varying vec3 vP; void main(){vP=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+    fragmentShader: 'varying vec3 vP; void main(){float t=clamp(vP.y/300.0+0.3,0.,1.);vec3 c=mix(vec3(1.0,0.55,0.45),vec3(0.3,0.4,0.85),t);gl_FragColor=vec4(c,1.);}'
+  })
+);
+scene.add(sky);
+
+// Ground (sea + coast strip)
+const sea = new THREE.Mesh(
+  new THREE.PlaneGeometry(1000, 1000),
+  new THREE.MeshLambertMaterial({color: 0x2a4060})
+);
+sea.rotation.x = -Math.PI/2; sea.position.y = -2; scene.add(sea);
+
+// Coastline strip (a darker rectangle for variety)
+const coast = new THREE.Mesh(
+  new THREE.PlaneGeometry(800, 80),
+  new THREE.MeshLambertMaterial({color: 0x4a5530})
+);
+coast.rotation.x = -Math.PI/2; coast.position.set(0, -1.5, 200); scene.add(coast);
+
+// Distant mountains (low-poly cones)
+for (let i = 0; i < 18; i++) {
+  const a = (i / 18) * Math.PI * 2;
+  const r = 320 + Math.random() * 30;
+  const h = 30 + Math.random() * 30;
+  const m = new THREE.Mesh(
+    new THREE.ConeGeometry(20 + Math.random() * 12, h, 4),
+    new THREE.MeshLambertMaterial({color: 0x4a3a4a})
+  );
+  m.position.set(Math.cos(a) * r, h/2 - 2, Math.sin(a) * r);
+  m.rotation.y = Math.random() * Math.PI;
+  scene.add(m);
+}
+
+// Clouds (white blobs in the air)
+for (let i = 0; i < 14; i++) {
+  const grp = new THREE.Group();
+  for (let j = 0; j < 5; j++) {
+    const cl = new THREE.Mesh(
+      new THREE.SphereGeometry(8 + Math.random() * 5, 8, 6),
+      new THREE.MeshLambertMaterial({color: 0xffffff, transparent: true, opacity: 0.8})
+    );
+    cl.position.set((Math.random() - 0.5) * 15, (Math.random() - 0.5) * 4, (Math.random() - 0.5) * 15);
+    grp.add(cl);
+  }
+  grp.position.set((Math.random() - 0.5) * 400, 50 + Math.random() * 30, (Math.random() - 0.5) * 400);
+  scene.add(grp);
+}
+
+// Track waypoints (pylons in 3D, course at altitude)
+const TRACK = [
+  new THREE.Vector3(   0, 30,  80),
+  new THREE.Vector3(  60, 35,  60),
+  new THREE.Vector3(  90, 25,   0),
+  new THREE.Vector3(  60, 40, -60),
+  new THREE.Vector3(   0, 30, -90),
+  new THREE.Vector3( -60, 25, -60),
+  new THREE.Vector3( -90, 40,   0),
+  new THREE.Vector3( -60, 35,  60),
+];
+const TRACK_LEN = TRACK.length;
+const SEG_LEN = []; let TOTAL_LEN = 0;
+for (let i = 0; i < TRACK_LEN; i++) {
+  const len = TRACK[i].distanceTo(TRACK[(i+1) % TRACK_LEN]);
+  SEG_LEN.push(len); TOTAL_LEN += len;
+}
+
+// Build pylon gates (two vertical pillars defining a gate)
+TRACK.forEach((wp, i) => {
+  const next = TRACK[(i+1) % TRACK_LEN];
+  const fwd = new THREE.Vector3().subVectors(next, wp).normalize();
+  const left = new THREE.Vector3(-fwd.z, 0, fwd.x).normalize();
+  const c = i === 0 ? 0xfbbf24 : 0x0ea5e9;
+  for (let s of [-1, 1]) {
+    const pyl = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.6, 0.8, wp.y * 1.4, 8),
+      new THREE.MeshLambertMaterial({color: 0xffffff})
+    );
+    pyl.position.set(wp.x + left.x * 6 * s, wp.y * 0.7 - 2, wp.z + left.z * 6 * s);
+    scene.add(pyl);
+    // Top cap
+    const cap = new THREE.Mesh(
+      new THREE.SphereGeometry(1.2, 8, 6),
+      new THREE.MeshBasicMaterial({color: c})
+    );
+    cap.position.set(wp.x + left.x * 6 * s, wp.y + 4, wp.z + left.z * 6 * s);
+    scene.add(cap);
+  }
+  // Banner across the gate
+  const banner = new THREE.Mesh(
+    new THREE.BoxGeometry(13, 0.3, 0.1),
+    new THREE.MeshBasicMaterial({color: c, transparent: true, opacity: 0.7})
+  );
+  banner.position.set(wp.x, wp.y + 5, wp.z);
+  banner.lookAt(next);
+  banner.rotation.y += Math.PI / 2;
+  scene.add(banner);
+});
+
+// Plane factory
+function makePlane(color) {
+  const grp = new THREE.Group();
+  // fuselage
+  const fus = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.4, 0.25, 3.5, 8),
+    new THREE.MeshLambertMaterial({color})
+  );
+  fus.rotation.x = Math.PI / 2; grp.add(fus);
+  // nose
+  const nose = new THREE.Mesh(
+    new THREE.ConeGeometry(0.4, 0.8, 8),
+    new THREE.MeshLambertMaterial({color: 0x222229})
+  );
+  nose.rotation.x = Math.PI / 2; nose.position.z = 2.0; grp.add(nose);
+  // wings
+  const wing = new THREE.Mesh(
+    new THREE.BoxGeometry(4.5, 0.12, 0.8),
+    new THREE.MeshLambertMaterial({color})
+  );
+  wing.position.set(0, 0, 0.2); grp.add(wing);
+  // tail vertical
+  const tv = new THREE.Mesh(
+    new THREE.BoxGeometry(0.1, 0.7, 0.7),
+    new THREE.MeshLambertMaterial({color})
+  );
+  tv.position.set(0, 0.45, -1.5); grp.add(tv);
+  // tail horizontal
+  const th = new THREE.Mesh(
+    new THREE.BoxGeometry(1.5, 0.1, 0.5),
+    new THREE.MeshLambertMaterial({color})
+  );
+  th.position.set(0, 0, -1.5); grp.add(th);
+  // prop
+  const prop = new THREE.Mesh(
+    new THREE.BoxGeometry(1.4, 0.08, 0.04),
+    new THREE.MeshBasicMaterial({color: 0x111111})
+  );
+  prop.position.set(0, 0, 2.4); grp.add(prop);
+  grp.userData.prop = prop;
+  return grp;
+}
+
+class Plane {
+  constructor(color, name, isPlayer, offset) {
+    this.color = color; this.name = name; this.isPlayer = isPlayer;
+    this.position = TRACK[0].clone().add(new THREE.Vector3(offset.x, offset.y, -8));
+    this.quaternion = new THREE.Quaternion();
+    const m = new THREE.Matrix4().lookAt(this.position, TRACK[1], new THREE.Vector3(0,1,0));
+    this.quaternion.setFromRotationMatrix(m);
+    this.velocity = 25;  // planes maintain forward speed
+    this.lap = 0; this.nextWaypoint = 1; this.lapStart = 0; this.bestLap = Infinity;
+    this.finished = false; this.finishTime = 0;
+    this.mesh = makePlane(color);
+    this.mesh.position.copy(this.position); this.mesh.quaternion.copy(this.quaternion);
+    scene.add(this.mesh);
+    this.aiAggression = 0.85 + Math.random() * 0.15;
+  }
+  forward() { return new THREE.Vector3(0, 0, 1).applyQuaternion(this.quaternion); }
+  progress() {
+    let d = this.lap * TOTAL_LEN;
+    const wp = (this.nextWaypoint - 1 + TRACK_LEN) % TRACK_LEN;
+    for (let i = 0; i < wp; i++) d += SEG_LEN[i];
+    d += Math.min(SEG_LEN[wp], this.position.distanceTo(TRACK[wp]));
+    return d;
+  }
+}
+
+const PLAYER = new Plane(0x0ea5e9, 'You', true, {x: 0, y: 0, z: 0});
+const AI1 = new Plane(0xfbbf24, 'Sparrow-4', false, {x: 6, y: 2, z: 0});
+const AI2 = new Plane(0xef4444, 'Hawk-1', false, {x: -6, y: -2, z: 0});
+const planes = [PLAYER, AI1, AI2];
+
+const keys = {};
+addEventListener('keydown', e => { keys[e.code] = true; if (['ShiftLeft','Space'].includes(e.code)) e.preventDefault(); });
+addEventListener('keyup', e => keys[e.code] = false);
+
+const _q = new THREE.Quaternion();
+const TURN_RATE = 1.4;
+const MAX = 35; const BOOST = 55;
+
+function updatePlayer(dt) {
+  const pitch = (keys['KeyW'] ? 1 : 0) + (keys['KeyS'] ? -1 : 0);
+  const roll = (keys['KeyA'] ? 1 : 0) + (keys['KeyD'] ? -1 : 0);
+  const yaw = (keys['KeyQ'] ? 1 : 0) + (keys['KeyE'] ? -1 : 0);
+  const boost = keys['ShiftLeft'];
+  if (pitch) { _q.setFromAxisAngle(new THREE.Vector3(1,0,0), pitch * TURN_RATE * dt); PLAYER.quaternion.multiply(_q); }
+  if (yaw)   { _q.setFromAxisAngle(new THREE.Vector3(0,1,0), yaw * TURN_RATE * dt);   PLAYER.quaternion.multiply(_q); }
+  if (roll)  { _q.setFromAxisAngle(new THREE.Vector3(0,0,1), -roll * TURN_RATE * 1.4 * dt); PLAYER.quaternion.multiply(_q); }
+  // banked turn: rolling causes yaw drift
+  if (Math.abs(roll) > 0.1) {
+    const right = new THREE.Vector3(1,0,0).applyQuaternion(PLAYER.quaternion);
+    const tilt = right.y;  // how banked we are
+    _q.setFromAxisAngle(new THREE.Vector3(0,1,0), tilt * 0.8 * dt);
+    PLAYER.quaternion.multiply(_q);
+  }
+  const target = boost ? BOOST : MAX;
+  PLAYER.velocity += (target - PLAYER.velocity) * 0.5 * dt;
+}
+
+function updateAI(p, dt) {
+  const target = TRACK[p.nextWaypoint];
+  const fwd = p.forward();
+  const toTarget = new THREE.Vector3().subVectors(target, p.position).normalize();
+  const axis = new THREE.Vector3().crossVectors(fwd, toTarget);
+  const ang = Math.acos(Math.max(-1, Math.min(1, fwd.dot(toTarget))));
+  if (axis.lengthSq() > 0.0001) {
+    axis.normalize();
+    _q.setFromAxisAngle(axis, Math.min(ang, TURN_RATE * dt));
+    p.quaternion.premultiply(_q);
+  }
+  p.velocity += (MAX * p.aiAggression - p.velocity) * 0.5 * dt;
+}
+
+function movePlane(p, dt) {
+  p.position.addScaledVector(p.forward(), p.velocity * dt);
+  // Floor: don't go below the sea
+  if (p.position.y < 4) p.position.y = 4;
+  p.mesh.position.copy(p.position);
+  p.mesh.quaternion.copy(p.quaternion);
+  // Spin propeller
+  if (p.mesh.userData.prop) p.mesh.userData.prop.rotation.z += dt * 30;
+}
+
+function checkRing(p) {
+  if (p.position.distanceTo(TRACK[p.nextWaypoint]) < 7) {
+    p.nextWaypoint = (p.nextWaypoint + 1) % TRACK_LEN;
+    if (p.nextWaypoint === 1 && p.lap >= 0) {
+      const now = state.elapsed;
+      if (p.lap > 0) p.bestLap = Math.min(p.bestLap, now - p.lapStart);
+      p.lapStart = now;
+      p.lap++;
+      if (p.lap > LAPS) { p.finished = true; p.finishTime = now; }
+    }
+  }
+}
+
+const LAPS = 3;
+const state = { phase: 'pre', elapsed: 0, countdown: 0 };
+
+function startCountdown() {
+  state.phase = 'countdown'; state.countdown = 3.5;
+  document.getElementById('overlay').style.display = 'none';
+  document.getElementById('hud').style.display = 'flex';
+  document.getElementById('speedo').style.display = 'block';
+  document.getElementById('alt-readout').style.display = 'block';
+  document.getElementById('nav-back').style.display = 'block';
+  document.getElementById('countdown').style.display = 'block';
+}
+document.getElementById('start-btn').addEventListener('click', startCountdown);
+document.getElementById('restart-btn').addEventListener('click', () => location.reload());
+
+function fmt(s){if(!isFinite(s))return '--:--.--';const m=Math.floor(s/60);return `${m}:${(s-m*60).toFixed(2).padStart(5,'0')}`;}
+function ord(n){return n+(['st','nd','rd'][n-1]||'th');}
+
+function updateHUD() {
+  document.getElementById('lap-text').textContent = `${Math.min(LAPS, Math.max(1, PLAYER.lap))} / ${LAPS}`;
+  const sorted = planes.slice().sort((a,b) => b.progress() - a.progress());
+  document.getElementById('pos-text').textContent = ord(sorted.indexOf(PLAYER) + 1);
+  document.getElementById('time-text').textContent = fmt(state.elapsed - PLAYER.lapStart);
+  document.getElementById('best-text').textContent = 'Best: ' + fmt(PLAYER.bestLap);
+  document.getElementById('speed-num').textContent = Math.round(PLAYER.velocity * 1.5);
+  document.getElementById('alt-num').textContent = Math.round(PLAYER.position.y * 12);
+}
+
+const camPos = new THREE.Vector3();
+const camTarget = new THREE.Vector3();
+function updateCamera(dt) {
+  const back = new THREE.Vector3(0, 2.5, -10).applyQuaternion(PLAYER.quaternion).add(PLAYER.position);
+  const look = PLAYER.forward().multiplyScalar(20).add(PLAYER.position);
+  const lerp = 1 - Math.pow(0.001, dt);
+  camPos.lerp(back, lerp); camTarget.lerp(look, lerp);
+  camera.position.copy(camPos); camera.lookAt(camTarget);
+  camera.up.copy(new THREE.Vector3(0,1,0).applyQuaternion(PLAYER.quaternion));
+}
+camPos.copy(PLAYER.position).add(new THREE.Vector3(0, 8, -15)); camera.position.copy(camPos);
+
+function showResults() {
+  state.phase = 'done';
+  const sorted = planes.slice().sort((a,b) => {
+    if (a.finished && b.finished) return a.finishTime - b.finishTime;
+    if (a.finished) return -1; if (b.finished) return 1;
+    return b.progress() - a.progress();
+  });
+  const p = sorted.indexOf(PLAYER) + 1;
+  document.getElementById('result-headline').textContent = p === 1 ? 'WINNER' : (p === 2 ? 'P2' : 'P3');
+  const st = document.getElementById('standings'); st.innerHTML = '';
+  sorted.forEach((c, i) => {
+    const r = document.createElement('div'); r.className = 'standing' + (c === PLAYER ? ' you' : '');
+    const time = c.finished ? fmt(c.finishTime) : '+DNF';
+    const best = isFinite(c.bestLap) ? `Best: ${fmt(c.bestLap)}` : '';
+    r.innerHTML = `<div class="standing-pos">${ord(i+1)}</div><div class="standing-name">${c.name}<small>${best}</small></div><div class="standing-time">${time}</div>`;
+    st.appendChild(r);
+  });
+  ['hud','speedo','alt-readout','countdown'].forEach(id => document.getElementById(id).style.display = 'none');
+  document.getElementById('results').style.display = 'flex';
+}
+
+const clock = new THREE.Clock();
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = Math.min(clock.getDelta(), 0.05);
+  if (state.phase === 'countdown') {
+    state.countdown -= dt;
+    const cd = document.getElementById('countdown');
+    if (state.countdown > 2.5) cd.textContent = '3';
+    else if (state.countdown > 1.5) cd.textContent = '2';
+    else if (state.countdown > 0.5) cd.textContent = '1';
+    else if (state.countdown > -0.5) { cd.textContent = 'GO!'; cd.style.color = '#10b981'; }
+    else { cd.style.display = 'none'; state.phase = 'racing'; planes.forEach(p => p.lapStart = state.elapsed); }
+  }
+  if (state.phase === 'racing') {
+    state.elapsed += dt;
+    if (!PLAYER.finished) updatePlayer(dt);
+    planes.forEach(p => { if (!p.finished) { if (!p.isPlayer) updateAI(p, dt); movePlane(p, dt); checkRing(p); } });
+    updateHUD();
+    if (planes.every(p => p.finished)) { setTimeout(showResults, 800); state.phase = 'finishing'; }
+  }
+  if (state.phase !== 'pre') updateCamera(dt);
+  else {
+    state.elapsed += dt * 0.3;
+    camera.position.set(Math.sin(state.elapsed) * 30, 35, 90 + Math.cos(state.elapsed) * 10);
+    camera.lookAt(0, 30, 80);
+  }
+  renderer.render(scene, camera);
+}
+animate();
+</script>
+</body>
+</html>
